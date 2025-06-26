@@ -6,20 +6,79 @@ export default function DesignVideoTutorials() {
         <p className="text-slate-600 dark:text-slate-400">Essential video content for AI-powered graphic design</p>
       </div>
       
-      {/* Placeholder for future video content */}
-      <div className="text-center py-12">
-        <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-          </svg>
+      {/* Video Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        {/* First Video - ComfyUI by Scott Detweiler */}
+        <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-6 shadow-lg">
+          <h5 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">ComfyUI</h5>
+          <p className="text-slate-600 dark:text-slate-400 mb-2">
+            <span className="font-medium text-slate-700 dark:text-slate-300">By Scott Detweiler</span>
+          </p>
+          <p className="text-slate-600 dark:text-slate-400 mb-4 text-sm">
+            A better method to use stable diffusion models on your local PC to create AI art.
+          </p>
+          
+          {/* YouTube Embed */}
+          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+            <iframe
+              className="absolute top-0 left-0 w-full h-full rounded-lg"
+              src="https://www.youtube.com/embed/videoseries?list=PLIF38owJLhR1EGDY4kOnsEnMyolZgza1x"
+              title="ComfyUI by Scott Detweiler"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            ></iframe>
+          </div>
+          
+          <div className="mt-4 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+            <span>34 videos • 275,129 views</span>
+            <a 
+              href="https://www.youtube.com/playlist?list=PLIF38owJLhR1EGDY4kOnsEnMyolZgza1x" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-purple-600 dark:text-purple-400 hover:underline font-medium"
+            >
+              Open in YouTube →
+            </a>
+          </div>
         </div>
-        <h5 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Coming Soon</h5>
-        <p className="text-slate-600 dark:text-slate-400 mb-4">
-          Video tutorials for AI-powered graphic design tools and techniques will be added here.
-        </p>
-        <p className="text-sm text-slate-500 dark:text-slate-500">
-          Topics will include: Midjourney, DALL-E, Stable Diffusion, and other AI design tools
-        </p>
+
+        {/* Second Video - Learn ComfyUI by Olivio Sarikas */}
+        <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-6 shadow-lg">
+          <h5 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">Learn ComfyUI</h5>
+          <p className="text-slate-600 dark:text-slate-400 mb-2">
+            <span className="font-medium text-slate-700 dark:text-slate-300">By Olivio Sarikas</span>
+          </p>
+          <p className="text-slate-600 dark:text-slate-400 mb-4 text-sm">
+            Comprehensive tutorials for learning ComfyUI from basics to advanced techniques.
+          </p>
+          
+          {/* YouTube Embed */}
+          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+            <iframe
+              className="absolute top-0 left-0 w-full h-full rounded-lg"
+              src="https://www.youtube.com/embed/videoseries?list=PLH1tkjphTlWUTApzX-Hmw_WykUpG13eza"
+              title="Learn ComfyUI by Olivio Sarikas"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            ></iframe>
+          </div>
+          
+          <div className="mt-4 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+            <span>Playlist • Multiple videos</span>
+            <a 
+              href="https://www.youtube.com/playlist?list=PLH1tkjphTlWUTApzX-Hmw_WykUpG13eza" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-purple-600 dark:text-purple-400 hover:underline font-medium"
+            >
+              Open in YouTube →
+            </a>
+          </div>
+        </div>
+        
       </div>
     </div>
   );

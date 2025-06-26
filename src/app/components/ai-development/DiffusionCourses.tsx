@@ -11,17 +11,17 @@ export default function DiffusionCourses() {
             
             <div className="space-y-3">
               <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                <h6 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Stable Diffusion WebUI Tutorial</h6>
+                <h6 className="font-medium text-blue-800 dark:text-blue-200 mb-2">AI Image Generation for Complete Newbies</h6>
                 <p className="text-sm text-blue-700 dark:text-blue-300 mb-2">
-                  Comprehensive guide to setting up and using Stable Diffusion for design projects
+                  Comprehensive guide to getting started with Stable Diffusion, FLUX, and other AI image generation tools. Covers installation, UI options, and essential concepts for beginners.
                 </p>
                 <a 
-                  href="https://github.com/AUTOMATIC1111/stable-diffusion-webui" 
+                  href="https://civitai.com/articles/7492" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium"
                 >
-                  GitHub Repository →
+                  Read Guide →
                 </a>
               </div>
 

@@ -56,6 +56,33 @@ export default function DiffusionTools() {
             </a>
           </div>
 
+          {/* ComfyUI */}
+          <div className="border-l-4 border-cyan-500 pl-4">
+            <h5 className="font-bold text-slate-900 dark:text-white mb-2">ComfyUI</h5>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+              Open-source node-based interface for generative AI workflows. Provides visual workflow building 
+              for Stable Diffusion and other AI models, allowing users to create complex image generation pipelines.
+            </p>
+            <div className="flex flex-wrap gap-2 mb-2">
+              <a 
+                href="https://www.comfy.org/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-cyan-600 dark:text-cyan-400 hover:underline text-sm font-medium"
+              >
+                Website →
+              </a>
+              <a 
+                href="https://docs.comfy.org/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-cyan-600 dark:text-cyan-400 hover:underline text-sm font-medium"
+              >
+                Documentation →
+              </a>
+            </div>
+          </div>
+
           {/* Adobe Firefly */}
           <div className="border-l-4 border-orange-500 pl-4">
             <h5 className="font-bold text-slate-900 dark:text-white mb-2">Adobe Firefly</h5>

@@ -25,10 +25,13 @@ This is a Next.js-based educational platform for learning AI concepts. The proje
 
 ## Development Workflow
 
+**IMPORTANT**: This project uses custom scripts for development. Do NOT use `npm run dev` directly.
+
 - **Dev Server**: `./scripts/dev.sh` or `docker-compose -f infrastructure/docker-compose.yml up --build`
-- **Build**: `npm run build`
-- **Production**: `npm start`
+- **Production**: `./scripts/prod.sh` or `docker-compose -f infrastructure/docker-compose.prod.yml up --build`
 - **Linting**: `npm run lint`
+
+The scripts handle proper environment setup, dependency management, and container orchestration. Always use the provided scripts rather than direct npm commands for development and production workflows.
 
 ## Content Sections
 

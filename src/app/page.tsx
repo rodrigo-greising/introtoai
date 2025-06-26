@@ -21,6 +21,7 @@ export default function Home() {
             <div className="hidden md:flex items-center space-x-6 text-sm">
               <a href="#youtube" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Videos</a>
               <a href="#documents" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Documents</a>
+              <a href="#ai-development" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">AI Development</a>
               <a href="#labs" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Labs</a>
               <a href="#resources" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Resources</a>
             </div>
@@ -154,6 +155,221 @@ export default function Home() {
                 <span className="text-sm text-slate-500 dark:text-slate-500">PDF • 28 pages</span>
                 <button className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium">Download</button>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AI in Software Development Section */}
+      <section id="ai-development" className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-slate-800 dark:to-slate-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center space-x-2 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 rounded-full">AI-Powered Development</span>
+            </div>
+            <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">AI in Software Development</h3>
+            <p className="text-lg text-slate-600 dark:text-slate-400">Understanding how artificial intelligence enhances development through dedicated IDEs and extensions</p>
+          </div>
+          
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            {/* Left Column - Educational Content */}
+            <div className="space-y-8">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg border border-slate-200 dark:border-slate-700">
+                <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-4">What is AI-Enabled Software Development?</h4>
+                <p className="text-slate-700 dark:text-slate-300 mb-4">
+                  AI-enabled development tools come in various forms: dedicated IDEs built with AI capabilities, 
+                  extensions that add AI features to existing environments, and fully agentic platforms that 
+                  handle entire development workflows. These tools use large language models to understand context, 
+                  suggest completions, and generate code based on natural language descriptions.
+                </p>
+                <p className="text-slate-700 dark:text-slate-300 mb-4">
+                  The concept emerged from the idea that programming could be more intuitive if developers could describe 
+                  what they want to build in plain English, rather than having to write every line of code manually.
+                </p>
+                <p className="text-slate-700 dark:text-slate-300">
+                  This approach has evolved into what's known as <a href="https://en.wikipedia.org/wiki/Vibe_coding" target="_blank" rel="noopener noreferrer" className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium">vibe coding</a> - a technique where developers describe problems in natural language and let AI generate the code. While this lowers the barrier to entry for software creation, it also shifts the programmer's role from manual coding to guiding, testing, and refining AI-generated code.
+                </p>
+              </div>
+
+              
+
+              <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg border border-slate-200 dark:border-slate-700">
+                <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Understanding the Risks of Vibe Coding</h4>
+                <div className="space-y-6">
+                  <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border-l-4 border-red-500">
+                    <h5 className="font-semibold text-red-800 dark:text-red-200 mb-2">Security & Privacy Concerns</h5>
+                    <ul className="text-sm text-red-700 dark:text-red-300 space-y-1">
+                      <li>• <strong>Code vulnerabilities:</strong> AI-generated code may contain security flaws that aren't immediately obvious</li>
+                      <li>• <strong>Data exposure:</strong> Sensitive information in prompts could be stored or processed by AI services</li>
+                      <li>• <strong>Dependency risks:</strong> AI might suggest outdated or vulnerable third-party libraries</li>
+                      <li>• <strong>Injection attacks:</strong> Generated code may not properly sanitize user inputs</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 border-l-4 border-orange-500">
+                    <h5 className="font-semibold text-orange-800 dark:text-orange-200 mb-2">Production Readiness Issues</h5>
+                    <ul className="text-sm text-orange-700 dark:text-orange-300 space-y-1">
+                      <li>• <strong>Unpredictable costs:</strong> AI services can have variable pricing based on usage</li>
+                      <li>• <strong>Performance problems:</strong> Generated code may not be optimized for scale</li>
+                      <li>• <strong>Maintenance challenges:</strong> Code you don't fully understand is harder to debug and update</li>
+                      <li>• <strong>Legal compliance:</strong> AI-generated code may not meet industry standards or regulations</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border-l-4 border-blue-500">
+                    <h5 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">When Vibe Coding Makes Sense</h5>
+                    <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                      <li>• <strong>Prototypes & demos:</strong> Quick proof-of-concept applications for internal use</li>
+                      <li>• <strong>Personal projects:</strong> Tools you'll run locally on your own machine</li>
+                      <li>• <strong>Simple websites:</strong> Static sites without user data or sensitive information</li>
+                      <li>• <strong>Learning exercises:</strong> Understanding new technologies or frameworks</li>
+                      <li>• <strong>Automation scripts:</strong> One-time or personal productivity tools</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4">
+                    <h5 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">Best Practices</h5>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                      Always review, test, and understand AI-generated code before deploying it. Consider it a starting point 
+                      rather than a finished product, especially for applications that handle user data or run in production environments.
+                    </p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      Remember: Vibe coding is great for exploration and rapid prototyping, but production software requires 
+                      careful consideration of security, performance, and maintainability.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Tool Comparison */}
+            <div className="space-y-6">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg border border-slate-200 dark:border-slate-700">
+                <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Popular AI Development Tools</h4>
+                
+                <div className="space-y-6">
+                  {/* Cursor */}
+                  <div className="border-l-4 border-blue-500 pl-4">
+                    <h5 className="font-bold text-slate-900 dark:text-white mb-2">Cursor</h5>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                      AI-powered code editor built on VS Code with advanced chat and code generation capabilities.
+                    </p>
+                    <a 
+                      href="https://www.cursor.com/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-emerald-600 dark:text-emerald-400 hover:underline text-sm font-medium"
+                    >
+                      Learn More →
+                    </a>
+                  </div>
+
+                  {/* Replit */}
+                  <div className="border-l-4 border-purple-500 pl-4">
+                    <h5 className="font-bold text-slate-900 dark:text-white mb-2">Replit</h5>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                      Fully agentic cloud development platform that turns natural language descriptions into complete applications. 
+                      Unlike traditional IDEs, Replit handles the entire development workflow from idea to deployment.
+                    </p>
+                    <a 
+                      href="https://replit.com/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-purple-600 dark:text-purple-400 hover:underline text-sm font-medium"
+                    >
+                      Learn More →
+                    </a>
+                  </div>
+
+                  {/* GitHub Copilot */}
+                  <div className="border-l-4 border-emerald-500 pl-4">
+                    <h5 className="font-bold text-slate-900 dark:text-white mb-2">GitHub Copilot</h5>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                        Microsoft's AI pair programmer that suggests code completions in real-time.
+                      </p>
+                      <a 
+                        href="https://github.com/features/copilot" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium"
+                      >
+                        Learn More →
+                      </a>
+                  </div>
+
+                  {/* Claude Code */}
+                  <div className="border-l-4 border-orange-500 pl-4">
+                    <h5 className="font-bold text-slate-900 dark:text-white mb-2">Claude Code</h5>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                      Command-line AI tool that embeds Claude Opus 4 directly in your terminal for deep codebase understanding.
+                    </p>
+                    <a 
+                      href="https://www.anthropic.com/claude-code" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-orange-600 dark:text-orange-400 hover:underline text-sm font-medium"
+                    >
+                      Learn More →
+                    </a>
+                  </div>
+
+                  {/* Gemini Code Assist */}
+                  <div className="border-l-4 border-blue-500 pl-4">
+                    <h5 className="font-bold text-slate-900 dark:text-white mb-2">Gemini Code Assist</h5>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                      Google's AI-first coding solution with IDE extensions, CLI tools, and GitHub integration.
+                    </p>
+                    <a 
+                      href="https://codeassist.google/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium"
+                    >
+                      Learn More →
+                    </a>
+                  </div>
+                    
+                  {/* Cline */}
+                  <div className="border-l-4 border-orange-500 pl-4">
+                    <h5 className="font-bold text-slate-900 dark:text-white mb-2">Cline</h5>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                      Open-source collaborative AI coder that works across multiple IDEs and platforms.
+                    </p>
+                    <a 
+                      href="https://cline.bot/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-orange-600 dark:text-orange-400 hover:underline text-sm font-medium"
+                    >
+                      Learn More →
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg border border-slate-200 dark:border-slate-700 max-w-3xl mx-auto">
+              <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-4">The Future of AI-Assisted Development</h4>
+              <p className="text-slate-700 dark:text-slate-300 mb-6">
+                AI coding assistants represent a significant shift in how software is developed. While they don't replace 
+                the need for understanding programming fundamentals, they can dramatically reduce the time spent on 
+                boilerplate code and repetitive tasks, allowing developers to focus on creative problem-solving and 
+                architectural decisions.
+              </p>
+              <p className="text-slate-700 dark:text-slate-300">
+                As these tools continue to evolve, they're becoming more sophisticated at understanding context, 
+                following coding standards, and generating production-ready code. The key is learning to work 
+                effectively with AI as a collaborative partner rather than viewing it as a replacement for human expertise.
+              </p>
             </div>
           </div>
         </div>
@@ -483,6 +699,13 @@ export default function Home() {
                 className="text-slate-400 hover:text-white transition-colors"
               >
                 Documents
+              </a>
+              <span className="hidden sm:block text-slate-600">•</span>
+              <a 
+                href="#ai-development" 
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                AI Development
               </a>
               <span className="hidden sm:block text-slate-600">•</span>
               <a 

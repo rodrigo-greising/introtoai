@@ -1,0 +1,162 @@
+---
+description: Understanding UI Partterns
+globs: 
+alwaysApply: false
+---
+# UI Patterns & Design System
+
+## Color Palette
+
+### Primary Colors
+- **Blue**: `blue-600`, `blue-700` (primary actions, links)
+- **Purple**: `purple-600` (gradients, accents)
+- **Slate**: `slate-50` to `slate-900` (text, backgrounds)
+
+### Gradients
+- **Primary Gradient**: `bg-gradient-to-r from-blue-600 to-purple-600`
+- **Background Gradient**: `bg-gradient-to-br from-slate-50 to-blue-50`
+- **Dark Background**: `bg-gradient-to-br from-slate-900 to-slate-800`
+
+## Typography
+
+### Fonts
+- **Primary**: Geist Sans (variable: `--font-geist-sans`)
+- **Monospace**: Geist Mono (variable: `--font-geist-mono`)
+- Applied in [src/app/layout.tsx](mdc:src/app/layout.tsx)
+
+### Text Sizes
+- **Hero**: `text-4xl md:text-6xl font-bold`
+- **Section Headers**: `text-3xl font-bold`
+- **Card Titles**: `text-xl font-semibold`
+- **Body Text**: `text-lg` or default
+- **Small Text**: `text-sm`
+
+## Layout Patterns
+
+### Container Structure
+```tsx
+// Standard section container
+<section className="py-16 px-4 sm:px-6 lg:px-8">
+  <div className="max-w-7xl mx-auto">
+    {/* Content */}
+  </div>
+</section>
+```
+
+### Grid Layouts
+```tsx
+// Responsive grid patterns
+<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+  {/* Grid items */}
+</div>
+```
+
+### Header Pattern
+```tsx
+// Section headers
+<div className="text-center mb-12">
+  <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+    Section Title
+  </h3>
+  <p className="text-lg text-slate-600 dark:text-slate-400">
+    Section description
+  </p>
+</div>
+```
+
+## Component Patterns
+
+### Card Components
+```tsx
+// Standard card structure
+<div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-slate-200 dark:border-slate-700">
+  {/* Card content */}
+</div>
+```
+
+### Button Patterns
+```tsx
+// Primary button
+<button className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+  Button Text
+</button>
+
+// Secondary button
+<button className="inline-flex items-center px-6 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+  Button Text
+</button>
+```
+
+### Icon Patterns
+```tsx
+// Icon container with gradient background
+<div className="w-12 h-12 bg-gradient-to-br from-color-400 to-color-600 rounded-lg flex items-center justify-center">
+  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    {/* SVG path */}
+  </svg>
+</div>
+```
+
+## Responsive Design
+
+### Breakpoints
+- **Mobile**: Default (no prefix)
+- **Small**: `sm:` (640px+)
+- **Medium**: `md:` (768px+)
+- **Large**: `lg:` (1024px+)
+
+### Responsive Patterns
+```tsx
+// Responsive text sizing
+<h2 className="text-4xl md:text-6xl font-bold">
+
+// Responsive padding
+<div className="px-4 sm:px-6 lg:px-8">
+
+// Responsive grid
+<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+```
+
+## Dark Mode
+
+### Implementation
+- Uses Tailwind's `dark:` prefix
+- Applied automatically based on system preference
+- Consistent color mapping across components
+
+### Color Mapping
+- **Backgrounds**: `bg-white dark:bg-slate-800`
+- **Text**: `text-slate-900 dark:text-white`
+- **Secondary Text**: `text-slate-600 dark:text-slate-400`
+- **Borders**: `border-slate-200 dark:border-slate-700`
+
+## Interactive States
+
+### Hover Effects
+```tsx
+// Card hover
+className="hover:shadow-lg transition-shadow"
+
+// Button hover
+className="hover:bg-blue-700 transition-colors"
+
+// Link hover
+className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+```
+
+### Transitions
+- Use `transition-colors` for color changes
+- Use `transition-shadow` for shadow changes
+- Use `transition-transform` for movement effects
+
+## Accessibility
+
+### Focus States
+- Ensure all interactive elements have visible focus states
+- Use consistent focus ring styling
+- Maintain proper color contrast ratios
+
+### Semantic HTML
+- Use proper heading hierarchy (h1, h2, h3, etc.)
+- Include alt text for images
+- Use semantic elements (section, article, etc.)

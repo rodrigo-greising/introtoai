@@ -1,0 +1,54 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# IntroToAI Project Overview
+
+This is a Next.js-based educational platform for learning AI concepts. The project provides free AI learning resources including video tutorials, documents, and curated links.
+
+## Project Structure
+
+- **Main Entry Point**: [src/app/page.tsx](mdc:src/app/page.tsx) - The homepage with all learning content
+- **Layout**: [src/app/layout.tsx](mdc:src/app/layout.tsx) - Root layout with font configuration
+- **Styling**: [src/app/globals.css](mdc:src/app/globals.css) - Global styles and Tailwind CSS
+- **Configuration**: [package.json](mdc:package.json) - Dependencies and scripts
+- **TypeScript Config**: [tsconfig.json](mdc:tsconfig.json) - TypeScript configuration with path aliases
+
+## Key Features
+
+- **Modern UI**: Built with Tailwind CSS v4 and dark mode support
+- **Responsive Design**: Mobile-first approach with responsive breakpoints
+- **Performance**: Uses Next.js 15 with Turbopack for fast development
+- **Type Safety**: Full TypeScript implementation
+- **Docker Support**: Complete containerization setup in [infrastructure/](mdc:infrastructure)
+
+## Development Workflow
+
+- **Dev Server**: `./scripts/dev.sh` or `docker-compose -f infrastructure/docker-compose.yml up --build`
+- **Build**: `npm run build`
+- **Production**: `npm start`
+- **Linting**: `npm run lint`
+
+## Content Sections
+
+The homepage is organized into three main sections:
+1. **Video Tutorials** - YouTube playlists for AI learning
+2. **Learning Documents** - PDF guides and reference materials  
+3. **Additional Resources** - Curated links to external learning resources
+
+## Technology Stack
+
+- **Framework**: Next.js 15.3.4 with App Router
+- **UI**: Tailwind CSS v4 with PostCSS
+- **Language**: TypeScript 5
+- **Fonts**: Geist Sans and Geist Mono from Google Fonts
+- **Linting**: ESLint with Next.js configuration
+
+## Related Rules
+
+For specific guidance, refer to these rules:
+- **[UI Patterns](mdc:.cursor/rules/ui-patterns.mdc)** - Design system, styling, and component patterns
+- **[Development Guidelines](mdc:.cursor/rules/development-guidelines.mdc)** - Code standards and best practices
+- **[Infrastructure Guide](mdc:.cursor/rules/infrastructure-guide.mdc)** - Docker setup and deployment
+- **[Content Management](mdc:.cursor/rules/content-management.mdc)** - Managing learning resources and content

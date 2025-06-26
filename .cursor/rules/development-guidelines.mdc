@@ -1,0 +1,106 @@
+---
+description: Development guidelines
+globs: 
+alwaysApply: false
+---
+# Development Guidelines
+
+## Code Style & Standards
+
+### TypeScript
+- Use strict TypeScript configuration as defined in [tsconfig.json](mdc:tsconfig.json)
+- Leverage path aliases: `@/*` maps to `./src/*`
+- Prefer explicit typing over `any`
+- Use React.FC for functional components when appropriate
+
+### React/Next.js
+- Use the App Router pattern (files in [src/app/](mdc:src/app))
+- Follow Next.js 15 best practices
+- Use server components by default, client components when needed
+- Implement proper metadata in layout files
+
+### Styling
+- Use Tailwind CSS v4 utility classes
+- Follow mobile-first responsive design
+- Implement dark mode support with `dark:` prefixes
+- Use consistent color schemes (slate, blue, purple gradients)
+- Prefer semantic class names over arbitrary values
+
+### Component Structure
+```tsx
+// Example component structure
+export default function ComponentName() {
+  return (
+    <div className="container-classes">
+      {/* Content */}
+    </div>
+  );
+}
+```
+
+## File Organization
+
+### App Directory Structure
+- `src/app/page.tsx` - Main homepage
+- `src/app/layout.tsx` - Root layout with fonts and metadata
+- `src/app/globals.css` - Global styles and Tailwind imports
+
+### Infrastructure
+- [infrastructure/docker-compose.yml](mdc:infrastructure/docker-compose.yml) - Development environment
+- [infrastructure/docker-compose.prod.yml](mdc:infrastructure/docker-compose.prod.yml) - Production environment
+- [infrastructure/Dockerfile](mdc:infrastructure/Dockerfile) - Production build
+- [infrastructure/Dockerfile.dev](mdc:infrastructure/Dockerfile.dev) - Development build
+
+## Development Workflow
+
+### Local Development (Docker)
+1. Install dependencies: `npm install` (for local development tools)
+2. Start development server: `./scripts/dev.sh` or `docker-compose -f infrastructure/docker-compose.yml up --build`
+3. Access at `http://localhost:3000`
+4. Hot reload enabled with volume mounts
+
+### Docker Development
+```bash
+# Using convenience script
+./scripts/dev.sh
+
+# Or manually
+docker-compose -f infrastructure/docker-compose.yml up --build
+```
+
+### Production Build
+```bash
+# Local build
+npm run build
+npm start
+
+# Docker production
+./scripts/prod.sh
+```
+
+## Code Quality
+
+### Linting
+- Run `npm run lint` before commits
+- ESLint configuration extends Next.js defaults
+- Fix auto-fixable issues automatically
+
+### Performance
+- Use Next.js Image component for optimized images
+- Implement proper loading states
+- Optimize bundle size with dynamic imports when needed
+- Use Turbopack for faster development builds
+
+## Content Management
+
+### Adding New Sections
+1. Update the navigation in [src/app/page.tsx](mdc:src/app/page.tsx)
+2. Add corresponding section with proper IDs
+3. Maintain consistent styling patterns
+4. Update responsive breakpoints if needed
+
+### Styling Patterns
+- Use consistent spacing: `py-16 px-4 sm:px-6 lg:px-8`
+- Implement hover states: `hover:shadow-lg transition-shadow`
+- Use gradient backgrounds: `bg-gradient-to-br from-color-400 to-color-600`
+- Maintain dark mode compatibility

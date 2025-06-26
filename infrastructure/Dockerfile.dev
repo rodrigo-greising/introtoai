@@ -1,0 +1,14 @@
+# Development Dockerfile - stops at deps stage for hot reload
+FROM node:18-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci --frozen-lockfile || npm install
+
+# Development stage - just install dependencies
+FROM node:18-alpine AS dev
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+EXPOSE 3000
+CMD ["npm", "run", "dev"] 

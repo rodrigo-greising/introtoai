@@ -1,0 +1,163 @@
+---
+description: Understanding our CI/CD 
+globs: 
+alwaysApply: false
+---
+# Infrastructure & Deployment Guide
+
+## Docker Setup
+
+### Development Environment
+- **File**: [infrastructure/docker-compose.yml](mdc:infrastructure/docker-compose.yml)
+- **Purpose**: Local development with hot reload
+- **Features**: Volume mounts, development server, port 3000
+
+### Production Environment
+- **File**: [infrastructure/docker-compose.prod.yml](mdc:infrastructure/docker-compose.prod.yml)
+- **Purpose**: Production deployment
+- **Features**: Optimized build, production server
+
+### Dockerfiles
+- **Production**: [infrastructure/Dockerfile](mdc:infrastructure/Dockerfile) - Multi-stage build
+- **Development**: [infrastructure/Dockerfile.dev](mdc:infrastructure/Dockerfile.dev) - Development build
+
+## Quick Start Scripts
+
+### Development
+```bash
+# Using convenience script
+./scripts/dev.sh
+
+# Manual command
+docker-compose -f infrastructure/docker-compose.yml up --build
+```
+
+### Production
+```bash
+# Using convenience script
+./scripts/prod.sh
+
+# Manual command
+docker-compose -f infrastructure/docker-compose.prod.yml up --build
+```
+
+## Architecture Overview
+
+### Development Stack
+- **Base Image**: Node.js 18 Alpine
+- **Framework**: Next.js 15 with Turbopack
+- **Port**: 3000 (mapped to host)
+- **Volumes**: Source code mounted for hot reload
+- **Environment**: Development mode with debugging
+
+### Production Stack
+- **Multi-stage Build**: Optimized for size and performance
+- **Framework**: Next.js 15 production build
+- **Port**: 3000 (internal)
+- **Environment**: Production mode with optimizations
+
+## Environment Configuration
+
+### Development Variables
+```env
+NODE_ENV=development
+NEXT_TELEMETRY_DISABLED=1
+```
+
+### Production Variables
+```env
+NODE_ENV=production
+NEXT_TELEMETRY_DISABLED=1
+```
+
+## Build Process
+
+### Development Build
+1. Install dependencies
+2. Start development server with Turbopack
+3. Enable hot reload and debugging
+
+### Production Build
+1. Multi-stage Docker build
+2. Install dependencies
+3. Build Next.js application
+4. Create optimized production image
+5. Start production server
+
+## Deployment Options
+
+### Local Docker
+```bash
+# Build and run locally
+docker-compose -f infrastructure/docker-compose.prod.yml up --build
+```
+
+### Cloud Deployment
+- **Vercel**: Direct deployment from Git repository
+- **AWS**: ECS with load balancer
+- **Google Cloud**: Cloud Run
+- **Azure**: Container Instances
+
+## Performance Optimization
+
+### Build Optimizations
+- Multi-stage Docker builds
+- Alpine Linux base images
+- Dependency caching
+- Production-only dependencies
+
+### Runtime Optimizations
+- Next.js production mode
+- Static asset optimization
+- Image optimization
+- Bundle size optimization
+
+## Monitoring & Logging
+
+### Development Logs
+- Console output in development mode
+- Hot reload notifications
+- Build status messages
+
+### Production Logs
+- Structured logging
+- Error tracking
+- Performance monitoring
+- Health check endpoints
+
+## Security Considerations
+
+### Container Security
+- Non-root user execution
+- Minimal base images
+- Regular security updates
+- Dependency vulnerability scanning
+
+### Application Security
+- Environment variable management
+- HTTPS enforcement
+- Content Security Policy
+- Input validation
+
+## Troubleshooting
+
+### Common Issues
+1. **Port conflicts**: Change port mapping in docker-compose
+2. **Build failures**: Check Node.js version compatibility
+3. **Hot reload not working**: Verify volume mounts
+4. **Performance issues**: Check resource allocation
+
+### Debug Commands
+```bash
+# Check container status
+docker ps
+
+# View logs
+docker-compose logs
+
+# Access container shell
+docker exec -it container_name sh
+
+# Rebuild without cache
+docker-compose build --no-cache
+```

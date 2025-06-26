@@ -1,0 +1,42 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Cursor Rules Index
+
+This is the main index rule that helps navigate to specific guidelines based on the task at hand.
+
+## When to Use Each Rule
+
+### For UI/Design Tasks
+- **Reference**: [ui-patterns.mdc](mdc:.cursor/rules/ui-patterns.mdc)
+- **Use when**: Creating components, styling, implementing design patterns, working with Tailwind CSS, dark mode, responsive design
+
+### For Infrastructure/Deployment Tasks
+- **Reference**: [infrastructure-guide.mdc](mdc:.cursor/rules/infrastructure-guide.mdc)
+- **Use when**: Docker setup, deployment, environment configuration, build processes, container management
+
+### For Development Standards
+- **Reference**: [development-guidelines.mdc](mdc:.cursor/rules/development-guidelines.mdc)
+- **Use when**: Writing code, following TypeScript standards, React/Next.js patterns, file organization
+
+### For Project Context
+- **Reference**: [project-overview.mdc](mdc:.cursor/rules/project-overview.mdc)
+- **Use when**: Understanding project structure, technology stack, overall architecture
+
+## Quick Reference
+
+| Task Type | Primary Rule | Secondary Rule |
+|-----------|--------------|----------------|
+| UI Components | ui-patterns | development-guidelines |
+| Styling/CSS | ui-patterns | development-guidelines |
+| Docker/Deployment | infrastructure-guide | project-overview |
+| Content Updates | content-management | ui-patterns |
+| Code Standards | development-guidelines | project-overview |
+| Project Setup | project-overview | infrastructure-guide |
+
+## Always Check
+- **Project Overview** first for context
+- **Development Guidelines** for coding standards
+- **Specific rule** based on task type

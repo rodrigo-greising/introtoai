@@ -116,6 +116,43 @@ export default function YouTubeSection() {
               </a>
             </div>
           </div>
+
+          {/* Fourth Video - Practical Deep Learning for Coders */}
+          <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-6 shadow-lg">
+            <h4 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">Practical Deep Learning for Coders</h4>
+            <p className="text-slate-600 dark:text-slate-400 mb-2">
+              <span className="font-medium text-slate-700 dark:text-slate-300">By Jeremy Howard</span>
+            </p>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
+              A comprehensive course designed for coders who want to apply deep learning to practical problems. 
+              Learn to build models for computer vision, NLP, tabular analysis, and collaborative filtering using 
+              PyTorch, fastai, and Hugging Face. No special hardware required.
+            </p>
+            
+            {/* YouTube Embed */}
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                className="absolute top-0 left-0 w-full h-full rounded-lg"
+                src="https://www.youtube.com/embed/videoseries?list=PLfYUBJiXbdtSvpQjSnJJ_PmDQB_VyT5iU"
+                title="Practical Deep Learning for Coders Playlist"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              ></iframe>
+            </div>
+            
+            <div className="mt-6 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+              <span>8 videos • ~336K views</span>
+              <a 
+                href="https://www.youtube.com/playlist?list=PLfYUBJiXbdtSvpQjSnJJ_PmDQB_VyT5iU" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              >
+                Open in YouTube →
+              </a>
+            </div>
+          </div>
           
         </div>
       </div>

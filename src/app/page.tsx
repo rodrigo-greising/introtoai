@@ -16,10 +16,11 @@ export default function Home() {
       <ChattingAppsSection />
       <YouTubeSection />
       <DocumentsSection />
-      <BooksSection />
       <AIDevelopmentSection />
       <GoogleLabsSection />
       <ResourcesSection />
+      <BooksSection />
+
       <Footer />
     </div>
   );

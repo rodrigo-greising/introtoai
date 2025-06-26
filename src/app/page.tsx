@@ -2,6 +2,7 @@ import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import YouTubeSection from './components/YouTubeSection';
 import DocumentsSection from './components/DocumentsSection';
+import ChattingAppsSection from './components/chatting-apps/ChattingAppsSection';
 import AIDevelopmentSection from './components/ai-development/AIDevelopmentSection';
 import GoogleLabsSection from './components/labs/GoogleLabsSection';
 import ResourcesSection from './components/ResourcesSection';
@@ -14,6 +15,7 @@ export default function Home() {
       <HeroSection />
       <YouTubeSection />
       <DocumentsSection />
+      <ChattingAppsSection />
       <AIDevelopmentSection />
       <GoogleLabsSection />
       <ResourcesSection />

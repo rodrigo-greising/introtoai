@@ -136,7 +136,7 @@ export default function GoogleLabsSection() {
             </div>
             <span className="text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full">Google Labs</span>
           </div>
-          <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Cutting-Edge AI Experiments</h3>
+          <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">AI Experiments</h3>
           <p className="text-lg text-slate-600 dark:text-slate-400">Experience the future of AI with Google&apos;s latest experimental tools</p>
         </div>
         

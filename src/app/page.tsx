@@ -21,6 +21,7 @@ export default function Home() {
             <div className="hidden md:flex items-center space-x-6 text-sm">
               <a href="#youtube" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Videos</a>
               <a href="#documents" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Documents</a>
+              <a href="#labs" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Labs</a>
               <a href="#resources" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Resources</a>
             </div>
           </div>
@@ -66,54 +67,37 @@ export default function Home() {
             <p className="text-lg text-slate-600 dark:text-slate-400">Curated YouTube playlists to guide your AI learning journey</p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* 3Blue1Brown Neural Networks Playlist */}
-            <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-6 hover:shadow-lg transition-shadow">
-              <div className="w-full h-48 bg-gradient-to-br from-red-400 to-red-600 rounded-lg mb-4 flex items-center justify-center">
-                <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
+          {/* Embedded YouTube Playlist */}
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-6 shadow-lg">
+              <h4 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">Neural Networks by 3Blue1Brown</h4>
+              <p className="text-slate-600 dark:text-slate-400 mb-6">
+                A comprehensive series on the mathematics of neural networks and deep learning. 
+                Eight videos covering the fundamental concepts behind how neural networks work.
+              </p>
+              
+              {/* YouTube Embed */}
+              <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                <iframe
+                  className="absolute top-0 left-0 w-full h-full rounded-lg"
+                  src="https://www.youtube.com/embed/videoseries?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi"
+                  title="3Blue1Brown Neural Networks Playlist"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                ></iframe>
               </div>
-              <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Neural Networks</h4>
-              <p className="text-slate-600 dark:text-slate-400 mb-4">3Blue1Brown's comprehensive series on the mathematics of neural networks and deep learning</p>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-500 dark:text-slate-500">8 videos • ~4 hours</span>
+              
+              <div className="mt-6 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+                <span>8 videos • ~4 hours total</span>
                 <a 
                   href="https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium"
+                  className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
                 >
-                  Watch Playlist
+                  Open in YouTube →
                 </a>
-              </div>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-6 hover:shadow-lg transition-shadow">
-              <div className="w-full h-48 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg mb-4 flex items-center justify-center">
-                <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-              </div>
-              <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Machine Learning Basics</h4>
-              <p className="text-slate-600 dark:text-slate-400 mb-4">Introduction to machine learning concepts and algorithms</p>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-500 dark:text-slate-500">Coming Soon</span>
-                <button className="text-slate-400 dark:text-slate-500 text-sm font-medium cursor-not-allowed">Watch Playlist</button>
-              </div>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-6 hover:shadow-lg transition-shadow">
-              <div className="w-full h-48 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg mb-4 flex items-center justify-center">
-                <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-              </div>
-              <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">AI Applications</h4>
-              <p className="text-slate-600 dark:text-slate-400 mb-4">Real-world applications and use cases of artificial intelligence</p>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-500 dark:text-slate-500">Coming Soon</span>
-                <button className="text-slate-400 dark:text-slate-500 text-sm font-medium cursor-not-allowed">Watch Playlist</button>
               </div>
             </div>
           </div>
@@ -171,6 +155,240 @@ export default function Home() {
                 <button className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium">Download</button>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Google Labs Experiments Section */}
+      <section id="labs" className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center space-x-2 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-red-500 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full">Google Labs</span>
+            </div>
+            <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Cutting-Edge AI Experiments</h3>
+            <p className="text-lg text-slate-600 dark:text-slate-400">Experience the future of AI with Google's latest experimental tools</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Portraits */}
+            <div className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl mb-4 flex items-center justify-center shadow-lg">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Portraits</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Expert knowledge, delivered by AI coaches with personalized guidance</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">AI Coaching</span>
+                  <a 
+                    href="https://labs.google/portraits/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 text-sm font-medium group-hover:underline"
+                  >
+                    Try Now →
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Flow */}
+            <div className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-xl mb-4 flex items-center justify-center shadow-lg">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Flow</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Create cinematic clips and stories with Google's advanced AI models</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">AI Filmmaking</span>
+                  <a 
+                    href="https://flow.google/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium group-hover:underline"
+                  >
+                    Create →
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Project Mariner */}
+            <div className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl mb-4 flex items-center justify-center shadow-lg">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9m0 9c-5 0-9-4-9-9s4-9 9-9" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Project Mariner</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Explore the future of human-agent interaction in browsers</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">Browser AI</span>
+                  <a 
+                    href="https://labs.google.com/mariner/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 text-sm font-medium group-hover:underline"
+                  >
+                    Try Now →
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Stitch */}
+            <div className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl mb-4 flex items-center justify-center shadow-lg">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Stitch</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Turn prompts into UI designs and frontend code with AI</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">UI Design</span>
+                  <a 
+                    href="https://stitch.withgoogle.com/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 text-sm font-medium group-hover:underline"
+                  >
+                    Try Now →
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Jules */}
+            <div className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-xl mb-4 flex items-center justify-center shadow-lg">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Jules</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">AI coding agent that automates GitHub workflows and tasks</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">Code AI</span>
+                  <a 
+                    href="https://jules.google/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 text-sm font-medium group-hover:underline"
+                  >
+                    Try Now →
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Project Astra */}
+            <div className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-xl mb-4 flex items-center justify-center shadow-lg">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Project Astra</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Research prototype exploring future universal AI assistant capabilities</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">AI Assistant</span>
+                  <a 
+                    href="https://deepmind.google/technologies/gemini/project-astra/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 text-sm font-medium group-hover:underline"
+                  >
+                    Learn More →
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* SynthID Detector */}
+            <div className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl mb-4 flex items-center justify-center shadow-lg">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">SynthID Detector</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Detect AI-generated content in images, audio, and video files</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">AI Detection</span>
+                  <a 
+                    href="https://deepmind.google.com/frontiers/synthid" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 text-sm font-medium group-hover:underline"
+                  >
+                    Learn More →
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Whisk */}
+            <div className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-rose-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-pink-400 to-rose-500 rounded-xl mb-4 flex items-center justify-center shadow-lg">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Whisk</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Image generation tool with stories and creative AI capabilities</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">Image AI</span>
+                  <a 
+                    href="https://labs.google/experiments" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 text-sm font-medium group-hover:underline"
+                  >
+                    Explore →
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mt-8">
+            <a 
+              href="https://labs.google/experiments" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+              Explore All Experiments
+            </a>
           </div>
         </div>
       </section>
@@ -265,6 +483,13 @@ export default function Home() {
                 className="text-slate-400 hover:text-white transition-colors"
               >
                 Documents
+              </a>
+              <span className="hidden sm:block text-slate-600">•</span>
+              <a 
+                href="#labs" 
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                Labs
               </a>
               <span className="hidden sm:block text-slate-600">•</span>
               <a 

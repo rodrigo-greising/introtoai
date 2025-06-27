@@ -18,8 +18,8 @@ export default function YouTubeSection() {
             </p>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
               Andrej Karpathy is a renowned AI researcher and educator who co-founded OpenAI, led AI development at Tesla, 
-              and now runs Eureka Labs. He's known for creating Stanford's first deep learning course and his popular 
-              "Zero to Hero" series on LLM fundamentals. In this video, he shares his practical insights on working with Large Language Models.
+              and now runs Eureka Labs. He&apos;s known for creating Stanford&apos;s first deep learning course and his popular 
+              &ldquo;Zero to Hero&rdquo; series on LLM fundamentals. In this video, he shares his practical insights on working with Large Language Models.
             </p>
             
             {/* YouTube Embed */}

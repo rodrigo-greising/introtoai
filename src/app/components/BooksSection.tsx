@@ -211,15 +211,15 @@ export default function BooksSection() {
             <div className="grid md:grid-cols-3 gap-4 text-sm text-slate-600 dark:text-slate-400">
               <div>
                 <span className="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                <strong>Beginner:</strong> Start with "You Look Like a Thing and I Love You"
+                <strong>Beginner:</strong> Start with &ldquo;You Look Like a Thing and I Love You&rdquo;
               </div>
               <div>
                 <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-                <strong>Intermediate:</strong> Try "Human Compatible"
+                <strong>Intermediate:</strong> Try &ldquo;Human Compatible&rdquo;
               </div>
               <div>
                 <span className="inline-block w-3 h-3 bg-purple-500 rounded-full mr-2"></span>
-                <strong>Advanced:</strong> Dive into "Artificial Intelligence: A Modern Approach"
+                <strong>Advanced:</strong> Dive into &ldquo;Artificial Intelligence: A Modern Approach&rdquo;
               </div>
             </div>
           </div>

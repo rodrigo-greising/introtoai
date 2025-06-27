@@ -16,7 +16,7 @@ export default function ChattingAppsSection() {
               </svg>
             </div>
             <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">ChatGPT</h4>
-            <p className="text-slate-600 dark:text-slate-400 mb-4">OpenAI's conversational AI assistant</p>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">OpenAI&apos;s conversational AI assistant</p>
             <a href="https://chat.openai.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
               <span className="text-sm font-medium">Try ChatGPT</span>
               <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,7 +33,7 @@ export default function ChattingAppsSection() {
               </svg>
             </div>
             <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Claude</h4>
-            <p className="text-slate-600 dark:text-slate-400 mb-4">Anthropic's AI assistant</p>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">Anthropic&apos;s AI assistant</p>
             <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
               <span className="text-sm font-medium">Try Claude</span>
               <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +50,7 @@ export default function ChattingAppsSection() {
               </svg>
             </div>
             <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Gemini</h4>
-            <p className="text-slate-600 dark:text-slate-400 mb-4">Google's AI assistant</p>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">Google&apos;s AI assistant</p>
             <a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
               <span className="text-sm font-medium">Try Gemini</span>
               <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,7 +84,7 @@ export default function ChattingAppsSection() {
               </svg>
             </div>
             <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Grok</h4>
-            <p className="text-slate-600 dark:text-slate-400 mb-4">xAI's conversational AI</p>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">xAI&apos;s conversational AI</p>
             <a href="https://grok.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
               <span className="text-sm font-medium">Try Grok</span>
               <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,7 +101,7 @@ export default function ChattingAppsSection() {
               </svg>
             </div>
             <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">DeepSeek</h4>
-            <p className="text-slate-600 dark:text-slate-400 mb-4">DeepSeek's AI assistant</p>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">DeepSeek&apos;s AI assistant</p>
             <a href="https://chat.deepseek.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
               <span className="text-sm font-medium">Try DeepSeek</span>
               <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

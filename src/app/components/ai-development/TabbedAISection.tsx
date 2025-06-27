@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import EducationalContent from './EducationalContent';
 import ToolComparison from './ToolComparison';
-import FutureOutlook from './FutureOutlook';
 import DiffusionModelsSection from './DiffusionModelsSection';
 import DevelopmentVideoTutorials from './DevelopmentVideoTutorials';
 import DesignVideoTutorials from './DesignVideoTutorials';
@@ -65,9 +64,7 @@ export default function TabbedAISection() {
                 <EducationalContent />
                 <ToolComparison />
               </div>
-              
-              {/* Future Outlook */}
-              <FutureOutlook />
+
             </div>
           ) : (
             <div className="space-y-12">

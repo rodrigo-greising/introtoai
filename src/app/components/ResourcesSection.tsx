@@ -72,37 +72,6 @@ export default function ResourcesSection() {
             </a>
           </div>
 
-          {/* Fast.ai Course */}
-          <div className="group bg-slate-50 dark:bg-slate-800 rounded-xl p-6 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-            <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-teal-600 rounded-lg mb-4 flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Practical Deep Learning</h4>
-            <p className="text-slate-600 dark:text-slate-400 mb-2">
-              <span className="font-medium text-slate-700 dark:text-slate-300">By fast.ai</span>
-            </p>
-            <p className="text-slate-600 dark:text-slate-400 mb-4">
-              Learn practical deep learning with PyTorch. This course focuses on real-world applications 
-              and getting you building AI models quickly.
-            </p>
-            <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400 mb-4">
-              <span>Free course • Self-paced</span>
-              <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">Free</span>
-            </div>
-            <a 
-              href="https://course.fast.ai/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300"
-            >
-              <span className="text-sm font-medium">Start Learning</span>
-              <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
-          </div>
 
           {/* Papers With Code */}
           <div className="group bg-slate-50 dark:bg-slate-800 rounded-xl p-6 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
@@ -154,55 +123,6 @@ export default function ResourcesSection() {
             </a>
           </div>
 
-          {/* AI Community */}
-          <div className="group bg-slate-50 dark:bg-slate-800 rounded-xl p-6 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-            <div className="w-12 h-12 bg-gradient-to-br from-red-400 to-red-600 rounded-lg mb-4 flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </div>
-            <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">AI Communities</h4>
-            <p className="text-slate-600 dark:text-slate-400 mb-4">
-              Join vibrant AI communities on Reddit, Discord, and other platforms 
-              to connect with fellow learners and practitioners.
-            </p>
-            <a 
-              href="https://www.reddit.com/r/MachineLearning/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300"
-            >
-              <span className="text-sm font-medium">Join Community</span>
-              <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
-          </div>
-
-          {/* GitHub AI Projects */}
-          <div className="group bg-slate-50 dark:bg-slate-800 rounded-xl p-6 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-            <div className="w-12 h-12 bg-gradient-to-br from-gray-400 to-gray-600 rounded-lg mb-4 flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-              </svg>
-            </div>
-            <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Open Source AI</h4>
-            <p className="text-slate-600 dark:text-slate-400 mb-4">
-              Explore trending AI projects on GitHub. Find open-source implementations, 
-              tutorials, and tools to accelerate your learning.
-            </p>
-            <a 
-              href="https://github.com/topics/artificial-intelligence" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300"
-            >
-              <span className="text-sm font-medium">Browse Projects</span>
-              <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
-          </div>
         </div>
       </div>
     </section>

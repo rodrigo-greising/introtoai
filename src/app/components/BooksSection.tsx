@@ -6,7 +6,6 @@ interface Book {
   author: string;
   description: string;
   category: 'beginner' | 'intermediate' | 'advanced';
-  pages: number;
   year: number;
   link?: string;
 }
@@ -18,8 +17,7 @@ const books: Book[] = [
     author: 'Stuart Russell & Peter Norvig',
     description: 'The definitive AI textbook, comprehensive coverage from search to ethics.',
     category: 'advanced',
-    pages: 1136,
-    year: 2020,
+    year: 2022,
     link: 'http://aima.cs.berkeley.edu'
   },
   {
@@ -28,7 +26,6 @@ const books: Book[] = [
     author: 'Ian Goodfellow, Yoshua Bengio & Aaron Courville',
     description: 'Foundational reference on deep neural networks, theory and practice.',
     category: 'advanced',
-    pages: 800,
     year: 2016,
     link: 'https://www.deeplearningbook.org'
   },
@@ -38,7 +35,6 @@ const books: Book[] = [
     author: 'Stuart Russell',
     description: 'Insightful discussion on AI alignment and ensuring machines act in our interest.',
     category: 'intermediate',
-    pages: 352,
     year: 2019,
     link: 'https://en.wikipedia.org/wiki/Human_Compatible'
   },
@@ -48,19 +44,17 @@ const books: Book[] = [
     author: 'Yuval Noah Harari',
     description: 'Examines humanity\'s future in the age of AI and biotechnology.',
     category: 'intermediate',
-    pages: 464,
     year: 2017,
     link: 'https://www.ynharari.com/book/homo-deus/'
   },
   {
-    id: '5',
-    title: 'The Age of AI: And Our Human Future',
-    author: 'Henry Kissinger, Eric Schmidt & Daniel Huttenlocher',
-    description: 'Strategic and philosophical reflections on AI\'s impact on knowledge and power.',
+    id: '4.5',
+    title: 'NEXUS: A Brief History of Information Networks from the Stone Age to AI',
+    author: 'Yuval Noah Harari',
+    description: 'Explores humanity\'s voyage into the Information Age and how information networks have shaped our world, providing essential context for understanding today\'s AI revolution.',
     category: 'intermediate',
-    pages: 272,
-    year: 2021,
-    link: 'https://en.wikipedia.org/wiki/The_Age_of_AI:_And_Our_Human_Future'
+    year: 2025,
+    link: 'https://www.ynharari.com/book/nexus/'
   },
   {
     id: '6',
@@ -68,19 +62,8 @@ const books: Book[] = [
     author: 'Nick Bostrom',
     description: 'Seminal work on existential risks and the future of human-level AI.',
     category: 'intermediate',
-    pages: 352,
     year: 2014,
     link: 'https://en.wikipedia.org/wiki/Superintelligence_(book)'
-  },
-  {
-    id: '7',
-    title: 'You Look Like a Thing and I Love You',
-    author: 'Janelle Shane',
-    description: 'A fun, clear-eyed look at AI through surprising neural network experiments.',
-    category: 'beginner',
-    pages: 272,
-    year: 2019,
-    link: 'https://www.goodreads.com/book/show/43890879-you-look-like-a-thing-and-i-love-you'
   },
   {
     id: '8',
@@ -88,9 +71,53 @@ const books: Book[] = [
     author: 'Cathy O\'Neil',
     description: 'Powerful critique of biased algorithms and unfair systems.',
     category: 'beginner',
-    pages: 272,
     year: 2016,
     link: 'https://en.wikipedia.org/wiki/Weapons_of_Math_Destruction'
+  },
+  {
+    id: '9',
+    title: 'Life 3.0: Being Human in the Age of Artificial Intelligence',
+    author: 'Max Tegmark',
+    description: 'Explores possible futures of AI and how we might shape them to ensure beneficial outcomes for humanity.',
+    category: 'intermediate',
+    year: 2017,
+    link: 'https://en.wikipedia.org/wiki/Life_3.0'
+  },
+  {
+    id: '10',
+    title: 'The Master Algorithm: How the Quest for the Ultimate Learning Machine Will Remake Our World',
+    author: 'Pedro Domingos',
+    description: 'Introduces five paradigms of machine learning and argues for a unifying master algorithm.',
+    category: 'intermediate',
+    year: 2015,
+    link: 'https://en.wikipedia.org/wiki/The_Master_Algorithm'
+  },
+  {
+    id: '11',
+    title: 'Artificial Intelligence: A Guide for Thinking Humans',
+    author: 'Melanie Mitchell',
+    description: 'Offers a clear, skeptical look at what AI can and cannot do, emphasizing real-world limitations.',
+    category: 'intermediate',
+    year: 2019,
+    link: 'https://en.wikipedia.org/wiki/Artificial_Intelligence:_A_Guide_for_Thinking_Humans'
+  },
+  {
+    id: '12',
+    title: 'The Alignment Problem: Machine Learning and Human Values',
+    author: 'Brian Christian',
+    description: 'Explores the challenges of aligning AI systems with human values and intentions.',
+    category: 'intermediate',
+    year: 2020,
+    link: 'https://en.wikipedia.org/wiki/The_Alignment_Problem'
+  },
+  {
+    id: '13',
+    title: 'The Singularity Is Nearer: When We Merge with AI',
+    author: 'Ray Kurzweil',
+    description: 'A follow-up to The Singularity Is Near, examining the path to human-AI merger and what it means for our future.',
+    category: 'intermediate',
+    year: 2024,
+    link: 'https://en.wikipedia.org/wiki/The_Singularity_Is_Nearer'
   }
 ];
 
@@ -133,33 +160,32 @@ export default function BooksSection() {
           </p>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {books.map((book) => (
             <div 
               key={book.id}
-              className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-slate-200 dark:border-slate-700"
+              className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border border-slate-200 dark:border-slate-700"
             >
               {/* Category Badge */}
-              <div className="mb-4">
+              <div className="mb-3">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(book.category)}`}>
                   {getCategoryLabel(book.category)}
                 </span>
               </div>
               
               {/* Book Info */}
-              <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+              <h4 className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
                 {book.title}
               </h4>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
                 by {book.author}
               </p>
-              <p className="text-slate-600 dark:text-slate-400 mb-4">
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 line-clamp-3">
                 {book.description}
               </p>
               
               {/* Book Details */}
-              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-4">
-                <span>{book.pages} pages</span>
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-3">
                 <span>{book.year}</span>
               </div>
               

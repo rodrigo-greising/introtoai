@@ -9,10 +9,6 @@ export default function EducationalContent() {
           handle entire development workflows. These tools use large language models to understand context, 
           suggest completions, and generate code based on natural language descriptions.
         </p>
-        <p className="text-slate-700 dark:text-slate-300 mb-4">
-          The concept emerged from the idea that programming could be more intuitive if developers could describe 
-          what they want to build in plain English, rather than having to write every line of code manually.
-        </p>
         <p className="text-slate-700 dark:text-slate-300">
           This approach has evolved into what&apos;s known as <a href="https://en.wikipedia.org/wiki/Vibe_coding" target="_blank" rel="noopener noreferrer" className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium">vibe coding</a> - a technique where developers describe problems in natural language and let AI generate the code. While this lowers the barrier to entry for software creation, it also shifts the programmer&apos;s role from manual coding to guiding, testing, and refining AI-generated code.
         </p>

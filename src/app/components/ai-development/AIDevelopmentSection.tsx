@@ -1,6 +1,5 @@
 import EducationalContent from './EducationalContent';
 import ToolComparison from './ToolComparison';
-import FutureOutlook from './FutureOutlook';
 
 export default function AIDevelopmentSection() {
   return (
@@ -24,7 +23,6 @@ export default function AIDevelopmentSection() {
           <ToolComparison />
         </div>
 
-        <FutureOutlook />
       </div>
     </section>
   );

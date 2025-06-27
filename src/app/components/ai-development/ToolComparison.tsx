@@ -5,6 +5,24 @@ export default function ToolComparison() {
         <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Popular AI Development Tools</h4>
         
         <div className="space-y-6">
+          {/* Gemini CLI */}
+          <div className="border-l-4 border-green-500 pl-4">
+            <h5 className="font-bold text-slate-900 dark:text-white mb-2">Gemini CLI </h5>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+              <strong>FREE</strong> open-source AI agent that brings Gemini 2.5 Pro directly to your terminal. 
+              Features 60 requests/minute and 1,000 requests/day at no cost. Perfect for code understanding, 
+              file manipulation, and command execution with natural language.
+            </p>
+            <a 
+              href="https://github.com/google-gemini/gemini-cli" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-green-600 dark:text-green-400 hover:underline text-sm font-medium"
+            >
+              Learn More →
+            </a>
+          </div>
+
           {/* Cursor */}
           <div className="border-l-4 border-blue-500 pl-4">
             <h5 className="font-bold text-slate-900 dark:text-white mb-2">Cursor</h5>

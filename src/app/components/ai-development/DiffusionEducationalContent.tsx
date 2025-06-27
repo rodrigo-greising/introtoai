@@ -56,7 +56,6 @@ export default function DiffusionEducationalContent() {
             <h5 className="font-semibold text-orange-800 dark:text-orange-200 mb-2">Current Limitations</h5>
             <ul className="text-sm text-orange-700 dark:text-orange-300 space-y-1">
               <li>• <strong>Brand Consistency:</strong> Maintaining consistent visual identity</li>
-              <li>• <strong>Typography Control:</strong> Limited text generation capabilities</li>
               <li>• <strong>Copyright Issues:</strong> Legal considerations for commercial use</li>
               <li>• <strong>Quality Control:</strong> Need for human review and refinement</li>
             </ul>

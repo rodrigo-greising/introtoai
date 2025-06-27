@@ -34,7 +34,7 @@ export default function Footer() {
               href="#ai-development" 
               className="text-slate-400 hover:text-white transition-colors"
             >
-              AI Development
+              AI in Professional Settings
             </a>
             <span className="hidden sm:block text-slate-600">•</span>
             <a 
@@ -54,6 +54,17 @@ export default function Footer() {
           <div className="mt-8 pt-8 border-t border-slate-800">
             <p className="text-sm text-slate-500">
               © 2024 Intro to AI. Made with ❤️ for the AI community.
+            </p>
+            <p className="text-sm text-slate-500 mt-2">
+              Created by{' '}
+              <a 
+                href="https://github.com/rodrigo-greising" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                Rodrigo Greising
+              </a>
             </p>
           </div>
         </div>

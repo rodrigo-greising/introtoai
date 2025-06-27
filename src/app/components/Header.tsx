@@ -17,7 +17,7 @@ export default function Header() {
           <div className="hidden md:flex items-center space-x-6 text-sm">
             <a href="#youtube" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Videos</a>
             <a href="#documents" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Documents</a>
-            <a href="#ai-development" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">AI Development</a>
+            <a href="#ai-development" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">AI in Professional Settings            </a>
             <a href="#labs" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Labs</a>
             <a href="#resources" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Resources</a>
           </div>

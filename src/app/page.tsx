@@ -1,5 +1,4 @@
 import Header from './components/Header';
-import DocumentsSection from './components/DocumentsSection';
 import BooksSection from './components/BooksSection';
 import ChattingAppsSection from './components/chatting-apps/ChattingAppsSection';
 import GeneralAIVideoSection from './components/GeneralAIVideoSection';
@@ -15,10 +14,9 @@ export default function Home() {
       <ChattingAppsSection />
       <GeneralAIVideoSection />
       <TabbedAISection />
-      <GoogleLabsSection />
       <ResourcesSection />
+      <GoogleLabsSection />
       <BooksSection />
-      <DocumentsSection />
       <Footer />
     </div>
   );

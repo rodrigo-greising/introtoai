@@ -2,7 +2,7 @@ export default function DiffusionCourses() {
   return (
     <div className="text-center mt-12">
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg border border-slate-200 dark:border-slate-700 max-w-4xl mx-auto">
-        <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Design Learning Resources & Courses</h4>
+        <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-6">AI Image Generation Learning Resources</h4>
         
         <div className="grid md:grid-cols-2 gap-8 text-left">
           {/* Free Resources */}

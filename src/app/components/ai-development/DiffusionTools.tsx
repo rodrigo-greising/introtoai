@@ -56,6 +56,22 @@ export default function DiffusionTools() {
             </a>
           </div>
 
+          {/* FLUX.1 */}
+          <div className="border-l-4 border-emerald-500 pl-4">
+            <h5 className="font-bold text-slate-900 dark:text-white mb-2">FLUX.1 (Black Forest Labs)</h5>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+              High-quality open image generation model family with photorealistic and artistic variants, strong composition control.
+            </p>
+            <a 
+              href="https://blackforestlabs.ai/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-emerald-600 dark:text-emerald-400 hover:underline text-sm font-medium"
+            >
+              Learn More →
+            </a>
+          </div>
+
           {/* ComfyUI */}
           <div className="border-l-4 border-cyan-500 pl-4">
             <h5 className="font-bold text-slate-900 dark:text-white mb-2">ComfyUI</h5>

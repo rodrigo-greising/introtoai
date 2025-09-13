@@ -17,7 +17,7 @@ export default function ChattingAppsSection() {
             </div>
             <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">ChatGPT</h4>
             <p className="text-slate-600 dark:text-slate-400 mb-4">OpenAI&apos;s conversational AI assistant</p>
-            <a href="https://chat.openai.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
+            <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
               <span className="text-sm font-medium">Try ChatGPT</span>
               <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -104,6 +104,57 @@ export default function ChattingAppsSection() {
             <p className="text-slate-600 dark:text-slate-400 mb-4">DeepSeek&apos;s AI assistant</p>
             <a href="https://chat.deepseek.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
               <span className="text-sm font-medium">Try DeepSeek</span>
+              <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
+
+          {/* Perplexity */}
+          <div className="group bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-slate-200 dark:border-slate-700">
+            <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 rounded-lg mb-4 flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-2.21 0-4 1.79-4 4m8 0a4 4 0 00-4-4m0 8a4 4 0 004-4m-4 4a4 4 0 01-4-4" />
+              </svg>
+            </div>
+            <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Perplexity</h4>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">AI search and answer engine</p>
+            <a href="https://www.perplexity.ai/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
+              <span className="text-sm font-medium">Open Perplexity</span>
+              <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
+
+          {/* Microsoft Copilot */}
+          <div className="group bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-slate-200 dark:border-slate-700">
+            <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg mb-4 flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7a4 4 0 014-4h8a4 4 0 014 4v10a4 4 0 01-4 4H8a4 4 0 01-4-4V7z" />
+              </svg>
+            </div>
+            <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Microsoft Copilot</h4>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">Microsoft&apos;s AI assistant across web and Windows</p>
+            <a href="https://copilot.microsoft.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
+              <span className="text-sm font-medium">Open Copilot</span>
+              <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
+
+          {/* Le Chat (Mistral) */}
+          <div className="group bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-slate-200 dark:border-slate-700">
+            <div className="w-12 h-12 bg-gradient-to-br from-slate-400 to-slate-600 rounded-lg mb-4 flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v7a2 2 0 01-2 2H7l-4 3V10a2 2 0 012-2h2" />
+              </svg>
+            </div>
+            <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Le Chat</h4>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">Mistral&apos;s AI chat assistant</p>
+            <a href="https://chat.mistral.ai/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
+              <span className="text-sm font-medium">Try Le Chat</span>
               <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>

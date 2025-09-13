@@ -123,6 +123,54 @@ export default function ResourcesSection() {
             </a>
           </div>
 
+          {/* DeepLearning.AI Short Courses */}
+          <div className="group bg-slate-50 dark:bg-slate-800 rounded-xl p-6 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+            <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-blue-600 rounded-lg mb-4 flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
+              </svg>
+            </div>
+            <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">DeepLearning.AI Short Courses</h4>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">
+              Hands-on short courses on practical AI topics like LLMs, prompt engineering, RAG, and agents. Created with industry partners.
+            </p>
+            <a 
+              href="https://www.deeplearning.ai/short-courses/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300"
+            >
+              <span className="text-sm font-medium">Browse Courses</span>
+              <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+
+          {/* OpenAI Cookbook */}
+          <div className="group bg-slate-50 dark:bg-slate-800 rounded-xl p-6 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+            <div className="w-12 h-12 bg-gradient-to-br from-zinc-400 to-zinc-600 rounded-lg mb-4 flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h10" />
+              </svg>
+            </div>
+            <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">OpenAI Cookbook</h4>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">
+              Practical code examples for building with modern AI models: assistants, structured outputs, evals, and more.
+            </p>
+            <a 
+              href="https://cookbook.openai.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300"
+            >
+              <span className="text-sm font-medium">Explore Cookbook</span>
+              <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+
         </div>
       </div>
     </section>

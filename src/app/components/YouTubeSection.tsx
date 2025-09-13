@@ -47,24 +47,22 @@ export default function YouTubeSection() {
             </div>
           </div>
 
-          {/* Second Video - Neural Networks: Zero to Hero Playlist */}
+          {/* Second Video - Practical Deep Learning 2024-25 (fast.ai) */}
           <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-6 shadow-lg">
-            <h4 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">Neural Networks: Zero to Hero</h4>
+            <h4 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">Practical Deep Learning for Coders (2024-25)</h4>
             <p className="text-slate-600 dark:text-slate-400 mb-2">
-              <span className="font-medium text-slate-700 dark:text-slate-300">By Andrej Karpathy</span>
+              <span className="font-medium text-slate-700 dark:text-slate-300">By Jeremy Howard</span>
             </p>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
-              A comprehensive series that builds neural networks from scratch, starting with micrograd for backpropagation 
-              and progressing to building GPT models. Learn the fundamentals of deep learning through hands-on coding 
-              and mathematical intuition.
+              The latest fast.ai course focused on modern deep learning with PyTorch, covering vision, NLP, deployment, and practical tricks.
             </p>
             
             {/* YouTube Embed */}
             <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
               <iframe
                 className="absolute top-0 left-0 w-full h-full rounded-lg"
-                src="https://www.youtube.com/embed/videoseries?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ"
-                title="Neural Networks: Zero to Hero Playlist"
+                src="https://www.youtube.com/embed/videoseries?list=PLfYUBJiXbdtSm3bVudQfWKOQh3GVaAQyF"
+                title="Practical Deep Learning for Coders (2024-25)"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
@@ -72,9 +70,9 @@ export default function YouTubeSection() {
             </div>
             
             <div className="mt-6 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
-              <span>10 videos • ~2M views</span>
+              <span>New series • fast.ai</span>
               <a 
-                href="https://www.youtube.com/playlist?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ" 
+                href="https://www.youtube.com/playlist?list=PLfYUBJiXbdtSm3bVudQfWKOQh3GVaAQyF" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
@@ -84,20 +82,17 @@ export default function YouTubeSection() {
             </div>
           </div>
 
-          {/* Third Video - Existing 3Blue1Brown Playlist */}
+          {/* Third Video - Neural Networks: Zero to Hero (classic) */}
           <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-6 shadow-lg">
-            <h4 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">Neural Networks by 3Blue1Brown</h4>
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
-              A comprehensive series on the mathematics of neural networks and deep learning. 
-              Eight videos covering the fundamental concepts behind how neural networks work.
-            </p>
+            <h4 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">Neural Networks: Zero to Hero</h4>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">A popular series that builds from micrograd to GPT.</p>
             
             {/* YouTube Embed */}
             <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
               <iframe
                 className="absolute top-0 left-0 w-full h-full rounded-lg"
-                src="https://www.youtube.com/embed/videoseries?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi"
-                title="3Blue1Brown Neural Networks Playlist"
+                src="https://www.youtube.com/embed/videoseries?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ"
+                title="Neural Networks: Zero to Hero"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
@@ -105,9 +100,9 @@ export default function YouTubeSection() {
             </div>
             
             <div className="mt-6 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
-              <span>8 videos • ~4 hours total</span>
+              <span>10 videos • foundational</span>
               <a 
-                href="https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi" 
+                href="https://www.youtube.com/playlist?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-blue-600 dark:text-blue-400 hover:underline font-medium"

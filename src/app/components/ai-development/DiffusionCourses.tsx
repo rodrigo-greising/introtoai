@@ -24,6 +24,21 @@ export default function DiffusionCourses() {
                   Read Guide →
                 </a>
               </div>
+
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-4">
+                <h6 className="font-medium text-emerald-800 dark:text-emerald-200 mb-2">Stable Diffusion 3 Quickstart</h6>
+                <p className="text-sm text-emerald-700 dark:text-emerald-300 mb-2">
+                  Official docs and examples to get started with Stable Diffusion 3 for high-quality image generation.
+                </p>
+                <a 
+                  href="https://platform.stability.ai/docs" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-emerald-600 dark:text-emerald-400 hover:underline text-sm font-medium"
+                >
+                  Read Docs →
+                </a>
+              </div>
             </div>
           </div>
         </div>

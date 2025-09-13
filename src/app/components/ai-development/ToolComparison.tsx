@@ -9,8 +9,7 @@ export default function ToolComparison() {
           <div className="border-l-4 border-green-500 pl-4">
             <h5 className="font-bold text-slate-900 dark:text-white mb-2">Gemini CLI </h5>
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
-              <strong>FREE</strong> open-source AI agent that brings Gemini 2.5 Pro directly to your terminal. 
-              Features 60 requests/minute and 1,000 requests/day at no cost. Perfect for code understanding, 
+              Open-source AI agent that brings Gemini directly to your terminal. Useful for code understanding, 
               file manipulation, and command execution with natural language.
             </p>
             <a 
@@ -72,14 +71,14 @@ export default function ToolComparison() {
               </a>
           </div>
 
-          {/* Claude Code */}
+          {/* Aider */}
           <div className="border-l-4 border-orange-500 pl-4">
-            <h5 className="font-bold text-slate-900 dark:text-white mb-2">Claude Code</h5>
+            <h5 className="font-bold text-slate-900 dark:text-white mb-2">Aider</h5>
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
-              Command-line AI tool that embeds Claude Opus 4 directly in your terminal for deep codebase understanding.
+              Open-source AI pair programmer for your terminal and editor. Works with many models to edit code safely.
             </p>
             <a 
-              href="https://www.anthropic.com/claude-code" 
+              href="https://aider.chat/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-orange-600 dark:text-orange-400 hover:underline text-sm font-medium"

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Header, Sidebar, SidebarToggle, ContentWrapper } from "./layout";
-import { IntroSection, MentalModelSection, CachingSection, PlaceholderSection } from "./sections";
+import { IntroSection, MentalModelSection, CachingSection, ContextEngineeringSection, ContextTechniquesSection, PlaceholderSection } from "./sections";
 import { sections } from "@/app/data/sections";
 import { useActiveSection, scrollToSection } from "@/hooks/useActiveSection";
 
@@ -10,7 +10,9 @@ import { useActiveSection, scrollToSection } from "@/hooks/useActiveSection";
 const sectionComponents: Record<string, React.ComponentType> = {
   intro: IntroSection,
   "mental-model": MentalModelSection,
-  "prompt-caching": CachingSection,
+  "llm-caching": CachingSection,
+  "context-engineering": ContextEngineeringSection,
+  "context-techniques": ContextTechniquesSection,
 };
 
 export function GuideShell() {

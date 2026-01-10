@@ -36,28 +36,50 @@ export const sections: Section[] = [
     title: "The Mental Model",
     part: "foundations",
     description: "LLM as a stateless function, not a chat",
+    subSections: [
+      {
+        id: "why-this-matters",
+        title: "Why This Matters",
+      },
+      {
+        id: "practical-implications",
+        title: "Practical Implications",
+      },
+      {
+        id: "visualizing-cost",
+        title: "Visualizing the Cost Problem",
+      },
+      {
+        id: "two-approaches",
+        title: "The Two Approaches",
+      },
+    ],
   },
   {
-    id: "prompt-caching",
-    title: "Prompt Caching",
+    id: "llm-caching",
+    title: "LLM Caching",
     part: "foundations",
     description: "How providers optimize the stateless function",
     subSections: [
+      {
+        id: "how-caching-works",
+        title: "How LLM Caching Actually Works",
+      },
+      {
+        id: "conversations-and-caching",
+        title: "How Conversations Benefit from Caching",
+      },
       {
         id: "what-this-means",
         title: "What This Means for Context Engineering",
       },
       {
-        id: "provider-comparison",
-        title: "Provider Comparison",
+        id: "caching-economics",
+        title: "Caching Economics",
       },
       {
-        id: "implementing",
-        title: "Implementing Cache-Friendly Prompts",
-      },
-      {
-        id: "break-even",
-        title: "Break-Even Analysis",
+        id: "caching-cost-explorer",
+        title: "Caching Cost Explorer",
       },
       {
         id: "where-caching-delivers",
@@ -71,9 +93,59 @@ export const sections: Section[] = [
   },
   {
     id: "context-engineering",
-    title: "Context Engineering",
+    title: "Context Engineering Principles",
     part: "foundations",
-    description: "Signal vs noise, pure context principles",
+    description: "The theoretical foundations of effective context",
+    subSections: [
+      {
+        id: "signal-over-noise",
+        title: "1. Signal Over Noise",
+      },
+      {
+        id: "layered-architecture",
+        title: "2. Layered Context Architecture",
+      },
+      {
+        id: "explicit-over-implicit",
+        title: "3. Explicit Over Implicit",
+      },
+      {
+        id: "dynamic-relevance",
+        title: "4. Dynamic Relevance",
+      },
+      {
+        id: "compression-without-loss",
+        title: "5. Compression Without Loss",
+      },
+      {
+        id: "separation-of-concerns",
+        title: "6. Separation of Concerns",
+      },
+    ],
+  },
+  {
+    id: "context-techniques",
+    title: "Context Management Techniques",
+    part: "foundations",
+    description: "Practical patterns for managing context",
+    subSections: [
+      {
+        id: "conversation-context-patterns",
+        title: "Conversation Context Patterns",
+      },
+      {
+        id: "compression-strategies",
+        title: "Compression Strategies",
+      },
+      {
+        id: "system-architecture-patterns",
+        title: "System Architecture Patterns",
+      },
+      {
+        id: "techniques-connection",
+        title: "Connection to Foundations",
+      },
+    ],
   },
   {
     id: "prompt-anatomy",

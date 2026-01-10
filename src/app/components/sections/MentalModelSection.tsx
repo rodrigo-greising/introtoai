@@ -40,7 +40,7 @@ const response3 = await callLLM("Hello" + response1 + "How are you?" + response2
 // The "conversation" is reconstructed every time.`}
         />
 
-        <h3 className="text-xl font-semibold mt-8 mb-4">Why This Matters</h3>
+        <h3 id="why-this-matters" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Why This Matters</h3>
 
         <p className="text-muted-foreground">
           When you understand this, several things become clear:
@@ -78,7 +78,7 @@ const response3 = await callLLM("Hello" + response1 + "How are you?" + response2
           </Card>
         </div>
 
-        <h3 className="text-xl font-semibold mt-8 mb-4">Practical Implications</h3>
+        <h3 id="practical-implications" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Practical Implications</h3>
 
         <p className="text-muted-foreground mb-6">
           The simplest way to build a "chat" with an LLM is to accumulate messages and send 
@@ -92,7 +92,7 @@ const response3 = await callLLM("Hello" + response1 + "How are you?" + response2
           and inefficient</strong>. The cost math is brutal: input tokens grow quadratically, not linearly.
         </p>
 
-        <h4 className="text-lg font-medium mt-8 mb-4">Visualizing the Cost Problem</h4>
+        <h4 id="visualizing-cost" className="text-lg font-medium mt-8 mb-4 scroll-mt-20">Visualizing the Cost Problem</h4>
         
         <p className="text-muted-foreground mb-4">
           Drag the slider to see how costs scale with conversation length. Notice how input cost 
@@ -126,7 +126,7 @@ const response3 = await callLLM("Hello" + response1 + "How are you?" + response2
           user experience.
         </p>
 
-        <h4 className="text-lg font-medium mt-8 mb-4">The Two Approaches</h4>
+        <h4 id="two-approaches" className="text-lg font-medium mt-8 mb-4 scroll-mt-20">The Two Approaches</h4>
 
         <CodeBlock
           language="typescript"

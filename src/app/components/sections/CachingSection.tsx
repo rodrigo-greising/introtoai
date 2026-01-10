@@ -1,11 +1,11 @@
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout, CodeBlock, CachingCostVisualizer } from "@/app/components/ui";
 
 export function CachingSection() {
   return (
-    <section id="prompt-caching" className="scroll-mt-20">
+    <section id="llm-caching" className="scroll-mt-20">
       <SectionHeading
-        id="prompt-caching-heading"
-        title="Prompt Caching"
+        id="llm-caching-heading"
+        title="LLM Caching"
         subtitle="How providers optimize the stateless function"
       />
       
@@ -23,6 +23,122 @@ export function CachingSection() {
             identical prefixes <strong>reuse that precomputed state</strong>—slashing both cost and latency.
           </p>
         </Callout>
+
+        <h3 id="how-caching-works" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">How LLM Caching Actually Works</h3>
+
+        <p className="text-muted-foreground">
+          Most providers enable prompt caching automatically. But there are important 
+          nuances to understand:
+        </p>
+
+        <div className="space-y-4 mt-6">
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-foreground mb-2">1. Minimum Token Threshold</h4>
+              <p className="text-sm text-muted-foreground m-0">
+                Caching typically turns on automatically for prompts <strong className="text-emerald-500">1,024 tokens or longer</strong>. 
+                Below this threshold, the overhead of caching isn't worth it.
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-foreground mb-2">2. Exact Prefix Matches Only</h4>
+              <p className="text-sm text-muted-foreground m-0">
+                Cache hits are only possible when the new request's prompt starts with an <strong className="text-foreground">identical prefix</strong>—same 
+                messages, same tool definitions, same images/settings, same structured-output schema, same ordering. 
+                Any change to earlier content <strong className="text-rose-400">breaks the match</strong>.
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-foreground mb-2">3. Prefix-Only Caching</h4>
+              <p className="text-sm text-muted-foreground m-0">
+                The "new stuff" you append at the end (latest user message, any changed tool list, 
+                any changed image detail, etc.) <strong className="text-foreground">won't be cached for that request</strong>. 
+                Caching applies to the prefix that was already sent before.
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-foreground mb-2">4. Caches Expire</h4>
+              <p className="text-sm text-muted-foreground m-0">
+                With typical in-memory caching policies, cached prefixes persist for <strong className="text-foreground">5–10 minutes 
+                of inactivity</strong> (sometimes up to ~1 hour). If you pause longer, you'll get a cache miss 
+                and pay full price again.
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-foreground mb-2">5. High Throughput Can Reduce Hit Rates</h4>
+              <p className="text-sm text-muted-foreground m-0">
+                Requests are routed by a hash of the initial prefix. If the same prefix exceeds roughly 
+                <strong className="text-foreground"> 15 requests/minute</strong>, some requests may spill to other machines, 
+                reducing cache effectiveness.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <h3 id="conversations-and-caching" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">How Conversations Benefit from Caching</h3>
+
+        <p className="text-muted-foreground">
+          In a typical chat-style integration, each API call includes the whole <code className="text-xs bg-muted px-1 py-0.5 rounded">messages</code> array 
+          (system + prior user/assistant turns) plus the new user turn at the end. Because the earlier 
+          turns are repeated verbatim and sit at the beginning of the prompt, they often become a 
+          <strong className="text-foreground"> cacheable prefix</strong>.
+        </p>
+
+        <Callout variant="important" title='Not "Everything Is Cached"'>
+          <p className="mb-2">
+            A growing conversation tends to benefit from caching, but it's not as simple as 
+            "all prior messages are always cached":
+          </p>
+          <ul className="space-y-1 text-sm m-0 pl-4 list-disc">
+            <li>The latest user message (the "new stuff") is always processed fresh</li>
+            <li>If you modify the system prompt, inject a new tool schema, or reorder messages, you lose the cache</li>
+            <li>Long pauses (lunch break, overnight) will cause cache expiration</li>
+            <li>Different API routes or high request volumes can cause cache misses</li>
+          </ul>
+        </Callout>
+
+        <CodeBlock
+          language="text"
+          filename="conversation-caching-example.txt"
+          code={`Turn 1:
+  [System prompt] → NEW, written to cache
+  [User message 1] → NEW
+  ─────────────────
+  Total: ~2,100 tokens, all at full price
+
+Turn 2:
+  [System prompt] → ✅ CACHED (identical prefix)
+  [User message 1] → ✅ CACHED (part of prefix)
+  [Assistant reply 1] → ✅ CACHED (part of prefix)
+  [User message 2] → NEW (appended at end)
+  ─────────────────
+  ~1,800 tokens cached, ~100 tokens new
+
+Turn 3:
+  [System prompt] → ✅ CACHED
+  [User message 1] → ✅ CACHED
+  [Assistant reply 1] → ✅ CACHED
+  [User message 2] → ✅ CACHED
+  [Assistant reply 2] → ✅ CACHED
+  [User message 3] → NEW
+  ─────────────────
+  ~2,100 tokens cached, ~100 tokens new
+
+The cacheable prefix grows each turn while only
+~100-300 new tokens are charged at full price.`}
+        />
 
         <h3 id="what-this-means" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">What This Means for Context Engineering</h3>
 
@@ -60,363 +176,96 @@ async function goodApproach(userQuery: string, docs: string[]) {
 // can reuse the cached KV tensors`}
         />
 
-        <h3 id="provider-comparison" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Provider Comparison</h3>
-
-        <p className="text-muted-foreground mb-6">
-          Each major provider implements caching differently. Understanding these differences 
-          helps you optimize for your specific use case.
-        </p>
-
-        <div className="space-y-8">
-          {/* OpenAI */}
-          <div className="border-l-2 border-emerald-500 pl-6">
-            <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              OpenAI: Automatic Prefix Caching
-            </h4>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p className="m-0">
-                <strong className="text-foreground">How it works:</strong> Automatic. OpenAI routes 
-                requests based on a hash of the initial prefix (typically first 256 tokens). Cache 
-                lookup checks for matching prefixes, with hits reusing cached KV tensors. No explicit 
-                markup needed.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">Minimum:</strong> 1,024+ tokens to be eligible. 
-                All requests show <code className="text-xs bg-muted px-1 py-0.5 rounded">cached_tokens</code> in usage details.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">Retention:</strong> Two policies available:
-              </p>
-              <ul className="ml-4 mt-1 space-y-1 list-disc">
-                <li>
-                  <strong className="text-foreground">In-memory:</strong> 5-10 minutes of inactivity, 
-                  up to 1 hour maximum (default, all models)
-                </li>
-                <li>
-                  <strong className="text-foreground">Extended (24h):</strong> Up to 24 hours retention 
-                  (gpt-5.2, gpt-5.1, gpt-5, gpt-4.1 and newer). Configure via <code className="text-xs bg-muted px-1 py-0.5 rounded">prompt_cache_retention</code> parameter.
-                </li>
-              </ul>
-              <p className="m-0">
-                <strong className="text-foreground">Savings:</strong> Up to <strong className="text-emerald-500">90% off</strong> input 
-                token costs and up to <strong className="text-emerald-500">80% latency reduction</strong> on cache hits.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">Optimization:</strong> Use <code className="text-xs bg-muted px-1 py-0.5 rounded">prompt_cache_key</code> parameter 
-                to influence routing and improve hit rates. Keep each prefix-key combination below ~15 requests/min to avoid cache overflow.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">What's cached:</strong> Messages array, images, tool definitions, 
-                and structured output schemas. Exact prefix matches required for cache hits.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">Tip:</strong> Structure prompts with static content first, 
-                dynamic content last. Monitor <code className="text-xs bg-muted px-1 py-0.5 rounded">cached_tokens</code> in usage to track performance.
-              </p>
-              <p className="m-0 pt-3 mt-3 border-t border-border/50">
-                <a 
-                  href="https://platform.openai.com/docs/guides/prompt-caching" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-emerald-500 hover:text-emerald-400 transition-colors"
-                >
-                  OpenAI Prompt Caching Docs →
-                </a>
-              </p>
-            </div>
-          </div>
-
-          {/* Anthropic */}
-          <div className="border-l-2 border-orange-500 pl-6">
-            <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-orange-500" />
-              Anthropic: Explicit Cache Breakpoints
-            </h4>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p className="m-0">
-                <strong className="text-foreground">How it works:</strong> Explicit. You mark cacheable 
-                regions with <code className="text-xs bg-muted px-1 py-0.5 rounded">cache_control</code> breakpoints (up to 4). 
-                Cache prefixes are created in order: <code className="text-xs bg-muted px-1 py-0.5 rounded">tools</code> → 
-                <code className="text-xs bg-muted px-1 py-0.5 rounded">system</code> → <code className="text-xs bg-muted px-1 py-0.5 rounded">messages</code>.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">Supported models:</strong> Claude Opus 4.5, Opus 4.1, Opus 4, 
-                Sonnet 4.5, Sonnet 4, Sonnet 3.7, Haiku 4.5, Haiku 3.5, Haiku 3.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">Minimum:</strong> 4,096 tokens (Opus 4.5, Haiku 4.5), 
-                1,024 tokens (Opus 4.1/4, Sonnet 4.5/4/3.7), 2,048 tokens (Haiku 3.5/3).
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">Retention:</strong> 5 minutes default (refreshed on use), 
-                1 hour optional at extra cost. Use <code className="text-xs bg-muted px-1 py-0.5 rounded">ttl: "1h"</code> in 
-                <code className="text-xs bg-muted px-1 py-0.5 rounded">cache_control</code> for extended cache.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">Pricing:</strong> Write premium (<strong className="text-amber-500">1.25×</strong> for 5min, <strong className="text-amber-500">2×</strong> for 1hr), 
-                but reads are <strong className="text-emerald-500">0.1×</strong> (90% off). Break even at 2 calls using the same cached prefix.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">Automatic prefix checking:</strong> System checks backwards up to 20 blocks 
-                before each breakpoint to find the longest matching cached sequence. For prompts with more than 20 blocks, 
-                add explicit breakpoints earlier to ensure caching.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">What can be cached:</strong> Tools, system messages, text messages, 
-                images, documents, tool use/results. Thinking blocks are cached automatically alongside other content.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">Cache invalidation:</strong> Changes to tools invalidate everything. 
-                Changes to system (web search, citations toggle) invalidate system and messages. Changes to messages 
-                (images, tool_choice, thinking params) only invalidate messages cache.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">Important:</strong> <code className="text-xs bg-muted px-1 py-0.5 rounded">input_tokens</code> in usage 
-                represents only tokens <strong>after the last cache breakpoint</strong>, not total input. Calculate total as: 
-                <code className="text-xs bg-muted px-1 py-0.5 rounded">cache_read_input_tokens + cache_creation_input_tokens + input_tokens</code>.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">Bonus:</strong> Up to 4 breakpoints, cache shared within organization, 
-                organization-isolated (different orgs never share caches).
-              </p>
-              <p className="m-0 pt-3 mt-3 border-t border-border/50">
-                <a 
-                  href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-orange-500 hover:text-orange-400 transition-colors"
-                >
-                  Anthropic Prompt Caching Docs →
-                </a>
-              </p>
-            </div>
-          </div>
-
-          {/* Gemini */}
-          <div className="border-l-2 border-blue-500 pl-6">
-            <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-500" />
-              Gemini: Implicit + Explicit Caching
-            </h4>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p className="m-0">
-                <strong className="text-foreground">How it works:</strong> Two mechanisms available:
-              </p>
-              <ul className="ml-4 mt-1 space-y-1 list-disc">
-                <li>
-                  <strong className="text-foreground">Implicit caching:</strong> Automatically enabled on most models (effective May 8, 2025). 
-                  No configuration needed. Cost savings automatically passed on when requests hit caches.
-                </li>
-                <li>
-                  <strong className="text-foreground">Explicit caching:</strong> Manually create cache objects with system instructions, 
-                  documents, or video files. Reference cached content by name in subsequent requests.
-                </li>
-              </ul>
-              <p className="m-0">
-                <strong className="text-foreground">Minimum token limits:</strong>
-              </p>
-              <ul className="ml-4 mt-1 space-y-1 list-disc">
-                <li>Gemini 3 Flash Preview: 1,024 tokens</li>
-                <li>Gemini 3 Pro Preview: 4,096 tokens</li>
-                <li>Gemini 2.5 Flash: 1,024 tokens</li>
-                <li>Gemini 2.5 Pro: 4,096 tokens</li>
-              </ul>
-              <p className="m-0">
-                <strong className="text-foreground">Implicit caching tips:</strong> Put large and common content at the beginning of your prompt. 
-                Send requests with similar prefixes in a short amount of time. Cache hits visible in <code className="text-xs bg-muted px-1 py-0.5 rounded">usage_metadata</code>.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">Explicit caching retention:</strong> 1 hour default TTL (adjustable). 
-                Can update TTL or set specific <code className="text-xs bg-muted px-1 py-0.5 rounded">expire_time</code>. 
-                Supports listing, updating, and deleting caches.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">Pricing:</strong> Implicit caching provides automatic cost savings on hits (no cost saving guarantee). 
-                Explicit caching billing based on: (1) cache token count at reduced rate, (2) storage duration (TTL), 
-                (3) non-cached input tokens and output tokens.
-              </p>
-              <p className="m-0">
-                <strong className="text-foreground">Best for explicit caching:</strong> Chatbots with extensive system instructions, 
-                repetitive video file analysis, recurring queries against large document sets, frequent code repository analysis.
-              </p>
-              <p className="m-0 pt-3 mt-3 border-t border-border/50 flex flex-wrap gap-x-4 gap-y-1">
-                <a 
-                  href="https://ai.google.dev/gemini-api/docs/caching" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-500 hover:text-blue-400 transition-colors"
-                >
-                  Gemini API Docs →
-                </a>
-                <a 
-                  href="https://cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-overview" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-500 hover:text-blue-400 transition-colors"
-                >
-                  Vertex AI Docs →
-                </a>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <h3 id="implementing" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Implementing Cache-Friendly Prompts</h3>
+        <h3 id="caching-economics" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Caching Economics</h3>
 
         <p className="text-muted-foreground mb-4">
-          Here's how to structure your context for maximum cache hits with Anthropic's explicit approach:
+          Different providers have different caching economics, but the general pattern is:
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="anthropic-caching.ts"
-          showLineNumbers
-          code={`import Anthropic from "@anthropic-ai/sdk";
-
-const client = new Anthropic();
-
-// Example: Multiple cache breakpoints for different update frequencies
-// Breakpoint 1: Tools (rarely change)
-const tools = [
-  {
-    name: "search_documents",
-    description: "Search through the knowledge base",
-    input_schema: { /* ... */ }
-  },
-  {
-    name: "get_document",
-    description: "Retrieve a specific document by ID",
-    input_schema: { /* ... */ },
-    cache_control: { type: "ephemeral" }  // Cache all tools
-  }
-];
-
-// Breakpoint 2: System instructions (rarely change)
-const systemInstructions = {
-  type: "text",
-  text: "You are a helpful assistant...\\n# Instructions\\n- Always search first\\n- Provide citations",
-  cache_control: { type: "ephemeral" }
-};
-
-// Breakpoint 3: Reference documents (change occasionally)
-const referenceDocs = {
-  type: "text",
-  text: largeDocumentContent,  // Large document (must meet minimum: 1024+ tokens)
-  cache_control: { type: "ephemeral" }  // Or { type: "ephemeral", ttl: "1h" } for 1-hour cache
-};
-
-async function askQuestion(userQuestion: string) {
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-5",  // Supported: Opus 4.5, Sonnet 4.5, Haiku 4.5, etc.
-    max_tokens: 1024,
-    tools: tools,  // Cached at breakpoint 1
-    system: [systemInstructions, referenceDocs],  // Cached at breakpoints 2 & 3
-    messages: [{
-      role: "user",
-      content: userQuestion  // Variable part - not cached
-    }]
-  });
-  
-  // Understanding usage metrics:
-  // - cache_read_input_tokens: tokens read from cache (before breakpoints)
-  // - cache_creation_input_tokens: tokens written to cache (at breakpoints)
-  // - input_tokens: tokens AFTER last breakpoint only (not total input!)
-  console.log("Cache read:", response.usage.cache_read_input_tokens);
-  console.log("Cache write:", response.usage.cache_creation_input_tokens);
-  console.log("Uncached input:", response.usage.input_tokens);
-  
-  // Total input = cache_read + cache_creation + input_tokens
-  const totalInput = response.usage.cache_read_input_tokens + 
-                     response.usage.cache_creation_input_tokens + 
-                     response.usage.input_tokens;
-  console.log("Total input tokens:", totalInput);
-  
-  return response;
-}`}
-        />
-
-        <h3 id="break-even" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Break-Even Analysis</h3>
-
-        <p className="text-muted-foreground mb-4">
-          Different providers have different economics. Here's when caching pays off:
-        </p>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           <Card variant="default">
             <CardContent>
-              <h4 className="font-medium text-foreground mb-2">OpenAI</h4>
+              <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                Cache Read Discount
+              </h4>
               <p className="text-sm text-muted-foreground m-0">
-                No write premium. <strong className="text-emerald-500">Win on first cache hit</strong> (up to 90% savings). 
-                Focus on maximizing hit rate via stable prefixes and <code className="text-xs bg-muted px-1 py-0.5 rounded">prompt_cache_key</code>.
+                When you hit a cached prefix, you typically pay <strong className="text-emerald-500">~10% of the normal input price</strong> (90% discount). 
+                This is the key savings mechanism.
               </p>
             </CardContent>
           </Card>
           
           <Card variant="default">
             <CardContent>
-              <h4 className="font-medium text-foreground mb-2">Anthropic</h4>
+              <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                Cache Write Premium
+              </h4>
               <p className="text-sm text-muted-foreground m-0">
-                Write costs 1.25×, reads cost 0.1×. <strong className="text-emerald-500">Break even at 2 calls</strong> using 
-                the same cached prefix.
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card variant="default">
-            <CardContent>
-              <h4 className="font-medium text-foreground mb-2">Gemini</h4>
-              <p className="text-sm text-muted-foreground m-0">
-                Implicit caching is automatic with cost savings on hits (no guarantee). Explicit caching 
-                has storage costs based on token count and TTL duration—<strong className="text-amber-500">break-even depends on reuse frequency</strong> within the cache lifetime.
+                Some providers charge a <strong className="text-amber-500">~25% premium</strong> when writing to the cache (first request). 
+                Others have no write premium. Either way, the read discount quickly pays off.
               </p>
             </CardContent>
           </Card>
         </div>
+
+        <Callout variant="info" title="Break-Even Analysis">
+          <p className="m-0">
+            With a 25% write premium and 90% read discount, you <strong>break even at just 2 requests</strong> using 
+            the same prefix. With no write premium (like some providers), you win immediately on the first cache hit.
+          </p>
+        </Callout>
+
+        <h3 id="caching-cost-explorer" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Interactive: Caching Cost Explorer</h3>
+
+        <p className="text-muted-foreground mb-4">
+          Use this interactive tool to explore how caching <strong className="text-foreground">dramatically 
+          reduces input cost for long conversations</strong> and <strong className="text-foreground">extends 
+          the horizon of how many turns you can use</strong> before it becomes prohibitively expensive. 
+          The key insight: with caching, your <em>entire message prefix</em>—including conversation 
+          history—is cached. Only the new tokens each turn are charged at full price.
+        </p>
+
+        <Callout variant="tip" title="What to Explore" className="mb-6">
+          <ul className="space-y-1.5 text-sm m-0 pl-4 list-disc">
+            <li>Watch the <strong>dramatic difference</strong> between the dashed line (quadratic, no cache) and solid line (linear, with cache)</li>
+            <li>Notice how the <strong>cacheable prefix grows</strong> to include all previous messages—not just static content</li>
+            <li>Adjust <strong>cache hit rate</strong> to see how TTL expiration (long pauses) impacts costs</li>
+            <li>Toggle <strong>write premium</strong> to see how different provider economics affect the curve</li>
+          </ul>
+        </Callout>
+
+        <CachingCostVisualizer className="mb-8" />
+
+        <Callout variant="important" title="The Critical Factor: Cache Hits" className="mb-8">
+          <p className="mb-2">
+            <strong>Caching is powerful—but only when you maintain cache hits.</strong>
+          </p>
+          <p className="m-0">
+            Caches expire after 5-10 minutes of inactivity. A user who pauses for lunch loses the cache entirely, 
+            falling back to expensive quadratic costs. For applications with long gaps between messages, consider 
+            session management strategies: prompt users to continue soon, or design for shorter, focused conversations 
+            rather than marathon sessions.
+          </p>
+        </Callout>
 
         <h3 id="where-caching-delivers" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Where Caching Delivers Most Value</h3>
 
-        <div className="space-y-4">
-          <Card variant="highlight">
-            <CardContent>
-              <h4 className="font-medium text-foreground mb-2">🤖 Agentic Systems</h4>
-              <p className="text-sm text-muted-foreground m-0">
-                Heavy tool schemas + long instruction hierarchies create large, stable prefixes. 
-                Each tool call reuses the cached system context.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card variant="highlight">
-            <CardContent>
-              <h4 className="font-medium text-foreground mb-2">📚 RAG Pipelines</h4>
-              <p className="text-sm text-muted-foreground m-0">
-                Retrieved context often stays stable across follow-up questions. Cache the 
-                document chunks and system prompt together.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card variant="highlight">
-            <CardContent>
-              <h4 className="font-medium text-foreground mb-2">📄 Document Q&A</h4>
-              <p className="text-sm text-muted-foreground m-0">
-                Cache the document once, ask many questions. Perfect use case—the document 
-                is the stable prefix, questions are the variable suffix.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card variant="highlight">
-            <CardContent>
-              <h4 className="font-medium text-foreground mb-2">💻 Codebase Assistants</h4>
-              <p className="text-sm text-muted-foreground m-0">
-                Cache repository context (file tree, key files, conventions), then do iterative 
-                Q&A or refactoring tasks against that cached base.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <ul className="space-y-3 text-muted-foreground pl-4 list-disc">
+          <li>
+            <strong className="text-foreground">Agentic Systems</strong> — Heavy tool schemas + long instruction hierarchies create large, stable prefixes that get reused on every tool call.
+          </li>
+          <li>
+            <strong className="text-foreground">RAG Pipelines</strong> — Retrieved context often stays stable across follow-up questions. Cache the document chunks and system prompt together.
+          </li>
+          <li>
+            <strong className="text-foreground">Document Q&A</strong> — Cache the document once, ask many questions. The document is the stable prefix, questions are the variable suffix.
+          </li>
+          <li>
+            <strong className="text-foreground">Codebase Assistants</strong> — Cache repository context (file tree, key files, conventions), then do iterative Q&A or refactoring against that cached base.
+          </li>
+        </ul>
 
         <Callout variant="important" title="The Golden Rule" className="mt-8">
           <p className="mb-2">
@@ -469,16 +318,18 @@ interface OptimizedContext {
         />
 
         <Callout variant="info" title="Observability Matters">
-          <p className="mb-2">
+          <p className="m-0">
             All providers expose cache metrics in their responses. Monitor <code className="text-xs bg-muted px-1 py-0.5 rounded">cached_tokens</code>, 
             <code className="text-xs bg-muted px-1 py-0.5 rounded">cache_read_input_tokens</code>, or equivalent fields. If your cache hit rate 
             is low, revisit your prompt structure—something in your "stable" prefix is probably varying.
           </p>
+        </Callout>
+
+        <Callout variant="warning" title="API vs. Consumer Products" className="mt-6">
           <p className="m-0">
-            <strong>Important for Anthropic:</strong> The <code className="text-xs bg-muted px-1 py-0.5 rounded">input_tokens</code> field only represents 
-            tokens <strong>after your last cache breakpoint</strong>, not your total input. To get total input tokens, add 
-            <code className="text-xs bg-muted px-1 py-0.5 rounded">cache_read_input_tokens + cache_creation_input_tokens + input_tokens</code>. 
-            This affects both cost calculation and rate limit tracking.
+            This guide is about <strong>API behavior</strong> for developers. Consumer products like ChatGPT 
+            may implement conversation assembly and caching differently internally—the documentation describes 
+            API behavior, not necessarily how the consumer UI's backend works.
           </p>
         </Callout>
       </div>

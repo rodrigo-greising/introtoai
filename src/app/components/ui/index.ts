@@ -3,3 +3,5 @@ export { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./Car
 export { Callout } from "./Callout";
 export { SectionHeading } from "./SectionHeading";
 export { CostVisualizer } from "./CostVisualizer";
+export { CachingCostVisualizer } from "./CachingCostVisualizer";
+export { ContextLayersVisualizer } from "./ContextLayersVisualizer";

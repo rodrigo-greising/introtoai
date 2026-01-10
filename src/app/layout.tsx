@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Intro To AI - AI Learning Resources",
-  description: "Learn AI concepts with free video tutorials, documents, and curated resources. Master artificial intelligence through comprehensive educational content.",
+  title: "AI Engineering Guide",
+  description: "A practical guide for software engineers on effectively using AI in development workflows.",
 };
 
 export default function RootLayout({

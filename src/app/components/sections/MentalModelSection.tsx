@@ -1,4 +1,4 @@
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout, CodeBlock, CostVisualizer } from "@/app/components/ui";
 
 export function MentalModelSection() {
   return (
@@ -88,31 +88,68 @@ const response3 = await callLLM("Hello" + response1 + "How are you?" + response2
 
         <h3 className="text-xl font-semibold mt-8 mb-4">Practical Implications</h3>
 
+        <p className="text-muted-foreground mb-6">
+          The simplest way to build a "chat" with an LLM is to accumulate messages and send 
+          the entire history each turn. This isn't wrong—it's often the first implementation 
+          you'd write, and for some use cases (short conversations, prototypes, simple assistants) 
+          it works fine.
+        </p>
+
+        <p className="text-muted-foreground mb-6">
+          But for production systems, this naive approach becomes <strong className="text-foreground">expensive 
+          and inefficient</strong>. The cost math is brutal: input tokens grow quadratically, not linearly.
+        </p>
+
+        <h4 className="text-lg font-medium mt-8 mb-4">Visualizing the Cost Problem</h4>
+        
+        <p className="text-muted-foreground mb-4">
+          Drag the slider to see how costs scale with conversation length. Notice how input cost 
+          dominates as conversations grow—each turn resends everything that came before.
+        </p>
+
+        <CostVisualizer className="my-8" />
+
+        <h4 className="text-lg font-medium mt-8 mb-4">The Two Approaches</h4>
+
         <CodeBlock
           language="typescript"
           filename="practical-example.ts"
-          code={`// ❌ Anti-pattern: relying on conversation history
+          code={`// 📝 Simple approach: accumulating conversation history
+// Good for: prototypes, short chats, simple assistants
+// Watch out for: cost growth, context limits, error accumulation
 async function chatWithUser(userMessage: string) {
   conversationHistory.push(userMessage);
   const response = await callLLM(conversationHistory.join("\\n"));
   conversationHistory.push(response);
   return response;
-  // Problems: unbounded growth, accumulated errors, high cost
 }
 
-// ✅ Pattern: self-contained context
+// ✅ Production approach: self-contained context
+// Better for: cost control, reliability, long-running features
 async function processRequest(request: Request) {
   const context = buildContext({
     systemPrompt: SYSTEM_PROMPT,
     userRequest: request.message,
     relevantDocs: await retrieveRelevantDocs(request),
     userPreferences: request.user.preferences,
+    // Only include relevant history, summarized if needed
+    recentContext: summarizeIfNeeded(request.recentMessages),
   });
   
   return await callLLM(context);
-  // Benefits: predictable, testable, cost-controlled
 }`}
         />
+
+        <Callout variant="info" title="When to use each approach" className="mt-6">
+          <p className="mb-2">
+            <strong>Simple chat history</strong> is fine when: conversations are short (&lt;10 turns), 
+            you're prototyping, or cost isn't a concern.
+          </p>
+          <p>
+            <strong>Self-contained context</strong> is better when: building production features, 
+            conversations may be long, you need predictable costs, or reliability matters.
+          </p>
+        </Callout>
       </div>
     </section>
   );

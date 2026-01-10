@@ -13,8 +13,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Intro To AI - AI Learning Resources",
-  description: "Learn AI concepts with free video tutorials, documents, and curated resources. Master artificial intelligence through comprehensive educational content.",
+  title: "AI Engineering Guide",
+  description: "A practical guide for software engineers on effectively using AI in development workflows.",
+  keywords: ["AI", "LLM", "prompt engineering", "software development", "machine learning"],
+  authors: [{ name: "AI Engineering Guide" }],
 };
 
 export default function RootLayout({
@@ -23,9 +25,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
         {children}
       </body>

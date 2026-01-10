@@ -31,7 +31,7 @@ export function OrchestrationCostAnalysis({ className }: OrchestrationCostAnalys
     [selectedScenarioId]
   );
 
-  const tasks = scenario?.tasks || [];
+  const tasks = useMemo(() => scenario?.tasks || [], [scenario?.tasks]);
 
   // Calculate cost comparison
   const comparison = useMemo(() => {

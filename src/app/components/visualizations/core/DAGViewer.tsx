@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import type {
-  DAGTask,
   TaskState,
   TaskStatus,
   DAGViewerConfig,
@@ -98,10 +97,13 @@ export function DAGViewer({
     colorTheme = "cyan",
   } = config;
 
-  const layout: DAGLayoutConfig = {
-    ...DEFAULT_DAG_LAYOUT,
-    ...layoutOverrides,
-  };
+  const layout: DAGLayoutConfig = useMemo(
+    () => ({
+      ...DEFAULT_DAG_LAYOUT,
+      ...layoutOverrides,
+    }),
+    [layoutOverrides]
+  );
 
   const { width: svgWidth, height: svgHeight } = useMemo(
     () => calculateDAGDimensions(tasks, layout),

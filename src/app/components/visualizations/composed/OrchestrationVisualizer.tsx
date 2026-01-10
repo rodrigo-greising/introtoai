@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import type { Scenario, ChatMessage, TaskState } from "@/lib/visualizations/types";
+import type { Scenario, TaskState } from "@/lib/visualizations/types";
 import { orchestrationScenarios } from "@/lib/visualizations/data";
 import { initializeTaskStates } from "@/lib/visualizations/utils";
 import { ChatPanel, DAGViewer, PlaybackControls } from "../core";
@@ -257,9 +257,6 @@ export function OrchestrationVisualizer({
     },
     [taskStates]
   );
-
-  // Worker token count
-  const workerTokens = selectedTask?.internalChat?.reduce((sum, m) => sum + (m.tokens || 0), 0) || 0;
 
   if (!scenario) {
     return <div className={cn("text-muted-foreground", className)}>No scenarios available</div>;

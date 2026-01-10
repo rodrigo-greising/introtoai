@@ -5,7 +5,7 @@
  * that can be visualized with different combinations of components.
  */
 
-import type { ChatMessage, ContextDetail, WorkerMessage } from "./chat";
+import type { ChatMessage, ContextDetail } from "./chat";
 import type { DAGTask } from "./dag";
 
 /**

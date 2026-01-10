@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type {
   CostComparison,
@@ -175,7 +175,6 @@ export function CostBreakdown({
     showComparisonBars = true,
     showTaskBreakdown = true,
     labels = { baseline: "Linear", optimized: "Parallel" },
-    colorTheme = "cyan",
   } = config;
 
   // Derived values

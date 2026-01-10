@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import type { Scenario, ChatMessage, EmbeddingPoint, ScenarioStep } from "@/lib/visualizations/types";
 import { ragPatterns } from "@/lib/visualizations/data";
-import { ChatPanel, EmbeddingSpace, PlaybackControls } from "../core";
+import { ChatPanel, EmbeddingSpace } from "../core";
 
 // =============================================================================
 // Component Props

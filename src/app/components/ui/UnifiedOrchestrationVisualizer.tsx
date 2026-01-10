@@ -743,6 +743,7 @@ function getCompletedTasksAtPoint(
 interface ChatPanelProps {
   messages: ChatMessage[];
   tasks: DAGTask[];
+  taskStates: TaskState[];
   selectedTaskId: string | null;
   onSelectTask: (id: string | null) => void;
   playbackVisibleIds: Set<string>;
@@ -818,9 +819,38 @@ interface ChatTab {
   color: string;
 }
 
-function ChatPanel({ messages, tasks, selectedTaskId, onSelectTask, playbackVisibleIds }: ChatPanelProps) {
+function ChatPanel({ messages, tasks, taskStates, selectedTaskId, onSelectTask, playbackVisibleIds }: ChatPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<string>("orchestrator");
+
+  // Helper to get task status from taskStates
+  const getTaskStatus = useCallback((taskId: string): TaskStatus => {
+    const taskState = taskStates.find(t => t.id === taskId);
+    return taskState?.status || "pending";
+  }, [taskStates]);
+
+  // Helper to get status-based colors for tab indicators
+  const getStatusIndicatorColor = useCallback((taskId: string | undefined, isOrchestrator: boolean): string => {
+    if (isOrchestrator) {
+      // Orchestrator is "completed" when all tasks are done, "running" when any task is running
+      const hasRunning = taskStates.some(t => t.status === "running");
+      const allCompleted = taskStates.length > 0 && taskStates.every(t => t.status === "completed");
+      const hasStarted = taskStates.some(t => t.status !== "pending");
+      
+      if (allCompleted) return "bg-emerald-500";
+      if (hasRunning || hasStarted) return "bg-violet-500"; // Violet while orchestrating
+      return "bg-slate-500";
+    }
+    
+    if (!taskId) return "bg-slate-500";
+    
+    const status = getTaskStatus(taskId);
+    switch (status) {
+      case "completed": return "bg-emerald-500";
+      case "running": return "bg-amber-500";
+      default: return "bg-slate-500";
+    }
+  }, [taskStates, getTaskStatus]);
   
   // Build tabs: orchestrator + all workers with internal chats
   const tabs = useMemo<ChatTab[]>(() => {
@@ -903,7 +933,12 @@ function ChatPanel({ messages, tasks, selectedTaskId, onSelectTask, playbackVisi
                   "border border-b-0 -mb-px relative",
                   isActive ? [
                     "bg-card/80 border-border z-10",
-                    tab.type === "orchestrator" ? "text-violet-400" : "text-amber-400",
+                    // Text color matches task status
+                    tab.type === "orchestrator" 
+                      ? (taskStates.every(t => t.status === "completed") ? "text-emerald-400" : "text-violet-400")
+                      : (tab.taskId && getTaskStatus(tab.taskId) === "completed" ? "text-emerald-400" 
+                         : tab.taskId && getTaskStatus(tab.taskId) === "running" ? "text-amber-400" 
+                         : "text-slate-400"),
                   ] : [
                     "bg-transparent border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50",
                   ],
@@ -912,9 +947,10 @@ function ChatPanel({ messages, tasks, selectedTaskId, onSelectTask, playbackVisi
               >
                 <span className="flex items-center gap-1.5">
                   <span className={cn(
-                    "w-1.5 h-1.5 rounded-full",
-                    tab.type === "orchestrator" ? "bg-violet-500" : "bg-amber-500",
-                    !isActive && "opacity-50"
+                    "w-1.5 h-1.5 rounded-full transition-colors duration-300",
+                    getStatusIndicatorColor(tab.taskId, tab.type === "orchestrator"),
+                    !isActive && "opacity-50",
+                    tab.taskId && getTaskStatus(tab.taskId) === "running" && "animate-pulse"
                   )} />
                   {tab.shortLabel}
                 </span>
@@ -1594,6 +1630,7 @@ export function UnifiedOrchestrationVisualizer({ className }: UnifiedOrchestrati
         <ChatPanel
           messages={scenario.chatMessages}
           tasks={scenario.tasks}
+          taskStates={tasks}
           selectedTaskId={selectedTaskId}
           onSelectTask={setSelectedTaskId}
           playbackVisibleIds={visibleMessageIds}

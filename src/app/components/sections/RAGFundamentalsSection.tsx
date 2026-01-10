@@ -1,4 +1,4 @@
-import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout, EmbeddingVisualizer } from "@/app/components/ui";
 
 export function RAGFundamentalsSection() {
   return (
@@ -252,7 +252,22 @@ export function RAGFundamentalsSection() {
               </div>
             </CardContent>
           </Card>
+        </div>
 
+        {/* Interactive Embedding Visualizer */}
+        <div className="my-8">
+          <Callout variant="tip" title="Try It: Explore Word Embeddings" className="mb-4">
+            <p className="m-0">
+              This interactive tool runs a <strong>real embedding model</strong> directly in your browser. 
+              Add words and see how semantically similar words cluster together in 2D space. 
+              Click on any word to see similarity scores!
+            </p>
+          </Callout>
+          
+          <EmbeddingVisualizer />
+        </div>
+
+        <div className="grid gap-4 mt-6">
           <Card variant="default">
             <CardContent>
               <div className="flex items-start gap-4">

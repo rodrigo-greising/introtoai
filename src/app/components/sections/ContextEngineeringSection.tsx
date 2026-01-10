@@ -209,51 +209,32 @@ export function ContextEngineeringSection() {
         </Callout>
 
         <p className="text-muted-foreground mt-4">
-          The pattern: An <strong className="text-foreground">orchestrator</strong> model manages the overall 
-          workflow, while <strong className="text-foreground">worker</strong> models handle specific subtasks. 
-          Each worker gets a self-contained context—runs 5-15 messages to complete its task—then returns 
-          <em>only the result</em>, not the intermediate steps.
+          Complex tasks benefit from <strong className="text-foreground">decomposition</strong>—breaking work 
+          into focused subtasks, each with its own curated context. The key insight: <em>intermediate work 
+          doesn't need to pollute the main context</em>. Subtasks can explore, iterate, even fail—returning 
+          only the distilled result.
         </p>
 
-        <div className="grid gap-4 sm:grid-cols-2 mt-6">
-          <Card variant="default">
+        <div className="space-y-4 mt-6">
+          <Card variant="highlight">
             <CardContent>
-              <h4 className="font-medium text-cyan-400 mb-2">🎯 Orchestrator</h4>
+              <h4 className="font-medium text-foreground mb-2">Why Delegation Works</h4>
               <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
-                <li>Sees the big picture and overall goal</li>
-                <li>Decomposes work into focused subtasks</li>
-                <li>Routes each subtask with curated context</li>
-                <li>Receives results, not intermediate tool calls</li>
-                <li>Often a more capable (larger) model</li>
-              </ul>
-            </CardContent>
-          </Card>
-          
-          <Card variant="default">
-            <CardContent>
-              <h4 className="font-medium text-violet-400 mb-2">⚡ Worker</h4>
-              <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
-                <li>Fresh context scoped to one task</li>
-                <li>Can use tools, iterate, make mistakes</li>
-                <li>Runs 5-15 messages independently</li>
-                <li>Returns structured result only</li>
-                <li>Can be a smaller, faster, cheaper model</li>
+                <li><strong className="text-foreground">Focused context</strong> — Each subtask gets exactly the information it needs, nothing more</li>
+                <li><strong className="text-foreground">Clean boundaries</strong> — Exploration and intermediate steps stay isolated</li>
+                <li><strong className="text-foreground">Result filtering</strong> — Only the final output flows back, not the process</li>
+                <li><strong className="text-foreground">Parallel potential</strong> — Independent subtasks can run simultaneously</li>
               </ul>
             </CardContent>
           </Card>
         </div>
 
-        <p className="text-muted-foreground mt-6">
-          <strong className="text-foreground">Why this works:</strong> The orchestrator's context stays 
-          clean—it sees task assignments and results, not dozens of tool calls and exploration steps. 
-          Workers get focused context optimized for their specific task. Both benefit from the signal-over-noise principle.
-        </p>
-
         <Callout variant="tip" title="Context Boundaries as Architecture">
           <p className="m-0">
-            Delegation creates <strong>natural context boundaries</strong>. Each worker's context is isolated, 
-            preventing cross-contamination between subtasks. This is separation of concerns applied at the 
-            instance level, not just within a single context.
+            Delegation creates <strong>natural context boundaries</strong>. Each subtask's context is isolated, 
+            preventing cross-contamination. This is <em>separation of concerns</em> applied at the 
+            instance level. See <a href="#orchestration-patterns" className="text-cyan-400 hover:underline">Orchestration Patterns</a> for 
+            implementation approaches.
           </p>
         </Callout>
 

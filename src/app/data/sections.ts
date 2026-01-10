@@ -130,16 +130,8 @@ export const sections: Section[] = [
     description: "Practical patterns for managing context",
     subSections: [
       {
-        id: "conversation-context-patterns",
-        title: "Conversation Context Patterns",
-      },
-      {
         id: "orchestration-patterns",
         title: "Orchestration Patterns",
-      },
-      {
-        id: "message-roles-delimiters",
-        title: "Message Roles & Delimiters",
       },
       {
         id: "system-architecture-patterns",
@@ -164,6 +156,32 @@ export const sections: Section[] = [
     title: "RAG Fundamentals",
     part: "retrieval",
     description: "What RAG is and when to use it",
+    subSections: [
+      {
+        id: "what-is-rag",
+        title: "What is RAG?",
+      },
+      {
+        id: "why-rag",
+        title: "Why RAG?",
+      },
+      {
+        id: "rag-pipeline",
+        title: "The RAG Pipeline",
+      },
+      {
+        id: "rag-components",
+        title: "Key Components",
+      },
+      {
+        id: "rag-vs-alternatives",
+        title: "RAG vs Alternatives",
+      },
+      {
+        id: "when-to-use-rag",
+        title: "When to Use RAG",
+      },
+    ],
   },
   {
     id: "vector-databases",

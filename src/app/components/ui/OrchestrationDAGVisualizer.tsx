@@ -10,6 +10,12 @@ import { cn } from "@/lib/utils";
 type TaskStatus = "pending" | "running" | "completed";
 type DAGType = "static" | "dynamic";
 
+interface ContextDetail {
+  label: string;
+  value: string;
+  type: "system" | "tools" | "input" | "state" | "output";
+}
+
 interface Task {
   id: string;
   name: string;
@@ -19,6 +25,7 @@ interface Task {
   duration: number;
   column: number;
   row: number;
+  context?: ContextDetail[];
 }
 
 interface TaskState extends Task {
@@ -56,6 +63,11 @@ const scenarios: DAGScenario[] = [
         duration: 400,
         column: 0,
         row: 2,
+        context: [
+          { label: "System", value: "Query parser prompt: Extract intent, entities, and generate search variants", type: "system" },
+          { label: "Input", value: "Raw user query: \"How do I optimize React renders?\"", type: "input" },
+          { label: "Output", value: "Structured query object with terms, filters, and synonyms", type: "output" },
+        ],
       },
       {
         id: "search",
@@ -66,6 +78,12 @@ const scenarios: DAGScenario[] = [
         duration: 800,
         column: 1,
         row: 2,
+        context: [
+          { label: "System", value: "Search executor—no LLM needed, pure retrieval", type: "system" },
+          { label: "Input", value: "Parsed query terms: [\"react\", \"optimize\", \"render\", \"performance\"]", type: "input" },
+          { label: "State", value: "Vector DB connection, BM25 index access", type: "state" },
+          { label: "Output", value: "Top 10 document chunks with metadata and scores", type: "output" },
+        ],
       },
       {
         id: "analyze-1",
@@ -76,6 +94,12 @@ const scenarios: DAGScenario[] = [
         duration: 1200,
         column: 2,
         row: 0,
+        context: [
+          { label: "System", value: "Document analyzer: Extract claims, assess relevance, identify citations", type: "system" },
+          { label: "Input", value: "Doc: \"React.memo prevents re-renders by memoizing...\" (~800 tokens)", type: "input" },
+          { label: "Tools", value: "extract_claims(), score_relevance(), find_citations()", type: "tools" },
+          { label: "Output", value: "Structured analysis: { claims: [...], relevance: 0.92, citations: [...] }", type: "output" },
+        ],
       },
       {
         id: "analyze-2",
@@ -86,6 +110,12 @@ const scenarios: DAGScenario[] = [
         duration: 1000,
         column: 2,
         row: 1,
+        context: [
+          { label: "System", value: "Document analyzer: Extract claims, assess relevance, identify citations", type: "system" },
+          { label: "Input", value: "Doc: \"useMemo and useCallback are hooks for...\" (~650 tokens)", type: "input" },
+          { label: "Tools", value: "extract_claims(), score_relevance(), find_citations()", type: "tools" },
+          { label: "Output", value: "Structured analysis: { claims: [...], relevance: 0.87, citations: [...] }", type: "output" },
+        ],
       },
       {
         id: "analyze-3",
@@ -96,6 +126,12 @@ const scenarios: DAGScenario[] = [
         duration: 1400,
         column: 2,
         row: 2,
+        context: [
+          { label: "System", value: "Document analyzer: Extract claims, assess relevance, identify citations", type: "system" },
+          { label: "Input", value: "Doc: \"Virtual DOM diffing algorithm compares...\" (~920 tokens)", type: "input" },
+          { label: "Tools", value: "extract_claims(), score_relevance(), find_citations()", type: "tools" },
+          { label: "Output", value: "Structured analysis: { claims: [...], relevance: 0.78, citations: [...] }", type: "output" },
+        ],
       },
       {
         id: "analyze-4",
@@ -106,6 +142,12 @@ const scenarios: DAGScenario[] = [
         duration: 900,
         column: 2,
         row: 3,
+        context: [
+          { label: "System", value: "Document analyzer: Extract claims, assess relevance, identify citations", type: "system" },
+          { label: "Input", value: "Doc: \"React DevTools Profiler helps identify...\" (~450 tokens)", type: "input" },
+          { label: "Tools", value: "extract_claims(), score_relevance(), find_citations()", type: "tools" },
+          { label: "Output", value: "Structured analysis: { claims: [...], relevance: 0.82, citations: [...] }", type: "output" },
+        ],
       },
       {
         id: "analyze-5",
@@ -116,6 +158,12 @@ const scenarios: DAGScenario[] = [
         duration: 1100,
         column: 2,
         row: 4,
+        context: [
+          { label: "System", value: "Document analyzer: Extract claims, assess relevance, identify citations", type: "system" },
+          { label: "Input", value: "Doc: \"Code splitting with React.lazy reduces...\" (~580 tokens)", type: "input" },
+          { label: "Tools", value: "extract_claims(), score_relevance(), find_citations()", type: "tools" },
+          { label: "Output", value: "Structured analysis: { claims: [...], relevance: 0.71, citations: [...] }", type: "output" },
+        ],
       },
       {
         id: "synthesize",
@@ -126,6 +174,12 @@ const scenarios: DAGScenario[] = [
         duration: 1500,
         column: 3,
         row: 2,
+        context: [
+          { label: "System", value: "Synthesizer: Combine analyses into coherent answer with proper citations", type: "system" },
+          { label: "Input", value: "5 structured analyses (~400 tokens total)—NOT the original documents", type: "input" },
+          { label: "State", value: "Original query for reference, citation format requirements", type: "state" },
+          { label: "Output", value: "Final answer with inline citations: \"To optimize React renders: 1) Use React.memo [1]...\"", type: "output" },
+        ],
       },
     ],
   },
@@ -145,6 +199,13 @@ const scenarios: DAGScenario[] = [
         duration: 1200,
         column: 0,
         row: 1.5,
+        context: [
+          { label: "System", value: "Planning agent: Decompose task into subtasks, identify dependencies, output DAG structure", type: "system" },
+          { label: "Input", value: "Feature request: \"Add user notifications with email and in-app delivery\"", type: "input" },
+          { label: "State", value: "Codebase summary, existing patterns, tech stack constraints", type: "state" },
+          { label: "Tools", value: "analyze_codebase(), list_patterns(), estimate_complexity()", type: "tools" },
+          { label: "Output", value: "DAG definition: { nodes: [...], edges: [...], parallelizable: true }", type: "output" },
+        ],
       },
       {
         id: "validate",
@@ -155,6 +216,12 @@ const scenarios: DAGScenario[] = [
         duration: 200,
         column: 1,
         row: 1.5,
+        context: [
+          { label: "System", value: "DAG validator—deterministic code, no LLM needed", type: "system" },
+          { label: "Input", value: "Proposed DAG from planner", type: "input" },
+          { label: "State", value: "Graph algorithms: topological sort, cycle detection, connectivity check", type: "state" },
+          { label: "Output", value: "Validation result: { valid: true, executionOrder: [...] } or { valid: false, error: '...' }", type: "output" },
+        ],
       },
       {
         id: "schema",
@@ -165,6 +232,13 @@ const scenarios: DAGScenario[] = [
         duration: 800,
         column: 2,
         row: 0,
+        context: [
+          { label: "System", value: "Schema designer: Create types and DB schema following project conventions", type: "system" },
+          { label: "Input", value: "Task: Define notification data structures", type: "input" },
+          { label: "State", value: "Existing types, DB ORM patterns, naming conventions from codebase", type: "state" },
+          { label: "Tools", value: "read_file(), write_file(), run_typescript()", type: "tools" },
+          { label: "Output", value: "New files: types/notification.ts, prisma/schema additions", type: "output" },
+        ],
       },
       {
         id: "api",
@@ -175,6 +249,13 @@ const scenarios: DAGScenario[] = [
         duration: 1400,
         column: 3,
         row: 0,
+        context: [
+          { label: "System", value: "API implementer: Build endpoints following REST conventions", type: "system" },
+          { label: "Input", value: "Task: Create notification CRUD + delivery endpoints", type: "input" },
+          { label: "State", value: "Schema types from prior step, existing API patterns, auth middleware", type: "state" },
+          { label: "Tools", value: "read_file(), write_file(), run_tests(), grep_codebase()", type: "tools" },
+          { label: "Output", value: "New files: api/notifications/route.ts, services/notification.ts", type: "output" },
+        ],
       },
       {
         id: "ui-types",
@@ -185,6 +266,12 @@ const scenarios: DAGScenario[] = [
         duration: 400,
         column: 3,
         row: 1,
+        context: [
+          { label: "System", value: "Type generator: Transform backend schema to frontend types", type: "system" },
+          { label: "Input", value: "Backend types from schema step", type: "input" },
+          { label: "Tools", value: "codegen script execution, file writes", type: "tools" },
+          { label: "Output", value: "Generated: src/types/api/notifications.ts with request/response types", type: "output" },
+        ],
       },
       {
         id: "config",
@@ -195,6 +282,13 @@ const scenarios: DAGScenario[] = [
         duration: 600,
         column: 2,
         row: 3,
+        context: [
+          { label: "System", value: "Config updater: Add feature flags and environment variables", type: "system" },
+          { label: "Input", value: "Task: Add notification feature toggles and delivery settings", type: "input" },
+          { label: "State", value: "Existing config patterns, feature flag system", type: "state" },
+          { label: "Tools", value: "read_file(), write_file(), validate_env()", type: "tools" },
+          { label: "Output", value: "Updated: config/features.ts, .env.example", type: "output" },
+        ],
       },
       {
         id: "ui",
@@ -205,6 +299,13 @@ const scenarios: DAGScenario[] = [
         duration: 1800,
         column: 4,
         row: 1.5,
+        context: [
+          { label: "System", value: "UI builder: Create React components following design system", type: "system" },
+          { label: "Input", value: "Task: Build notification center, preferences panel, toast system", type: "input" },
+          { label: "State", value: "Generated types, design system components, feature flags from config", type: "state" },
+          { label: "Tools", value: "read_file(), write_file(), component library access", type: "tools" },
+          { label: "Output", value: "New components: NotificationCenter, NotificationPrefs, NotificationToast", type: "output" },
+        ],
       },
       {
         id: "integrate",
@@ -215,6 +316,13 @@ const scenarios: DAGScenario[] = [
         duration: 1000,
         column: 5,
         row: 0.75,
+        context: [
+          { label: "System", value: "Integration specialist: Wire UI to API, set up state management", type: "system" },
+          { label: "Input", value: "Task: Connect components to endpoints, add real-time updates", type: "input" },
+          { label: "State", value: "API endpoints from api step, UI components from ui step, state patterns", type: "state" },
+          { label: "Tools", value: "read_file(), write_file(), run_dev_server()", type: "tools" },
+          { label: "Output", value: "Updated hooks, API client methods, WebSocket integration", type: "output" },
+        ],
       },
       {
         id: "test",
@@ -225,6 +333,13 @@ const scenarios: DAGScenario[] = [
         duration: 1200,
         column: 6,
         row: 0.75,
+        context: [
+          { label: "System", value: "Test writer: Generate comprehensive tests for new feature", type: "system" },
+          { label: "Input", value: "Task: Test notification system end-to-end", type: "input" },
+          { label: "State", value: "All implemented files, existing test patterns, coverage requirements", type: "state" },
+          { label: "Tools", value: "read_file(), write_file(), run_tests(), coverage_report()", type: "tools" },
+          { label: "Output", value: "Test files: *.test.ts for API, components, integration", type: "output" },
+        ],
       },
     ],
   },
@@ -244,6 +359,11 @@ const scenarios: DAGScenario[] = [
         duration: 600,
         column: 0,
         row: 1.5,
+        context: [
+          { label: "System", value: "Query analyzer: Identify intent, extract entities, classify query type", type: "system" },
+          { label: "Input", value: "Raw query: \"What's the refund policy for enterprise plans?\"", type: "input" },
+          { label: "Output", value: "{ intent: 'policy_lookup', entities: ['refund', 'enterprise'], type: 'factual' }", type: "output" },
+        ],
       },
       {
         id: "rewrite",
@@ -254,6 +374,11 @@ const scenarios: DAGScenario[] = [
         duration: 500,
         column: 1,
         row: 0.5,
+        context: [
+          { label: "System", value: "Query expander: Generate semantic variations and related phrasings", type: "system" },
+          { label: "Input", value: "Structured query with intent and entities", type: "input" },
+          { label: "Output", value: "Queries: [\"enterprise refund policy\", \"cancel enterprise subscription\", \"money back guarantee business\"]", type: "output" },
+        ],
       },
       {
         id: "embed",
@@ -264,6 +389,11 @@ const scenarios: DAGScenario[] = [
         duration: 300,
         column: 1,
         row: 2.5,
+        context: [
+          { label: "System", value: "Embedding model: text-embedding-3-small (no LLM, deterministic)", type: "system" },
+          { label: "Input", value: "Original query text", type: "input" },
+          { label: "Output", value: "1536-dimensional vector for similarity search", type: "output" },
+        ],
       },
       {
         id: "vector-search",
@@ -274,6 +404,12 @@ const scenarios: DAGScenario[] = [
         duration: 400,
         column: 2,
         row: 2,
+        context: [
+          { label: "System", value: "Vector DB query—pure retrieval, no LLM", type: "system" },
+          { label: "Input", value: "Query embedding vector", type: "input" },
+          { label: "State", value: "Pinecone/Weaviate index with 50k document chunks", type: "state" },
+          { label: "Output", value: "Top 20 chunks by cosine similarity with scores", type: "output" },
+        ],
       },
       {
         id: "keyword-search",
@@ -284,6 +420,12 @@ const scenarios: DAGScenario[] = [
         duration: 350,
         column: 2,
         row: 0,
+        context: [
+          { label: "System", value: "BM25 search—lexical matching, no LLM", type: "system" },
+          { label: "Input", value: "Rewritten query variations", type: "input" },
+          { label: "State", value: "Elasticsearch/OpenSearch index", type: "state" },
+          { label: "Output", value: "Top 20 chunks by keyword relevance", type: "output" },
+        ],
       },
       {
         id: "graph-search",
@@ -294,6 +436,12 @@ const scenarios: DAGScenario[] = [
         duration: 500,
         column: 2,
         row: 1,
+        context: [
+          { label: "System", value: "Graph traversal—follows entity relationships", type: "system" },
+          { label: "Input", value: "Extracted entities: ['refund', 'enterprise']", type: "input" },
+          { label: "State", value: "Neo4j knowledge graph with entity relationships", type: "state" },
+          { label: "Output", value: "Related nodes: 'billing', 'cancellation', 'SLA', 'support tiers'", type: "output" },
+        ],
       },
       {
         id: "rerank",
@@ -304,6 +452,12 @@ const scenarios: DAGScenario[] = [
         duration: 700,
         column: 3,
         row: 1,
+        context: [
+          { label: "System", value: "Cross-encoder model: Pairwise relevance scoring (query, chunk) pairs", type: "system" },
+          { label: "Input", value: "Original query + ~50 candidate chunks from all sources", type: "input" },
+          { label: "State", value: "Reranker model (e.g., Cohere rerank, BGE reranker)", type: "state" },
+          { label: "Output", value: "Top 5 chunks sorted by relevance, duplicates removed", type: "output" },
+        ],
       },
       {
         id: "generate",
@@ -314,6 +468,12 @@ const scenarios: DAGScenario[] = [
         duration: 1500,
         column: 4,
         row: 1,
+        context: [
+          { label: "System", value: "Answer generator: Synthesize response grounded in retrieved context", type: "system" },
+          { label: "Input", value: "Original query + top 5 reranked chunks (~2000 tokens)", type: "input" },
+          { label: "State", value: "Output format requirements, citation style, confidence thresholds", type: "state" },
+          { label: "Output", value: "\"Enterprise plans have a 30-day refund policy [1]. To request a refund...\" with citations", type: "output" },
+        ],
       },
     ],
   },
@@ -806,11 +966,19 @@ export function OrchestrationDAGVisualizer({ className }: OrchestrationDAGVisual
 
         {/* Hover tooltip */}
         {hoveredTask && (
-          <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-72 bg-card/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-xl z-10">
+          <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 bg-card/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-xl z-10 max-h-[400px] overflow-y-auto">
             {(() => {
               const task = tasks.find(t => t.id === hoveredTask);
               if (!task) return null;
               const colors = statusColors[task.status];
+              
+              const contextTypeColors = {
+                system: "bg-violet-500",
+                tools: "bg-cyan-500",
+                input: "bg-amber-500",
+                state: "bg-blue-500",
+                output: "bg-emerald-500",
+              };
               
               return (
                 <>
@@ -830,7 +998,7 @@ export function OrchestrationDAGVisualizer({ className }: OrchestrationDAGVisual
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">{task.description}</p>
-                  <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                  <div className="flex items-center gap-3 text-[10px] text-muted-foreground mb-3">
                     <span className="flex items-center gap-1">
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -846,6 +1014,51 @@ export function OrchestrationDAGVisualizer({ className }: OrchestrationDAGVisual
                       </span>
                     )}
                   </div>
+                  
+                  {/* Context Details Section */}
+                  {task.context && task.context.length > 0 && (
+                    <div className="border-t border-border pt-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <svg className="w-3.5 h-3.5 text-[var(--highlight)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span className="text-[10px] font-semibold text-foreground uppercase tracking-wider">Context for this step</span>
+                      </div>
+                      <div className="space-y-2">
+                        {task.context.map((ctx, idx) => (
+                          <div key={idx} className="flex items-start gap-2">
+                            <div className={cn(
+                              "w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0",
+                              contextTypeColors[ctx.type]
+                            )} />
+                            <div className="flex-1 min-w-0">
+                              <span className="text-[10px] font-medium text-foreground">{ctx.label}:</span>
+                              <p className="text-[10px] text-muted-foreground m-0 leading-relaxed break-words">{ctx.value}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Context legend */}
+                      <div className="flex flex-wrap gap-2 mt-3 pt-2 border-t border-border/50">
+                        <span className="flex items-center gap-1 text-[8px] text-muted-foreground">
+                          <div className="w-1.5 h-1.5 rounded-full bg-violet-500" /> System
+                        </span>
+                        <span className="flex items-center gap-1 text-[8px] text-muted-foreground">
+                          <div className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Input
+                        </span>
+                        <span className="flex items-center gap-1 text-[8px] text-muted-foreground">
+                          <div className="w-1.5 h-1.5 rounded-full bg-cyan-500" /> Tools
+                        </span>
+                        <span className="flex items-center gap-1 text-[8px] text-muted-foreground">
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> State
+                        </span>
+                        <span className="flex items-center gap-1 text-[8px] text-muted-foreground">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Output
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </>
               );
             })()}

@@ -1,4 +1,4 @@
-import { SectionHeading, Card, CardContent, Callout, EmbeddingVisualizer } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout, EmbeddingVisualizer, RAGPatternsVisualizer } from "@/app/components/ui";
 
 export function RAGFundamentalsSection() {
   return (
@@ -322,6 +322,80 @@ export function RAGFundamentalsSection() {
             </CardContent>
           </Card>
         </div>
+
+        {/* RAG in Practice */}
+        <h3 id="rag-in-practice" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          RAG in Practice: Two Patterns
+        </h3>
+
+        <p className="text-muted-foreground">
+          Understanding the theory is one thing—seeing RAG work is another. There are 
+          <strong className="text-foreground"> two primary ways</strong> to integrate RAG into your systems, 
+          each with different trade-offs and use cases.
+        </p>
+
+        <div className="grid gap-4 sm:grid-cols-2 mt-6">
+          <Card variant="default">
+            <CardContent>
+              <div className="flex items-start gap-3">
+                <div className="text-2xl">🔧</div>
+                <div>
+                  <h4 className="font-medium text-cyan-400 mb-1">RAG as Agent Tool</h4>
+                  <p className="text-sm text-muted-foreground m-0">
+                    The agent <strong className="text-foreground">decides</strong> when to search. RAG is a capability 
+                    the agent can invoke—like any other tool. Good for: autonomous agents, multi-step reasoning, 
+                    flexible search strategies.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card variant="default">
+            <CardContent>
+              <div className="flex items-start gap-3">
+                <div className="text-2xl">🧠</div>
+                <div>
+                  <h4 className="font-medium text-violet-400 mb-1">RAG for Context Engineering</h4>
+                  <p className="text-sm text-muted-foreground m-0">
+                    The system <strong className="text-foreground">automatically</strong> retrieves relevant context 
+                    before the LLM even sees the query. Uses techniques like HyDE (hypothetical document embeddings). 
+                    Good for: consistent SOPs, guaranteed context, support agents.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Callout variant="tip" title="Interactive Demo">
+          <p className="m-0">
+            The visualizer below demonstrates <strong>both patterns</strong> with concrete examples. 
+            Watch the conversation flow alongside the embedding space to see how queries match 
+            against different types of indexed content.
+          </p>
+        </Callout>
+
+        {/* Interactive RAG Patterns Visualizer */}
+        <div className="my-8">
+          <RAGPatternsVisualizer />
+        </div>
+
+        <Callout variant="important" title="The HyDE Pattern Explained">
+          <p className="mb-2">
+            In the <strong>&quot;RAG for Context Engineering&quot;</strong> example, notice how the user query 
+            matches against <em>hypothetical questions</em>, not raw document text. This is the 
+            <strong> HyDE (Hypothetical Document Embeddings)</strong> pattern:
+          </p>
+          <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
+            <li><strong className="text-foreground">During ingestion:</strong> Generate hypothetical questions 
+            that each SOP/FAQ would answer</li>
+            <li><strong className="text-foreground">During query:</strong> Match user query against these 
+            hypothetical questions (not raw docs)</li>
+            <li><strong className="text-foreground">Why it works:</strong> Questions embed more similarly to 
+            questions than documents do—better semantic matching</li>
+          </ul>
+        </Callout>
 
         {/* RAG vs Alternatives */}
         <h3 id="rag-vs-alternatives" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">

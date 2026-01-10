@@ -8,3 +8,4 @@ export { ContextLayersVisualizer } from "./ContextLayersVisualizer";
 export { UnifiedOrchestrationVisualizer } from "./UnifiedOrchestrationVisualizer";
 export { OrchestrationCostComparison } from "./OrchestrationCostComparison";
 export { EmbeddingVisualizer } from "./EmbeddingVisualizer";
+export { RAGPatternsVisualizer } from "./RAGPatternsVisualizer";

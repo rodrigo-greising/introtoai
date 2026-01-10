@@ -1,4 +1,5 @@
-import { SectionHeading, Card, CardContent, Callout, EmbeddingVisualizer, RAGPatternsVisualizer } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout, EmbeddingVisualizer } from "@/app/components/ui";
+import { RAGVisualizer } from "@/app/components/visualizations";
 
 export function RAGFundamentalsSection() {
   return (
@@ -378,7 +379,7 @@ export function RAGFundamentalsSection() {
 
         {/* Interactive RAG Patterns Visualizer */}
         <div className="my-8">
-          <RAGPatternsVisualizer />
+          <RAGVisualizer />
         </div>
 
         <Callout variant="important" title="The HyDE Pattern Explained">

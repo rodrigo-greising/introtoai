@@ -1,4 +1,5 @@
-import { SectionHeading, Card, CardContent, Callout, CodeBlock, UnifiedOrchestrationVisualizer, OrchestrationCostComparison } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { OrchestrationVisualizer, OrchestrationCostAnalysis } from "@/app/components/visualizations";
 
 export function ContextTechniquesSection() {
   return (
@@ -74,7 +75,7 @@ export function ContextTechniquesSection() {
           <strong className="text-foreground">hover over chat messages</strong> to see what triggered them.
         </p>
 
-        <UnifiedOrchestrationVisualizer className="mt-6 mb-8" />
+        <OrchestrationVisualizer className="mt-6 mb-8" />
 
         {/* Cost & Time Comparison */}
         <h4 className="text-lg font-medium mt-8 mb-4">Cost & Time Analysis: Parallel vs. Linear</h4>
@@ -92,7 +93,7 @@ export function ContextTechniquesSection() {
           and only summaries flow back to the orchestrator.
         </p>
 
-        <OrchestrationCostComparison className="mt-6 mb-8" />
+        <OrchestrationCostAnalysis className="mt-6 mb-8" />
 
         {/* System Architecture Patterns */}
         <h3 id="system-architecture-patterns" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">

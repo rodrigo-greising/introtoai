@@ -5,7 +5,9 @@ export { SectionHeading } from "./SectionHeading";
 export { CostVisualizer } from "./CostVisualizer";
 export { CachingCostVisualizer } from "./CachingCostVisualizer";
 export { ContextLayersVisualizer } from "./ContextLayersVisualizer";
-export { UnifiedOrchestrationVisualizer } from "./UnifiedOrchestrationVisualizer";
-export { OrchestrationCostComparison } from "./OrchestrationCostComparison";
 export { EmbeddingVisualizer } from "./EmbeddingVisualizer";
-export { RAGPatternsVisualizer } from "./RAGPatternsVisualizer";
+
+// New unified visualization components are in @/app/components/visualizations
+// - OrchestrationVisualizer (replaces UnifiedOrchestrationVisualizer)
+// - RAGVisualizer (replaces RAGPatternsVisualizer)
+// - OrchestrationCostAnalysis (replaces OrchestrationCostComparison)

@@ -1,4 +1,4 @@
-import { SectionHeading, Card, CardContent, Callout, CodeBlock, OrchestrationDAGVisualizer, OrchestratorWorkerVisualizer } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout, CodeBlock, UnifiedOrchestrationVisualizer, OrchestrationCostComparison } from "@/app/components/ui";
 
 export function ContextTechniquesSection() {
   return (
@@ -26,59 +26,6 @@ export function ContextTechniquesSection() {
           <strong className="text-foreground"> spawning focused sub-tasks with isolated context</strong>. 
           An orchestrator delegates, workers execute, and only results flow back.
         </p>
-
-        <CodeBlock
-          language="typescript"
-          filename="orchestrator-worker.ts"
-          code={`// Orchestrator: decomposes work, stays clean
-async function orchestrate(task: ComplexTask): Promise<Result> {
-  const plan = await planSubtasks(task);
-  
-  // Spawn workers in parallel or series as needed
-  const results = await Promise.all(
-    plan.subtasks.map(subtask => 
-      // Each worker gets focused, isolated context
-      spawnWorker({
-        task: subtask.description,
-        context: subtask.relevantContext,  // Only what's needed
-        tools: subtask.allowedTools,
-      })
-    )
-  );
-  
-  // Orchestrator sees results, NOT intermediate steps
-  // No tool calls, no exploration, no dead ends
-  return synthesizeResults(results);
-}
-
-// Worker: focused context, does the actual work
-async function spawnWorker(config: WorkerConfig): Promise<WorkerResult> {
-  const workerSession = createFreshSession();
-  
-  // Build focused context for this specific task
-  const context = assembleContext({
-    systemPrompt: WORKER_SYSTEM_PROMPT,
-    task: config.task,
-    relevantContext: config.context,  // Curated, not everything
-    tools: config.tools,
-  });
-  
-  // Worker runs 5-15 messages, iterates, uses tools
-  // This could be a smaller, cheaper, faster model
-  let result = await workerSession.run(context);
-  
-  // Return ONLY the structured result
-  // All intermediate tool calls stay inside the worker
-  return {
-    output: result.finalOutput,
-    summary: result.summary,
-    // NOT: result.allMessages, result.toolCalls, etc.
-  };
-}
-
-// The orchestrator's context stays clean and focused
-// Workers can explore, fail, retry—invisible to orchestrator`}
-        />
 
         <Callout variant="tip" title="Why This Works">
           <p className="m-0">
@@ -110,36 +57,42 @@ async function spawnWorker(config: WorkerConfig): Promise<WorkerResult> {
           </Card>
         </div>
 
-        {/* Orchestrator-Worker Visualization */}
-        <h4 className="text-lg font-medium mt-8 mb-4">Interactive: Context Isolation in Action</h4>
+        {/* Unified Orchestration Visualization */}
+        <h4 className="text-lg font-medium mt-8 mb-4">Interactive: Orchestration Patterns</h4>
         
         <p className="text-muted-foreground mb-4">
-          Watch how the <strong className="text-foreground">orchestrator maintains a clean, global context</strong> while 
-          workers operate in <strong className="text-foreground">isolated sessions with focused context</strong>. The key insight: 
-          worker exploration (tool calls, file reads, dead ends) never pollutes the orchestrator's conversation. 
-          <strong className="text-foreground"> Hover over any message</strong> to see exactly what's in its context.
+          Explore two key orchestration patterns side-by-side: <strong className="text-foreground">Search MapReduce</strong> (fan-out 
+          to parallel analyzers, then reduce) and <strong className="text-foreground">Orchestrator-Worker</strong> (dynamic 
+          delegation with isolated sessions). The <strong className="text-foreground">left panel</strong> shows the simulated 
+          chat—messages that would appear as the system executes. The <strong className="text-foreground">right panel</strong> visualizes 
+          the same execution as a DAG, showing dependencies and parallel execution.
         </p>
 
-        <OrchestratorWorkerVisualizer className="mt-6 mb-8" />
+        <p className="text-muted-foreground mb-4">
+          Press <strong className="text-foreground">Play</strong> to watch both views animate in sync. 
+          <strong className="text-foreground"> Hover over DAG nodes</strong> to see context details, or{" "}
+          <strong className="text-foreground">hover over chat messages</strong> to see what triggered them.
+        </p>
 
-        {/* DAG Orchestration Visualizer */}
-        <h4 className="text-lg font-medium mt-8 mb-4">Interactive: DAG-Based Task Orchestration</h4>
+        <UnifiedOrchestrationVisualizer className="mt-6 mb-8" />
+
+        {/* Cost & Time Comparison */}
+        <h4 className="text-lg font-medium mt-8 mb-4">Cost & Time Analysis: Parallel vs. Linear</h4>
         
         <p className="text-muted-foreground mb-4">
-          Task orchestration can be modeled as a <strong className="text-foreground">directed acyclic graph (DAG)</strong> where 
-          nodes are subtasks and edges represent dependencies. The orchestrator executes tasks in <strong className="text-foreground">maximally 
-          parallel fashion</strong>—each task starts the instant its dependencies complete.
+          So what's the <strong className="text-foreground">actual benefit</strong> of orchestration patterns? 
+          The comparison below calculates the token counts from the scenarios above and shows what happens 
+          when you execute them in parallel (with isolated context) versus linearly (with accumulated context).
         </p>
 
         <p className="text-muted-foreground mb-4">
-          DAGs can be <strong className="text-foreground">statically defined</strong> (workflow patterns known at design time) 
-          or <strong className="text-foreground">dynamically generated</strong> (agent plans a task-specific graph at runtime). 
-          Explore both patterns below—press <strong className="text-foreground">Play</strong> to watch parallel execution unfold.
-          <strong className="text-foreground"> Hover over any node</strong> to see the specific context that step receives: 
-          system prompts, inputs, available tools, and expected outputs.
+          In <strong className="text-foreground">linear execution</strong>, each step inherits all context 
+          from previous steps—the final synthesizer would need to process the entire accumulated history. 
+          In <strong className="text-foreground">parallel execution</strong>, workers have isolated context, 
+          and only summaries flow back to the orchestrator.
         </p>
 
-        <OrchestrationDAGVisualizer className="mt-6 mb-8" />
+        <OrchestrationCostComparison className="mt-6 mb-8" />
 
         {/* System Architecture Patterns */}
         <h3 id="system-architecture-patterns" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">

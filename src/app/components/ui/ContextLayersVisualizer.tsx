@@ -7,7 +7,7 @@ interface Layer {
   name: string;
   volatility: string;
   description: string;
-  cacheStatus: "highest" | "stable" | "session" | "fresh";
+  cacheStatus: "highest" | "stable" | "session" | "realtime" | "fresh";
   cacheLabel: string;
 }
 
@@ -46,6 +46,14 @@ const layers: Layer[] = [
   },
   {
     id: 5,
+    name: "Real-time Context",
+    volatility: "real-time",
+    description: "Current time, agent state machine status, live signals",
+    cacheStatus: "realtime",
+    cacheLabel: "Injected fresh each turn",
+  },
+  {
+    id: 6,
     name: "Current Request",
     volatility: "per-turn",
     description: "Latest user message, immediate context",
@@ -73,6 +81,12 @@ const cacheStatusColors: Record<Layer["cacheStatus"], { bg: string; border: stri
     badge: "bg-amber-500/15 text-amber-400",
     text: "text-amber-400",
   },
+  realtime: {
+    bg: "bg-violet-500/8",
+    border: "border-violet-500/25",
+    badge: "bg-violet-500/15 text-violet-400",
+    text: "text-violet-400",
+  },
   fresh: {
     bg: "bg-cyan-500/8",
     border: "border-cyan-500/30",
@@ -94,7 +108,7 @@ export function ContextLayersVisualizer({ className }: ContextLayersVisualizerPr
         <div 
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "linear-gradient(180deg, rgba(52, 211, 153, 0.04) 0%, rgba(52, 211, 153, 0.02) 40%, rgba(34, 211, 238, 0.04) 100%)",
+            background: "linear-gradient(180deg, rgba(52, 211, 153, 0.04) 0%, rgba(52, 211, 153, 0.02) 35%, rgba(167, 139, 250, 0.03) 70%, rgba(34, 211, 238, 0.04) 100%)",
           }}
         />
         
@@ -140,6 +154,7 @@ export function ContextLayersVisualizer({ className }: ContextLayersVisualizerPr
                           layer.volatility === "static" && "bg-emerald-500/15 text-emerald-400",
                           layer.volatility === "semi-static" && "bg-emerald-500/10 text-emerald-400/70",
                           layer.volatility === "per-session" && "bg-amber-500/15 text-amber-400",
+                          layer.volatility === "real-time" && "bg-violet-500/15 text-violet-400",
                           layer.volatility === "per-turn" && "bg-cyan-500/15 text-cyan-400"
                         )}>
                           {layer.volatility}
@@ -155,9 +170,14 @@ export function ContextLayersVisualizer({ className }: ContextLayersVisualizerPr
                       "hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium whitespace-nowrap flex-shrink-0",
                       colors.badge
                     )}>
-                      {layer.cacheStatus !== "fresh" && (
+                      {layer.cacheStatus !== "fresh" && layer.cacheStatus !== "realtime" && (
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                      {layer.cacheStatus === "realtime" && (
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       )}
                       {layer.cacheStatus === "fresh" && (
@@ -188,7 +208,7 @@ export function ContextLayersVisualizer({ className }: ContextLayersVisualizerPr
             <div 
               className="h-1 w-full rounded-full"
               style={{
-                background: "linear-gradient(90deg, #34d399 0%, #34d399 30%, #fbbf24 60%, #22d3ee 100%)",
+                background: "linear-gradient(90deg, #34d399 0%, #34d399 25%, #fbbf24 50%, #a78bfa 75%, #22d3ee 100%)",
               }}
             />
           </div>

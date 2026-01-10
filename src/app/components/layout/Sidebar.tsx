@@ -42,39 +42,35 @@ export function Sidebar({
   onSubSectionClick,
   onClose,
 }: SidebarProps) {
-  // Track which sections with sub-sections are expanded
+  // Track which sections the user has manually expanded
+  const [manuallyExpanded, setManuallyExpanded] = useState<Set<string>>(new Set());
+  
+  // Compute expanded sections: active section + manually expanded ones
   const [expandedSections, setExpandedSections] = useState<Set<string>>(() => {
-    // Auto-expand sections that have active sub-sections
     const expanded = new Set<string>();
     sections.forEach((section) => {
-      if (section.subSections?.some((sub) => activeSection === sub.id)) {
-        expanded.add(section.id);
-      }
-    });
-    // Also expand if the section itself is active
-    sections.forEach((section) => {
-      if (activeSection === section.id && section.subSections) {
+      if (section.subSections?.some((sub) => activeSection === sub.id) ||
+          (activeSection === section.id && section.subSections)) {
         expanded.add(section.id);
       }
     });
     return expanded;
   });
 
-  // Auto-expand sections when their sub-sections become active
+  // When activeSection changes, update expanded to only include active section + manually expanded
   useEffect(() => {
+    const newExpanded = new Set<string>(manuallyExpanded);
+    
     sections.forEach((section) => {
-      if (section.subSections?.some((sub) => activeSection === sub.id)) {
-        setExpandedSections((prev) => {
-          if (!prev.has(section.id)) {
-            const next = new Set(prev);
-            next.add(section.id);
-            return next;
-          }
-          return prev;
-        });
+      // Auto-expand the section containing the active item
+      if (activeSection === section.id || 
+          section.subSections?.some((sub) => activeSection === sub.id)) {
+        newExpanded.add(section.id);
       }
     });
-  }, [activeSection, sections]);
+    
+    setExpandedSections(newExpanded);
+  }, [activeSection, sections, manuallyExpanded]);
 
   // Group sections by part
   const groupedSections = sections.reduce(
@@ -98,6 +94,11 @@ export function Sidebar({
   };
 
   const toggleSectionExpansion = (sectionId: string) => {
+    // Check if this section contains the active item
+    const section = sections.find(s => s.id === sectionId);
+    const isActiveSection = activeSection === sectionId || 
+      section?.subSections?.some((sub) => activeSection === sub.id);
+    
     setExpandedSections((prev) => {
       const next = new Set(prev);
       if (next.has(sectionId)) {
@@ -107,6 +108,28 @@ export function Sidebar({
       }
       return next;
     });
+    
+    // Track manual expansion/collapse (only if not the active section)
+    if (!isActiveSection) {
+      setManuallyExpanded((prev) => {
+        const next = new Set(prev);
+        if (prev.has(sectionId)) {
+          // User is collapsing a manually expanded section
+          next.delete(sectionId);
+        } else {
+          // User is manually expanding a section
+          next.add(sectionId);
+        }
+        return next;
+      });
+    } else {
+      // If collapsing the active section, remove it from manually expanded
+      setManuallyExpanded((prev) => {
+        const next = new Set(prev);
+        next.delete(sectionId);
+        return next;
+      });
+    }
   };
 
   const handleSectionClick = (sectionId: string) => {

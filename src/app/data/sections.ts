@@ -110,12 +110,12 @@ export const sections: Section[] = [
         title: "3. Explicit Over Implicit",
       },
       {
-        id: "dynamic-relevance",
-        title: "4. Dynamic Relevance",
+        id: "context-lifecycle",
+        title: "4. Context Lifecycle Management",
       },
       {
-        id: "compression-without-loss",
-        title: "5. Compression Without Loss",
+        id: "delegation-orchestration",
+        title: "5. Delegation & Orchestration",
       },
       {
         id: "separation-of-concerns",
@@ -134,8 +134,12 @@ export const sections: Section[] = [
         title: "Conversation Context Patterns",
       },
       {
-        id: "compression-strategies",
-        title: "Compression Strategies",
+        id: "orchestration-patterns",
+        title: "Orchestration Patterns",
+      },
+      {
+        id: "message-roles-delimiters",
+        title: "Message Roles & Delimiters",
       },
       {
         id: "system-architecture-patterns",

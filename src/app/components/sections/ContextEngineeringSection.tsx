@@ -137,14 +137,14 @@ export function ContextEngineeringSection() {
           <li><strong className="text-foreground">Relevant history:</strong> Include conversation history only if the task requires continuity</li>
         </ul>
 
-        {/* Principle 4: Dynamic Relevance */}
-        <h3 id="dynamic-relevance" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
-          4. Dynamic Relevance
+        {/* Principle 4: Context Lifecycle */}
+        <h3 id="context-lifecycle" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          4. Context Lifecycle Management
         </h3>
 
         <p className="text-muted-foreground">
-          As conversations grow, context must evolve. The principle: <strong className="text-foreground">keep 
-          what's relevant, compress what's useful but not critical, drop what's stale</strong>.
+          Context isn't static—it must <strong className="text-foreground">evolve as work progresses</strong>. 
+          The principle: curate actively to preserve information density while respecting token limits.
         </p>
 
         <div className="grid gap-4 sm:grid-cols-3 mt-6">
@@ -152,7 +152,7 @@ export function ContextEngineeringSection() {
             <CardContent>
               <h4 className="font-medium text-emerald-500 mb-2">Keep</h4>
               <p className="text-sm text-muted-foreground m-0">
-                Active task state, current objectives, recent decisions that affect next steps
+                Active task state, current objectives, recent decisions affecting next steps
               </p>
             </CardContent>
           </Card>
@@ -161,7 +161,7 @@ export function ContextEngineeringSection() {
             <CardContent>
               <h4 className="font-medium text-amber-500 mb-2">Compress</h4>
               <p className="text-sm text-muted-foreground m-0">
-                Earlier conversation history → summary. Explored options → key conclusions only
+                Earlier history → summary. Explored options → key conclusions only
               </p>
             </CardContent>
           </Card>
@@ -170,69 +170,90 @@ export function ContextEngineeringSection() {
             <CardContent>
               <h4 className="font-medium text-rose-400 mb-2">Drop</h4>
               <p className="text-sm text-muted-foreground m-0">
-                Resolved subtasks, superseded decisions, tangential discussions that led nowhere
+                Completed subtasks, superseded decisions, tangential dead-ends
               </p>
             </CardContent>
           </Card>
         </div>
 
         <p className="text-muted-foreground mt-6">
-          This directly connects to caching: <strong className="text-foreground">pruning the middle 
-          of your context breaks the cache</strong>. If you need to modify Layer 3 content, you 
-          invalidate the cached prefix. Design your compression strategy to preserve the stable 
-          prefix while evolving the variable portions.
+          When compression is needed, <strong className="text-foreground">compress the middle first</strong>. 
+          This aligns with the "Lost in the Middle" findings—middle content gets less attention anyway—and 
+          preserves your cache-friendly stable prefix. Intelligent summaries beat naive truncation.
         </p>
 
-        <Callout variant="info" title="Cache Breakpoints">
+        <Callout variant="warning" title="Avoid Auto-Truncation">
           <p className="m-0">
-            Some providers (e.g., Anthropic) support explicit <strong>cache breakpoints</strong>—markers 
-            that let you modify content after the breakpoint without invalidating everything before it. 
-            This enables more flexible context management while preserving cache benefits.
+            Some APIs automatically truncate when inputs exceed limits, typically dropping earlier content 
+            blindly—exactly the wrong strategy. <strong>Prefer deliberate curation</strong> over automated truncation.
           </p>
         </Callout>
 
-        {/* Principle 5: Compression Without Loss */}
-        <h3 id="compression-without-loss" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
-          5. Compression Without Loss
+        {/* Principle 5: Delegation & Orchestration */}
+        <h3 id="delegation-orchestration" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          5. Delegation & Orchestration
         </h3>
 
         <p className="text-muted-foreground">
-          When context grows beyond limits, compression is mandatory. The principle: 
-          <strong className="text-foreground"> preserve information density, not token count</strong>. 
-          Intelligent summaries beat naive truncation every time.
+          Stop thinking of AI as a single conversation. Think of it as <strong className="text-foreground">multiple 
+          instances that can work in parallel or in series</strong>. This unlocks a powerful pattern: 
+          <em>focused delegation</em>.
         </p>
 
-        <p className="text-muted-foreground">
-          This aligns with primacy/recency findings: the middle of long contexts gets the 
-          least attention anyway. So when you must compress, <strong className="text-foreground">compress 
-          the middle first</strong>—keep the critical prefix and the fresh tail intact.
+        <Callout variant="important" title="The Key Insight">
+          <p className="m-0">
+            A sub-agent with <strong>a fresh, focused context</strong> often outperforms a single overloaded 
+            context that's trying to do everything. Each delegated task gets exactly the context it needs—no 
+            more, no less.
+          </p>
+        </Callout>
+
+        <p className="text-muted-foreground mt-4">
+          The pattern: An <strong className="text-foreground">orchestrator</strong> model manages the overall 
+          workflow, while <strong className="text-foreground">worker</strong> models handle specific subtasks. 
+          Each worker gets a self-contained context—runs 5-15 messages to complete its task—then returns 
+          <em>only the result</em>, not the intermediate steps.
         </p>
 
         <div className="grid gap-4 sm:grid-cols-2 mt-6">
           <Card variant="default">
             <CardContent>
-              <h4 className="font-medium text-rose-400 mb-2">❌ Naive Truncation</h4>
-              <p className="text-sm text-muted-foreground m-0">
-                Drop older messages blindly until tokens fit. Loses important context unpredictably.
-              </p>
+              <h4 className="font-medium text-cyan-400 mb-2">🎯 Orchestrator</h4>
+              <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
+                <li>Sees the big picture and overall goal</li>
+                <li>Decomposes work into focused subtasks</li>
+                <li>Routes each subtask with curated context</li>
+                <li>Receives results, not intermediate tool calls</li>
+                <li>Often a more capable (larger) model</li>
+              </ul>
             </CardContent>
           </Card>
           
           <Card variant="default">
             <CardContent>
-              <h4 className="font-medium text-emerald-500 mb-2">✓ Intelligent Compression</h4>
-              <p className="text-sm text-muted-foreground m-0">
-                Summarize older content, keep recent messages intact. Preserves information density.
-              </p>
+              <h4 className="font-medium text-violet-400 mb-2">⚡ Worker</h4>
+              <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
+                <li>Fresh context scoped to one task</li>
+                <li>Can use tools, iterate, make mistakes</li>
+                <li>Runs 5-15 messages independently</li>
+                <li>Returns structured result only</li>
+                <li>Can be a smaller, faster, cheaper model</li>
+              </ul>
             </CardContent>
           </Card>
         </div>
 
-        <Callout variant="warning" title="Auto-Truncation Hazard">
+        <p className="text-muted-foreground mt-6">
+          <strong className="text-foreground">Why this works:</strong> The orchestrator's context stays 
+          clean—it sees task assignments and results, not dozens of tool calls and exploration steps. 
+          Workers get focused context optimized for their specific task. Both benefit from the signal-over-noise principle.
+        </p>
+
+        <Callout variant="tip" title="Context Boundaries as Architecture">
           <p className="m-0">
-            Some APIs offer automatic truncation when inputs exceed context limits. This 
-            typically drops earlier content blindly—exactly the opposite of what you want. 
-            <strong> Prefer deliberate curation</strong> over automated truncation.
+            Delegation creates <strong>natural context boundaries</strong>. Each worker's context is isolated, 
+            preventing cross-contamination between subtasks. This is separation of concerns applied at the 
+            instance level, not just within a single context.
           </p>
         </Callout>
 

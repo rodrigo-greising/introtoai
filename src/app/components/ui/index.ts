@@ -5,3 +5,4 @@ export { SectionHeading } from "./SectionHeading";
 export { CostVisualizer } from "./CostVisualizer";
 export { CachingCostVisualizer } from "./CachingCostVisualizer";
 export { ContextLayersVisualizer } from "./ContextLayersVisualizer";
+export { OrchestrationDAGVisualizer } from "./OrchestrationDAGVisualizer";

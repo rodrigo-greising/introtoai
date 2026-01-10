@@ -4,6 +4,7 @@
  * Reusable building blocks for composing interactive visualizations.
  */
 
+// Existing core components
 export { ChatPanel } from "./ChatPanel";
 export type { ChatPanelProps } from "./ChatPanel";
 
@@ -18,3 +19,16 @@ export type { CostBreakdownProps } from "./CostBreakdown";
 
 export { EmbeddingSpace } from "./EmbeddingSpace";
 export type { EmbeddingSpaceProps } from "./EmbeddingSpace";
+
+// V3 Shared Components - Interactive wrappers and controls
+export { ViewCodeToggle } from "./ViewCodeToggle";
+export type { ViewCodeToggleProps } from "./ViewCodeToggle";
+
+export { InteractiveWrapper } from "./InteractiveWrapper";
+export type { InteractiveWrapperProps } from "./InteractiveWrapper";
+
+export { StepThroughPlayer } from "./StepThroughPlayer";
+export type { StepThroughPlayerProps, Step } from "./StepThroughPlayer";
+
+export { CodeLogicPanel } from "./CodeLogicPanel";
+export type { CodeLogicPanelProps } from "./CodeLogicPanel";

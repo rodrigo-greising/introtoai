@@ -257,6 +257,14 @@ export function RAGFundamentalsSection() {
 
         {/* Interactive Embedding Visualizer */}
         <div className="my-8">
+          <Callout variant="info" title="Connection to Embeddings Section" className="mb-4">
+            <p className="m-0">
+              Embeddings are the foundation of semantic search in RAG. If you haven&apos;t already, check out the{" "}
+              <strong><a href="#embeddings" className="text-[var(--highlight)] hover:underline">Understanding Embeddings</a></strong>{" "}
+              section for a deep dive into how text becomes vectors.
+            </p>
+          </Callout>
+          
           <Callout variant="tip" title="Try It: Explore Word Embeddings" className="mb-4">
             <p className="m-0">
               This interactive tool runs a <strong>real embedding model</strong> directly in your browser. 

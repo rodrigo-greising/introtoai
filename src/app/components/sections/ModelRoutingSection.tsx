@@ -1,4 +1,247 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { cn } from "@/lib/utils";
 import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
+import { 
+  Send,
+  Zap,
+  Brain,
+  Sparkles,
+  Code2,
+  DollarSign,
+  Clock,
+} from "lucide-react";
+
+// =============================================================================
+// Router Simulator
+// =============================================================================
+
+interface RoutingResult {
+  model: string;
+  category: string;
+  complexity: string;
+  reasoning: string;
+  estimatedCost: string;
+  estimatedLatency: string;
+}
+
+function RouterSimulator() {
+  const [prompt, setPrompt] = useState("");
+  const [result, setResult] = useState<RoutingResult | null>(null);
+  const [isRouting, setIsRouting] = useState(false);
+
+  const examplePrompts = [
+    "What's 2 + 2?",
+    "Write a poem about the ocean",
+    "Debug this Python function that's throwing an IndexError",
+    "Explain step by step how to solve: If 3x + 7 = 22, what is x?",
+    "Hi! How are you today?",
+  ];
+
+  const simulateRouting = useCallback((input: string) => {
+    setIsRouting(true);
+    
+    // Simulate routing logic
+    setTimeout(() => {
+      const lower = input.toLowerCase();
+      const length = input.length;
+      
+      let category = "general";
+      let complexity = "medium";
+      let model = "gpt-4o";
+      let reasoning = "";
+      let estimatedCost = "$0.002";
+      let estimatedLatency = "1-2s";
+
+      // Simple questions
+      if (length < 30 && !lower.includes("explain") && !lower.includes("why")) {
+        category = "simple_qa";
+        complexity = "low";
+        model = "gpt-4o-mini";
+        reasoning = "Short prompt, likely a simple question";
+        estimatedCost = "$0.0001";
+        estimatedLatency = "0.3-0.5s";
+      }
+      // Reasoning tasks
+      else if (lower.includes("step by step") || lower.includes("solve") || lower.includes("calculate")) {
+        category = "reasoning";
+        complexity = "high";
+        model = "o1";
+        reasoning = "Multi-step reasoning detected";
+        estimatedCost = "$0.015";
+        estimatedLatency = "10-30s";
+      }
+      // Creative tasks
+      else if (lower.includes("write") || lower.includes("poem") || lower.includes("story") || lower.includes("creative")) {
+        category = "creative";
+        complexity = "medium";
+        model = "claude-3-5-sonnet";
+        reasoning = "Creative generation task";
+        estimatedCost = "$0.003";
+        estimatedLatency = "2-4s";
+      }
+      // Code tasks
+      else if (lower.includes("code") || lower.includes("function") || lower.includes("debug") || lower.includes("error")) {
+        category = "code";
+        complexity = "medium";
+        model = "claude-3-5-sonnet";
+        reasoning = "Programming/debugging task";
+        estimatedCost = "$0.003";
+        estimatedLatency = "1-3s";
+      }
+      // Casual conversation
+      else if (lower.includes("hi") || lower.includes("hello") || lower.includes("how are") || lower.includes("thanks")) {
+        category = "conversation";
+        complexity = "low";
+        model = "gpt-4o-mini";
+        reasoning = "Casual conversation, no complex task";
+        estimatedCost = "$0.0001";
+        estimatedLatency = "0.2-0.4s";
+      }
+
+      setResult({
+        model,
+        category,
+        complexity,
+        reasoning,
+        estimatedCost,
+        estimatedLatency,
+      });
+      setIsRouting(false);
+    }, 500);
+  }, []);
+
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (prompt.trim()) {
+      simulateRouting(prompt);
+    }
+  }, [prompt, simulateRouting]);
+
+  const getModelColor = (model: string) => {
+    if (model.includes("mini")) return "cyan";
+    if (model.includes("o1")) return "violet";
+    if (model.includes("claude")) return "amber";
+    return "emerald";
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Input */}
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div className="relative">
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Enter a prompt to see how it would be routed..."
+            className="w-full h-24 px-4 py-3 rounded-lg bg-muted/30 border border-border text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/50 resize-none"
+          />
+          <button
+            type="submit"
+            disabled={!prompt.trim() || isRouting}
+            className={cn(
+              "absolute bottom-3 right-3 p-2 rounded-lg transition-all",
+              prompt.trim() && !isRouting
+                ? "bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30"
+                : "bg-muted/50 text-muted-foreground cursor-not-allowed"
+            )}
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Example prompts */}
+        <div className="flex flex-wrap gap-2">
+          <span className="text-xs text-muted-foreground">Try:</span>
+          {examplePrompts.map((ex, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => {
+                setPrompt(ex);
+                simulateRouting(ex);
+              }}
+              className="px-2 py-1 text-xs rounded bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+            >
+              {ex.slice(0, 30)}{ex.length > 30 ? "..." : ""}
+            </button>
+          ))}
+        </div>
+      </form>
+
+      {/* Result */}
+      {result && (
+        <div className="p-4 rounded-lg bg-muted/20 border border-border animate-in fade-in">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-sm font-medium text-foreground">Routing Decision</h4>
+            <span className={cn(
+              "px-3 py-1 rounded-full text-xs font-medium",
+              `bg-${getModelColor(result.model)}-500/20 text-${getModelColor(result.model)}-400`
+            )} style={{
+              backgroundColor: `var(--${getModelColor(result.model)}-500-20, rgba(100,150,200,0.2))`,
+              color: `var(--${getModelColor(result.model)}-400, rgb(100,180,220))`,
+            }}>
+              {result.model}
+            </span>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="flex items-center gap-2">
+              <Brain className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <div className="text-xs text-muted-foreground">Category</div>
+                <div className="text-sm font-medium">{result.category}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <div className="text-xs text-muted-foreground">Complexity</div>
+                <div className="text-sm font-medium">{result.complexity}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <div className="text-xs text-muted-foreground">Est. Cost</div>
+                <div className="text-sm font-medium">{result.estimatedCost}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <div className="text-xs text-muted-foreground">Est. Latency</div>
+                <div className="text-sm font-medium">{result.estimatedLatency}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 pt-3 border-t border-border">
+            <div className="text-xs text-muted-foreground">{result.reasoning}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Legend */}
+      <div className="flex flex-wrap gap-4 text-xs text-muted-foreground pt-2 border-t border-border">
+        <div className="flex items-center gap-1">
+          <Zap className="w-3 h-3 text-cyan-400" />
+          <span>gpt-4o-mini: Fast & cheap</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Brain className="w-3 h-3 text-violet-400" />
+          <span>o1: Deep reasoning</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Code2 className="w-3 h-3 text-amber-400" />
+          <span>claude: Code & creative</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function ModelRoutingSection() {
   return (
@@ -159,6 +402,26 @@ async function routeRequest(prompt: string): Promise<RouterDecision> {
             </CardContent>
           </Card>
         </div>
+
+        {/* Interactive Router */}
+        <h3 id="try-router" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Try the Router
+        </h3>
+
+        <p className="text-muted-foreground">
+          See how a router would classify and route different prompts. This simplified demo uses 
+          heuristics—a real router might use a small ML model for more nuanced classification.
+        </p>
+
+        <InteractiveWrapper
+          title="Interactive: Router Simulator"
+          description="Enter prompts to see routing decisions"
+          icon="🔀"
+          colorTheme="cyan"
+          minHeight="auto"
+        >
+          <RouterSimulator />
+        </InteractiveWrapper>
 
         <h3 id="routing-strategies" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
           Routing Strategies

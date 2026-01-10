@@ -1,4 +1,190 @@
+"use client";
+
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
+import { 
+  Play, 
+  CheckCircle,
+  XCircle,
+  Clock,
+  RotateCcw,
+  Terminal,
+} from "lucide-react";
+
+// =============================================================================
+// Test Harness Builder
+// =============================================================================
+
+interface TestCase {
+  id: string;
+  name: string;
+  status: "pending" | "running" | "passed" | "failed";
+  duration?: number;
+  error?: string;
+}
+
+function TestHarnessBuilder() {
+  const [tests, setTests] = useState<TestCase[]>([
+    { id: "1", name: "should return correct sum for positive numbers", status: "pending" },
+    { id: "2", name: "should handle zero correctly", status: "pending" },
+    { id: "3", name: "should handle negative numbers", status: "pending" },
+    { id: "4", name: "should throw for non-numeric input", status: "pending" },
+    { id: "5", name: "should handle large numbers", status: "pending" },
+  ]);
+  const [isRunning, setIsRunning] = useState(false);
+  const [iteration, setIteration] = useState(0);
+
+  const runTests = async () => {
+    setIsRunning(true);
+    setIteration(prev => prev + 1);
+    
+    // Reset all tests
+    setTests(prev => prev.map(t => ({ ...t, status: "pending", error: undefined })));
+    
+    for (let i = 0; i < tests.length; i++) {
+      // Set running
+      setTests(prev => prev.map((t, idx) => 
+        idx === i ? { ...t, status: "running" as const } : t
+      ));
+      
+      // Simulate test execution
+      await new Promise(r => setTimeout(r, 300 + Math.random() * 400));
+      
+      // Random pass/fail (weighted toward pass after more iterations)
+      const passRate = 0.6 + (iteration * 0.1);
+      const passed = Math.random() < passRate;
+      const duration = Math.floor(10 + Math.random() * 90);
+      
+      setTests(prev => prev.map((t, idx) => 
+        idx === i ? { 
+          ...t, 
+          status: passed ? "passed" as const : "failed" as const,
+          duration,
+          error: passed ? undefined : "AssertionError: Expected 42 but got 41"
+        } : t
+      ));
+    }
+    
+    setIsRunning(false);
+  };
+
+  const reset = () => {
+    setTests(prev => prev.map(t => ({ ...t, status: "pending", error: undefined, duration: undefined })));
+    setIteration(0);
+  };
+
+  const passedCount = tests.filter(t => t.status === "passed").length;
+  const failedCount = tests.filter(t => t.status === "failed").length;
+  const allPassed = passedCount === tests.length;
+
+  const getStatusIcon = (status: TestCase["status"]) => {
+    switch (status) {
+      case "passed": return <CheckCircle className="w-4 h-4 text-emerald-400" />;
+      case "failed": return <XCircle className="w-4 h-4 text-rose-400" />;
+      case "running": return <Clock className="w-4 h-4 text-amber-400 animate-spin" />;
+      default: return <div className="w-4 h-4 rounded-full border-2 border-muted-foreground/30" />;
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Controls */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={runTests}
+          disabled={isRunning}
+          className={cn(
+            "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+            !isRunning
+              ? "bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30"
+              : "bg-muted/30 text-muted-foreground cursor-not-allowed"
+          )}
+        >
+          <Play className="w-4 h-4" />
+          Run Tests
+        </button>
+        <button
+          onClick={reset}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-muted/30 text-muted-foreground hover:text-foreground transition-all"
+        >
+          <RotateCcw className="w-4 h-4" />
+          Reset
+        </button>
+        {iteration > 0 && (
+          <span className="ml-auto text-sm text-muted-foreground">
+            Iteration #{iteration}
+          </span>
+        )}
+      </div>
+
+      {/* Test list */}
+      <div className="rounded-lg border border-border overflow-hidden">
+        <div className="bg-muted/30 px-4 py-2 border-b border-border flex items-center gap-2">
+          <Terminal className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm font-medium">Test Suite: add.test.ts</span>
+        </div>
+        <div className="divide-y divide-border">
+          {tests.map((test) => (
+            <div
+              key={test.id}
+              className={cn(
+                "px-4 py-3 flex items-start gap-3 transition-all",
+                test.status === "running" && "bg-amber-500/5",
+                test.status === "failed" && "bg-rose-500/5"
+              )}
+            >
+              {getStatusIcon(test.status)}
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-mono">{test.name}</div>
+                {test.error && (
+                  <div className="text-xs text-rose-400 mt-1 font-mono">{test.error}</div>
+                )}
+              </div>
+              {test.duration && (
+                <span className="text-xs text-muted-foreground shrink-0">{test.duration}ms</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Summary */}
+      {(passedCount > 0 || failedCount > 0) && (
+        <div className={cn(
+          "p-4 rounded-lg flex items-center justify-between",
+          allPassed 
+            ? "bg-emerald-500/10 border border-emerald-500/30"
+            : "bg-rose-500/10 border border-rose-500/30"
+        )}>
+          <div className="flex items-center gap-4 text-sm">
+            <span className="text-emerald-400">{passedCount} passed</span>
+            {failedCount > 0 && (
+              <span className="text-rose-400">{failedCount} failed</span>
+            )}
+          </div>
+          <span className={cn(
+            "text-sm font-medium",
+            allPassed ? "text-emerald-400" : "text-rose-400"
+          )}>
+            {allPassed ? "✓ All tests pass!" : "✗ Some tests failed"}
+          </span>
+        </div>
+      )}
+
+      {/* AI feedback hint */}
+      <div className="text-xs text-muted-foreground">
+        {failedCount > 0 
+          ? "→ AI would receive error messages and iterate on the implementation"
+          : passedCount > 0 
+            ? "→ AI iteration complete. Implementation verified."
+            : "→ Run tests to validate AI-generated code"
+        }
+      </div>
+    </div>
+  );
+}
 
 export function HarnessesSection() {
   return (
@@ -23,6 +209,26 @@ export function HarnessesSection() {
             The harness enables automation; the tests define correctness.
           </p>
         </Callout>
+
+        {/* Interactive Harness */}
+        <h3 id="try-harness" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Try It: Test Harness Simulation
+        </h3>
+
+        <p className="text-muted-foreground">
+          See how a test harness provides feedback to AI. Run the tests multiple times—the &quot;AI&quot; 
+          improves with each iteration (simulated by increasing pass rate).
+        </p>
+
+        <InteractiveWrapper
+          title="Interactive: Test Harness"
+          description="Simulate AI iteration against tests"
+          icon="🧪"
+          colorTheme="cyan"
+          minHeight="auto"
+        >
+          <TestHarnessBuilder />
+        </InteractiveWrapper>
 
         {/* What is a Test Harness */}
         <h3 id="what-is-harness" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">

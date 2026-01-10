@@ -1,4 +1,253 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import { cn } from "@/lib/utils";
 import { SectionHeading, Card, CardContent, Callout, CodeBlock, CachingCostVisualizer } from "@/app/components/ui";
+import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { Check, X, ArrowRight, Zap } from "lucide-react";
+
+// =============================================================================
+// Prefix Match Visualization
+// =============================================================================
+
+interface PromptPart {
+  id: string;
+  label: string;
+  content: string;
+  tokens: number;
+  type: "static" | "variable";
+}
+
+const samplePrompts: { request1: PromptPart[]; request2: PromptPart[] } = {
+  request1: [
+    { id: "sys", label: "System Prompt", content: "You are a helpful coding assistant...", tokens: 1200, type: "static" },
+    { id: "tools", label: "Tool Schemas", content: "[readFile, writeFile, search]", tokens: 800, type: "static" },
+    { id: "examples", label: "Few-shot Examples", content: "Example: user asks about React...", tokens: 500, type: "static" },
+    { id: "user1", label: "User Message", content: "How do I create a custom hook?", tokens: 50, type: "variable" },
+  ],
+  request2: [
+    { id: "sys", label: "System Prompt", content: "You are a helpful coding assistant...", tokens: 1200, type: "static" },
+    { id: "tools", label: "Tool Schemas", content: "[readFile, writeFile, search]", tokens: 800, type: "static" },
+    { id: "examples", label: "Few-shot Examples", content: "Example: user asks about React...", tokens: 500, type: "static" },
+    { id: "user2", label: "User Message", content: "Now show me how to test it", tokens: 40, type: "variable" },
+  ],
+};
+
+function PrefixMatchDemo() {
+  const [showRequest2, setShowRequest2] = useState(false);
+  const [selectedChange, setSelectedChange] = useState<string | null>(null);
+
+  // Simulate what happens when a part changes
+  const changedRequest2 = useMemo(() => {
+    if (!selectedChange) return samplePrompts.request2;
+    
+    return samplePrompts.request2.map((part) => {
+      if (part.id === selectedChange) {
+        return { ...part, content: part.content + " [MODIFIED]", type: "variable" as const };
+      }
+      return part;
+    });
+  }, [selectedChange]);
+
+  const calculateCacheMatch = () => {
+    if (!showRequest2) return { cached: 0, fresh: 0, matched: [] };
+    
+    let cached = 0;
+    const matched: string[] = [];
+    
+    for (let i = 0; i < changedRequest2.length; i++) {
+      const r1Part = samplePrompts.request1[i];
+      const r2Part = changedRequest2[i];
+      
+      if (r1Part && r2Part && r1Part.content === r2Part.content && r1Part.type === "static") {
+        cached += r2Part.tokens;
+        matched.push(r2Part.id);
+      } else {
+        break; // Cache match breaks at first difference
+      }
+    }
+    
+    const fresh = changedRequest2.reduce((sum, p) => sum + p.tokens, 0) - cached;
+    return { cached, fresh, matched };
+  };
+
+  const { cached, fresh, matched } = calculateCacheMatch();
+
+  const coreLogic = `// How prefix caching works internally (simplified)
+
+function checkCacheMatch(newPrompt: Token[], cache: CacheEntry[]): CacheResult {
+  let matchedTokens = 0;
+  
+  // Find the longest matching prefix in cache
+  for (const entry of cache) {
+    let i = 0;
+    while (
+      i < entry.tokens.length && 
+      i < newPrompt.length &&
+      entry.tokens[i] === newPrompt[i]  // Exact match required!
+    ) {
+      i++;
+    }
+    
+    if (i > matchedTokens) {
+      matchedTokens = i;
+      cachedKVState = entry.kvState.slice(0, i);
+    }
+  }
+  
+  return {
+    cachedTokens: matchedTokens,        // Reuse KV cache
+    freshTokens: newPrompt.length - matchedTokens,  // Must compute
+    // Fresh tokens are charged at 100% price
+    // Cached tokens are charged at ~10% price (90% discount)
+  };
+}
+
+// Key insight: ANY change in the prefix breaks the match!
+// "Hello world" and "Hello World" are DIFFERENT prefixes`;
+
+  return (
+    <ViewCodeToggle
+      code={coreLogic}
+      title="Prefix Cache Matching"
+      description="How providers determine which tokens can be served from cache"
+    >
+      <div className="space-y-6">
+        {/* Request 1 */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-foreground">Request 1 (Initial)</span>
+            <span className="text-xs text-muted-foreground">
+              {samplePrompts.request1.reduce((sum, p) => sum + p.tokens, 0)} tokens total
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {samplePrompts.request1.map((part) => (
+              <div
+                key={part.id}
+                className={cn(
+                  "px-3 py-2 rounded-lg border text-sm transition-all",
+                  part.type === "static"
+                    ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400"
+                    : "bg-amber-500/10 border-amber-500/30 text-amber-400"
+                )}
+              >
+                <div className="font-medium">{part.label}</div>
+                <div className="text-xs opacity-70">{part.tokens} tokens</div>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            First request: all tokens processed fresh, written to cache
+          </p>
+        </div>
+
+        {/* Toggle */}
+        <button
+          onClick={() => setShowRequest2(!showRequest2)}
+          className={cn(
+            "w-full flex items-center justify-center gap-2 py-2 rounded-lg border transition-all",
+            showRequest2
+              ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-400"
+              : "bg-muted/50 border-border text-muted-foreground hover:bg-muted"
+          )}
+        >
+          <ArrowRight className={cn("w-4 h-4 transition-transform", showRequest2 && "rotate-90")} />
+          {showRequest2 ? "Hide Request 2" : "Show Request 2 (with caching)"}
+        </button>
+
+        {/* Request 2 */}
+        {showRequest2 && (
+          <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-foreground">Request 2 (Subsequent)</span>
+              <span className="text-xs text-muted-foreground">
+                {changedRequest2.reduce((sum, p) => sum + p.tokens, 0)} tokens total
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {changedRequest2.map((part, index) => {
+                const isCached = matched.includes(part.id);
+                const isAfterBreak = !isCached && matched.length > 0 && index >= matched.length;
+                const wasCacheBroken = selectedChange === part.id;
+
+                return (
+                  <button
+                    key={part.id}
+                    onClick={() => {
+                      if (part.type === "static" && part.id !== selectedChange) {
+                        setSelectedChange(part.id);
+                      } else if (part.id === selectedChange) {
+                        setSelectedChange(null);
+                      }
+                    }}
+                    className={cn(
+                      "px-3 py-2 rounded-lg border text-sm transition-all text-left",
+                      isCached
+                        ? "bg-emerald-500/10 border-emerald-500/30"
+                        : wasCacheBroken
+                        ? "bg-rose-500/10 border-rose-500/30"
+                        : "bg-amber-500/10 border-amber-500/30",
+                      part.type === "static" && !wasCacheBroken && "cursor-pointer hover:ring-2 hover:ring-offset-2 hover:ring-offset-background hover:ring-rose-500/50"
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      {isCached ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      ) : wasCacheBroken ? (
+                        <X className="w-3.5 h-3.5 text-rose-400" />
+                      ) : null}
+                      <span className={cn(
+                        "font-medium",
+                        isCached ? "text-emerald-400" : wasCacheBroken ? "text-rose-400" : "text-amber-400"
+                      )}>
+                        {part.label}
+                      </span>
+                    </div>
+                    <div className="text-xs opacity-70 mt-0.5">
+                      {isCached ? "CACHED" : wasCacheBroken ? "MODIFIED - cache broken!" : "FRESH"}
+                      {" • "}{part.tokens} tokens
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Cache stats */}
+            <div className="flex items-center gap-4 p-3 rounded-lg bg-muted/30 border border-border mt-3">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                <span className="text-sm">
+                  <span className="text-emerald-400 font-medium">{cached}</span>
+                  <span className="text-muted-foreground"> cached tokens (90% off)</span>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-amber-500" />
+                <span className="text-sm">
+                  <span className="text-amber-400 font-medium">{fresh}</span>
+                  <span className="text-muted-foreground"> fresh tokens (full price)</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Hint */}
+            <p className="text-xs text-muted-foreground">
+              {selectedChange 
+                ? "🔴 Modifying any part of the prefix breaks the cache for all subsequent parts!"
+                : "💡 Click on any static part to simulate modifying it and breaking the cache"
+              }
+            </p>
+          </div>
+        )}
+      </div>
+    </ViewCodeToggle>
+  );
+}
+
+// =============================================================================
+// Main Section Component
+// =============================================================================
 
 export function CachingSection() {
   return (
@@ -24,9 +273,25 @@ export function CachingSection() {
           </p>
         </Callout>
 
-        <h3 id="how-caching-works" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">How LLM Caching Actually Works</h3>
+        <h3 id="how-caching-works" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">How LLM Caching Works</h3>
 
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground mb-4">
+          Caching matches <strong className="text-foreground">exact prefixes</strong>. If your new request 
+          starts with the same tokens as a previous request, the provider can reuse the precomputed 
+          attention state for those tokens.
+        </p>
+
+        <InteractiveWrapper
+          title="Interactive: Prefix Cache Matching"
+          description="See how cache hits work and what breaks them"
+          icon={<Zap className="w-4 h-4" />}
+          colorTheme="emerald"
+          minHeight="auto"
+        >
+          <PrefixMatchDemo />
+        </InteractiveWrapper>
+
+        <p className="text-muted-foreground mt-4">
           Most providers enable prompt caching automatically. But there are important 
           nuances to understand:
         </p>
@@ -87,7 +352,7 @@ export function CachingSection() {
           </Card>
         </div>
 
-        <h3 id="conversations-and-caching" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">How Conversations Benefit from Caching</h3>
+        <h3 id="conversations-and-caching" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Conversations and Caching</h3>
 
         <p className="text-muted-foreground">
           In a typical chat-style integration, each API call includes the whole <code className="text-xs bg-muted px-1 py-0.5 rounded">messages</code> array 
@@ -138,42 +403,6 @@ Turn 3:
 
 The cacheable prefix grows each turn while only
 ~100-300 new tokens are charged at full price.`}
-        />
-
-        <h3 id="what-this-means" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">What This Means for Context Engineering</h3>
-
-        <p className="text-muted-foreground">
-          Caching fundamentally changes how you should structure prompts. The rule is simple:
-        </p>
-
-        <CodeBlock
-          language="typescript"
-          filename="cache-friendly-context.ts"
-          showLineNumbers
-          code={`// ❌ BAD: Variable content at the beginning breaks caching
-async function badApproach(userQuery: string, docs: string[]) {
-  return await callLLM(\`
-    User asks: \${userQuery}
-    
-    Here are your instructions...
-    [10,000 tokens of system prompt, tools, examples]
-  \`);
-}
-
-// ✅ GOOD: Static prefix, variable content at the end
-async function goodApproach(userQuery: string, docs: string[]) {
-  return await callLLM(\`
-    [System instructions - STATIC]
-    [Tool schemas - STATIC]
-    [Few-shot examples - STATIC]
-    [Reference docs - mostly STATIC]
-    
-    User query: \${userQuery}
-  \`);
-}
-
-// Every request that shares the same static prefix 
-// can reuse the cached KV tensors`}
         />
 
         <h3 id="caching-economics" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Caching Economics</h3>
@@ -250,7 +479,43 @@ async function goodApproach(userQuery: string, docs: string[]) {
           </p>
         </Callout>
 
-        <h3 id="where-caching-delivers" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Where Caching Delivers Most Value</h3>
+        <h3 id="cache-friendly-design" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Cache-Friendly Design</h3>
+
+        <p className="text-muted-foreground">
+          Caching fundamentally changes how you should structure prompts. The rule is simple:
+        </p>
+
+        <CodeBlock
+          language="typescript"
+          filename="cache-friendly-context.ts"
+          showLineNumbers
+          code={`// ❌ BAD: Variable content at the beginning breaks caching
+async function badApproach(userQuery: string, docs: string[]) {
+  return await callLLM(\`
+    User asks: \${userQuery}
+    
+    Here are your instructions...
+    [10,000 tokens of system prompt, tools, examples]
+  \`);
+}
+
+// ✅ GOOD: Static prefix, variable content at the end
+async function goodApproach(userQuery: string, docs: string[]) {
+  return await callLLM(\`
+    [System instructions - STATIC]
+    [Tool schemas - STATIC]
+    [Few-shot examples - STATIC]
+    [Reference docs - mostly STATIC]
+    
+    User query: \${userQuery}
+  \`);
+}
+
+// Every request that shares the same static prefix 
+// can reuse the cached KV tensors`}
+        />
+
+        <h4 className="text-lg font-medium mt-6 mb-3">Where Caching Delivers Most Value</h4>
 
         <ul className="space-y-3 text-muted-foreground pl-4 list-disc">
           <li>
@@ -277,59 +542,11 @@ async function goodApproach(userQuery: string, docs: string[]) {
           </p>
         </Callout>
 
-        <h3 id="connection-to-mental-model" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Connection to the Mental Model</h3>
-
-        <p className="text-muted-foreground">
-          Caching reinforces our core mental model: the LLM is a stateless function. Each call 
-          rebuilds internal state from the context you provide. Caching just lets the provider 
-          <em> skip the rebuild</em> when the prefix is identical.
-        </p>
-
-        <p className="text-muted-foreground">
-          This has profound implications for how you architect AI features:
-        </p>
-
-        <CodeBlock
-          language="typescript"
-          filename="context-architecture.ts"
-          code={`// Your context is your API contract with the model.
-// Structure it for both quality AND cacheability.
-
-interface OptimizedContext {
-  // Layer 1: System identity (almost never changes)
-  systemPrompt: string;
-  
-  // Layer 2: Capabilities (rarely changes)
-  toolSchemas: ToolSchema[];
-  
-  // Layer 3: Domain knowledge (changes occasionally)
-  referenceDocuments: Document[];
-  
-  // Layer 4: Session state (changes per session)
-  conversationSummary?: string;
-  
-  // Layer 5: Request specifics (changes every call)
-  userMessage: string;
-}
-
-// Layers 1-3 are your "cache surface"
-// Layers 4-5 are your "variable tail"
-// Maximize surface, minimize tail = maximum savings`}
-        />
-
-        <Callout variant="info" title="Observability Matters">
+        <Callout variant="info" title="Observability Matters" className="mt-6">
           <p className="m-0">
             All providers expose cache metrics in their responses. Monitor <code className="text-xs bg-muted px-1 py-0.5 rounded">cached_tokens</code>, 
             <code className="text-xs bg-muted px-1 py-0.5 rounded">cache_read_input_tokens</code>, or equivalent fields. If your cache hit rate 
             is low, revisit your prompt structure—something in your "stable" prefix is probably varying.
-          </p>
-        </Callout>
-
-        <Callout variant="warning" title="API vs. Consumer Products" className="mt-6">
-          <p className="m-0">
-            This guide is about <strong>API behavior</strong> for developers. Consumer products like ChatGPT 
-            may implement conversation assembly and caching differently internally—the documentation describes 
-            API behavior, not necessarily how the consumer UI's backend works.
           </p>
         </Callout>
       </div>

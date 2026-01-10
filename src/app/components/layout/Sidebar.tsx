@@ -13,6 +13,12 @@ import {
   Workflow,
   Shield,
   Rocket,
+  Blocks,
+  Database,
+  GitBranch,
+  Code,
+  TestTube,
+  Settings,
 } from "lucide-react";
 import type { Section } from "@/app/data/sections";
 
@@ -28,10 +34,15 @@ interface SidebarProps {
 // Icon mapping for section parts
 const partIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   foundations: BookOpen,
-  retrieval: Brain,
-  architecture: Layers,
+  context: Layers,
+  capabilities: Blocks,
+  retrieval: Database,
+  orchestration: GitBranch,
+  safety: Shield,
+  evaluation: TestTube,
+  "coding-agents": Code,
   workflow: Workflow,
-  production: Shield,
+  production: Settings,
 };
 
 export function Sidebar({
@@ -87,10 +98,15 @@ export function Sidebar({
 
   const partLabels: Record<string, string> = {
     foundations: "Foundations",
-    retrieval: "Retrieval & Knowledge",
-    architecture: "Task Architecture",
+    context: "Context Engineering",
+    capabilities: "Capabilities",
+    retrieval: "Knowledge & Retrieval",
+    orchestration: "Orchestration",
+    safety: "Safety & Control",
+    evaluation: "Evaluation",
+    "coding-agents": "Coding Agents",
     workflow: "Development Workflow",
-    production: "Production Concerns",
+    production: "Production",
   };
 
   const toggleSectionExpansion = (sectionId: string) => {

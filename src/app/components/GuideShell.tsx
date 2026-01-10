@@ -4,55 +4,134 @@ import { useState, useCallback } from "react";
 import { Header, Sidebar, SidebarToggle, ContentWrapper } from "./layout";
 import {
   IntroSection,
+  HowLLMsWorkSection,
   MentalModelSection,
+  EmbeddingsSection,
   CachingSection,
-  ContextEngineeringSection,
+  ContextPrinciplesSection,
+  LayeredContextSection,
   ContextTechniquesSection,
+  // Capabilities
+  StructuredOutputsSection,
+  ToolsSection,
+  AgenticLoopSection,
+  WorkflowsVsAgentsSection,
+  // Retrieval
   RAGFundamentalsSection,
+  VectorDatabasesSection,
+  ChunkingStrategiesSection,
+  // Orchestration
   SkillsProgressiveDiscoverySection,
   ModelRoutingSection,
+  TaskDecompositionSection,
+  OrchestrationPatternsSection,
+  ParallelizationSection,
+  DelegationSection,
   PlaceholderSection,
-  // Agentic Methodology Sections
-  SpecDrivenDevSection,
-  TestDrivenAISection,
+  // Evaluation
   HarnessesSection,
-  CICDIterationSection,
+  TestDrivenAISection,
+  // Safety
+  GuardrailsSection,
+  HumanInLoopSection,
   ExternalControlSection,
-  // Tooling Deep-Dive Sections
+  // Coding Agents
+  CodingAgentsIntroSection,
   CursorIDESection,
+  CursorRulesSection,
+  CursorModesSection,
+  CursorPatternsSection,
+  BackgroundAgentsSection,
+  // Workflow
+  SpecDrivenDevSection,
+  CICDIterationSection,
   GraphiteSection,
   LinearSection,
-  BackgroundAgentsSection,
   E2EPipelineSection,
+  // Production
+  CostOptimizationSection,
+  ReliabilitySection,
 } from "./sections";
 import { sections } from "@/app/data/sections";
 import { useActiveSection, scrollToSection } from "@/hooks/useActiveSection";
 
-// Map section IDs to their components
+/**
+ * Section Component Map
+ * 
+ * Maps section IDs from sections.ts to their React components.
+ * Sections without a mapped component will render PlaceholderSection.
+ * 
+ * V3 Section Mapping:
+ * - Part 1 (Foundations): intro, how-llms-work, mental-model, embeddings, llm-caching
+ * - Part 2 (Context): context-principles, layered-context, context-lifecycle
+ * - Part 3 (Capabilities): structured-outputs, tools, agentic-loop, workflows-vs-agents
+ * - Part 4 (Retrieval): rag-fundamentals, vector-databases, chunking-strategies
+ * - Part 5 (Orchestration): task-decomposition, orchestration-patterns, parallelization, delegation, skills, model-routing
+ * - Part 6 (Safety): guardrails, human-in-loop, external-control
+ * - Part 7 (Evaluation): harnesses, tdd-ai
+ * - Part 8 (Coding Agents): coding-agents-intro, cursor-architecture, cursor-rules, cursor-modes, cursor-patterns, background-agents
+ * - Part 9 (Workflow): spec-driven, cicd-iteration, graphite, linear, e2e-pipeline
+ * - Part 10 (Production): cost-optimization, reliability
+ */
 const sectionComponents: Record<string, React.ComponentType> = {
-  // Foundations
-  intro: IntroSection,
+  // Part 1: Foundations
+  "intro": IntroSection,
+  "how-llms-work": HowLLMsWorkSection,
   "mental-model": MentalModelSection,
+  "embeddings": EmbeddingsSection,
   "llm-caching": CachingSection,
-  "context-engineering": ContextEngineeringSection,
-  "context-techniques": ContextTechniquesSection,
-  // Retrieval
+
+  // Part 2: Context Engineering
+  "context-principles": ContextPrinciplesSection,
+  "layered-context": LayeredContextSection,
+  "context-lifecycle": ContextTechniquesSection, // Has lifecycle content
+
+  // Part 3: Capabilities
+  "structured-outputs": StructuredOutputsSection,
+  "tools": ToolsSection,
+  "agentic-loop": AgenticLoopSection,
+  "workflows-vs-agents": WorkflowsVsAgentsSection,
+
+  // Part 4: Knowledge & Retrieval
   "rag-fundamentals": RAGFundamentalsSection,
-  // Architecture
-  "skills-progressive-discovery": SkillsProgressiveDiscoverySection,
+  "vector-databases": VectorDatabasesSection,
+  "chunking-strategies": ChunkingStrategiesSection,
+
+  // Part 5: Orchestration
+  "task-decomposition": TaskDecompositionSection,
+  "orchestration-patterns": OrchestrationPatternsSection,
+  "parallelization": ParallelizationSection,
+  "delegation": DelegationSection,
+  "skills": SkillsProgressiveDiscoverySection,
   "model-routing": ModelRoutingSection,
-  // Workflow - Agentic Methodologies
-  "spec-driven-dev": SpecDrivenDevSection,
-  "test-driven-ai": TestDrivenAISection,
-  "harnesses-evaluation": HarnessesSection,
-  "cicd-iteration": CICDIterationSection,
+
+  // Part 6: Safety & Control
+  "guardrails": GuardrailsSection,
+  "human-in-loop": HumanInLoopSection,
   "external-control": ExternalControlSection,
-  // Workflow - Tooling Deep-Dives
-  "cursor-ide": CursorIDESection,
-  "graphite-stacked-prs": GraphiteSection,
-  "linear-task-management": LinearSection,
+
+  // Part 7: Evaluation
+  "harnesses": HarnessesSection,
+  "tdd-ai": TestDrivenAISection,
+
+  // Part 8: Coding Agents
+  "coding-agents-intro": CodingAgentsIntroSection,
+  "cursor-architecture": CursorIDESection,
+  "cursor-rules": CursorRulesSection,
+  "cursor-modes": CursorModesSection,
+  "cursor-patterns": CursorPatternsSection,
   "background-agents": BackgroundAgentsSection,
-  "e2e-agentic-pipeline": E2EPipelineSection,
+
+  // Part 9: Development Workflow
+  "spec-driven": SpecDrivenDevSection,
+  "cicd-iteration": CICDIterationSection,
+  "graphite": GraphiteSection,
+  "linear": LinearSection,
+  "e2e-pipeline": E2EPipelineSection,
+
+  // Part 10: Production
+  "cost-optimization": CostOptimizationSection,
+  "reliability": ReliabilitySection,
 };
 
 export function GuideShell() {

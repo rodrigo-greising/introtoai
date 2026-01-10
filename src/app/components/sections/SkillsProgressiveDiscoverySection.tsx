@@ -1,4 +1,207 @@
+"use client";
+
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
+import { 
+  Search,
+  Code2,
+  Shield,
+  Database,
+  FileText,
+  CheckCircle,
+} from "lucide-react";
+
+// =============================================================================
+// Skill Registry Browser
+// =============================================================================
+
+interface Skill {
+  id: string;
+  name: string;
+  category: string;
+  icon: React.ReactNode;
+  description: string;
+  triggers: string[];
+  tools: string[];
+  loaded: boolean;
+}
+
+function SkillRegistryBrowser() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [loadedSkills, setLoadedSkills] = useState<Set<string>>(new Set());
+
+  const skills: Skill[] = [
+    {
+      id: "code-review",
+      name: "Code Review",
+      category: "core",
+      icon: <Code2 className="w-4 h-4" />,
+      description: "Analyze code for correctness, style, and best practices",
+      triggers: ["review", "PR", "pull request", "code quality"],
+      tools: ["readFile", "analyzeDiff", "lintCode"],
+      loaded: false,
+    },
+    {
+      id: "security-audit",
+      name: "Security Audit",
+      category: "security",
+      icon: <Shield className="w-4 h-4" />,
+      description: "Check for vulnerabilities and security issues",
+      triggers: ["security", "vulnerability", "CVE", "audit"],
+      tools: ["scanDependencies", "checkSecrets", "analyzePermissions"],
+      loaded: false,
+    },
+    {
+      id: "database-migration",
+      name: "Database Migration",
+      category: "data",
+      icon: <Database className="w-4 h-4" />,
+      description: "Create and validate database schema changes",
+      triggers: ["migration", "schema", "database", "SQL"],
+      tools: ["generateMigration", "validateSchema", "rollbackPlan"],
+      loaded: false,
+    },
+    {
+      id: "documentation",
+      name: "Documentation",
+      category: "core",
+      icon: <FileText className="w-4 h-4" />,
+      description: "Generate and update technical documentation",
+      triggers: ["docs", "readme", "documentation", "API docs"],
+      tools: ["extractTypes", "generateDocs", "updateReadme"],
+      loaded: false,
+    },
+  ];
+
+  const categories = [...new Set(skills.map(s => s.category))];
+
+  const filteredSkills = skills.filter(skill => {
+    const matchesSearch = !searchQuery || 
+      skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      skill.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      skill.triggers.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesCategory = !selectedCategory || skill.category === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  const toggleSkillLoad = (skillId: string) => {
+    setLoadedSkills(prev => {
+      const next = new Set(prev);
+      if (next.has(skillId)) {
+        next.delete(skillId);
+      } else {
+        next.add(skillId);
+      }
+      return next;
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Search and filter */}
+      <div className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search skills by name, trigger, or description..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 rounded-lg bg-muted/30 border border-border text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+          />
+        </div>
+        <select
+          value={selectedCategory || ""}
+          onChange={(e) => setSelectedCategory(e.target.value || null)}
+          className="px-3 py-2 rounded-lg bg-muted/30 border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+        >
+          <option value="">All categories</option>
+          {categories.map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Skill cards */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        {filteredSkills.map(skill => {
+          const isLoaded = loadedSkills.has(skill.id);
+          
+          return (
+            <div
+              key={skill.id}
+              className={cn(
+                "p-4 rounded-lg border transition-all cursor-pointer",
+                isLoaded
+                  ? "bg-cyan-500/10 border-cyan-500/30"
+                  : "bg-muted/30 border-border hover:border-border/80"
+              )}
+              onClick={() => toggleSkillLoad(skill.id)}
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "p-1.5 rounded",
+                    isLoaded ? "bg-cyan-500/20 text-cyan-400" : "bg-muted text-muted-foreground"
+                  )}>
+                    {skill.icon}
+                  </div>
+                  <div>
+                    <div className="font-medium text-sm">{skill.name}</div>
+                    <div className="text-xs text-muted-foreground">{skill.category}</div>
+                  </div>
+                </div>
+                {isLoaded && (
+                  <CheckCircle className="w-4 h-4 text-cyan-400" />
+                )}
+              </div>
+              
+              <p className="text-xs text-muted-foreground mb-2">{skill.description}</p>
+              
+              {isLoaded && (
+                <div className="space-y-2 pt-2 border-t border-border/50">
+                  <div>
+                    <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Triggers</div>
+                    <div className="flex flex-wrap gap-1">
+                      {skill.triggers.map(t => (
+                        <span key={t} className="px-1.5 py-0.5 text-[10px] rounded bg-cyan-500/10 text-cyan-400">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Tools</div>
+                    <div className="flex flex-wrap gap-1">
+                      {skill.tools.map(t => (
+                        <span key={t} className="px-1.5 py-0.5 text-[10px] rounded bg-muted text-muted-foreground font-mono">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Stats */}
+      <div className="flex gap-4 text-xs text-muted-foreground pt-2 border-t border-border">
+        <span>{skills.length} skills available</span>
+        <span>•</span>
+        <span className="text-cyan-400">{loadedSkills.size} loaded</span>
+        <span className="ml-auto">Click a skill to load/unload</span>
+      </div>
+    </div>
+  );
+}
 
 export function SkillsProgressiveDiscoverySection() {
   return (
@@ -493,6 +696,26 @@ Include confidence levels and any caveats.
             </div>
           </div>
         </div>
+
+        {/* Interactive Skill Registry */}
+        <h3 id="skill-registry" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Skill Registry Browser
+        </h3>
+
+        <p className="text-muted-foreground">
+          A skill registry lets agents discover and load capabilities on demand. Click skills below 
+          to see their full details—this simulates the progressive disclosure pattern in action.
+        </p>
+
+        <InteractiveWrapper
+          title="Interactive: Skill Registry"
+          description="Search and explore available skills"
+          icon="📚"
+          colorTheme="cyan"
+          minHeight="auto"
+        >
+          <SkillRegistryBrowser />
+        </InteractiveWrapper>
 
         {/* Building a Skill Library */}
         <h3 id="building-skill-library" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">

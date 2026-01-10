@@ -1,4 +1,206 @@
+"use client";
+
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
+import { 
+  User, 
+  Bot,
+  ArrowRight,
+  Shield,
+  Pause,
+  Play,
+  RotateCcw,
+} from "lucide-react";
+
+// =============================================================================
+// Boundary Demo
+// =============================================================================
+
+interface BoundaryState {
+  budget: number;
+  maxBudget: number;
+  iterations: number;
+  maxIterations: number;
+  status: "running" | "paused" | "stopped" | "complete";
+  lastAction: string;
+}
+
+function BoundaryDemo() {
+  const [state, setState] = useState<BoundaryState>({
+    budget: 0,
+    maxBudget: 5,
+    iterations: 0,
+    maxIterations: 10,
+    status: "paused",
+    lastAction: "Waiting to start...",
+  });
+
+  const actions = [
+    { name: "Read file", cost: 0.01 },
+    { name: "Generate code", cost: 0.15 },
+    { name: "Run tests", cost: 0.02 },
+    { name: "Search codebase", cost: 0.05 },
+    { name: "Write file", cost: 0.03 },
+  ];
+
+  const runStep = () => {
+    if (state.status !== "running") return;
+    
+    const action = actions[Math.floor(Math.random() * actions.length)];
+    const newBudget = state.budget + action.cost;
+    const newIterations = state.iterations + 1;
+    
+    // Check boundaries
+    if (newBudget >= state.maxBudget) {
+      setState(prev => ({
+        ...prev,
+        budget: newBudget,
+        iterations: newIterations,
+        status: "stopped",
+        lastAction: `⛔ Budget exceeded! Stopped after: ${action.name}`,
+      }));
+      return;
+    }
+    
+    if (newIterations >= state.maxIterations) {
+      setState(prev => ({
+        ...prev,
+        budget: newBudget,
+        iterations: newIterations,
+        status: "complete",
+        lastAction: `✅ Max iterations reached. Last: ${action.name}`,
+      }));
+      return;
+    }
+    
+    setState(prev => ({
+      ...prev,
+      budget: newBudget,
+      iterations: newIterations,
+      lastAction: `${action.name} ($${action.cost.toFixed(2)})`,
+    }));
+    
+    // Continue running
+    setTimeout(runStep, 500);
+  };
+
+  const start = () => {
+    setState(prev => ({ ...prev, status: "running" }));
+    setTimeout(runStep, 500);
+  };
+
+  const pause = () => {
+    setState(prev => ({ ...prev, status: "paused" }));
+  };
+
+  const reset = () => {
+    setState({
+      budget: 0,
+      maxBudget: 5,
+      iterations: 0,
+      maxIterations: 10,
+      status: "paused",
+      lastAction: "Waiting to start...",
+    });
+  };
+
+  const budgetPercent = (state.budget / state.maxBudget) * 100;
+  const iterationPercent = (state.iterations / state.maxIterations) * 100;
+
+  return (
+    <div className="space-y-4">
+      {/* Controls */}
+      <div className="flex items-center gap-3">
+        {state.status === "paused" && (
+          <button
+            onClick={start}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 text-sm font-medium"
+          >
+            <Play className="w-4 h-4" />
+            Start Agent
+          </button>
+        )}
+        {state.status === "running" && (
+          <button
+            onClick={pause}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 text-sm font-medium"
+          >
+            <Pause className="w-4 h-4" />
+            Pause
+          </button>
+        )}
+        <button
+          onClick={reset}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-muted/30 text-muted-foreground hover:text-foreground text-sm font-medium"
+        >
+          <RotateCcw className="w-4 h-4" />
+          Reset
+        </button>
+        <span className={cn(
+          "ml-auto px-3 py-1 rounded-full text-xs font-medium",
+          state.status === "running" && "bg-emerald-500/20 text-emerald-400",
+          state.status === "paused" && "bg-muted text-muted-foreground",
+          state.status === "stopped" && "bg-rose-500/20 text-rose-400",
+          state.status === "complete" && "bg-cyan-500/20 text-cyan-400"
+        )}>
+          {state.status}
+        </span>
+      </div>
+
+      {/* Boundaries */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="p-4 rounded-lg bg-muted/20 border border-border">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium">Budget Limit</span>
+            <span className="text-sm text-muted-foreground">
+              ${state.budget.toFixed(2)} / ${state.maxBudget.toFixed(2)}
+            </span>
+          </div>
+          <div className="h-2 rounded-full bg-muted/30 overflow-hidden">
+            <div 
+              className={cn(
+                "h-full rounded-full transition-all",
+                budgetPercent >= 100 ? "bg-rose-500" : budgetPercent >= 80 ? "bg-amber-500" : "bg-emerald-500"
+              )}
+              style={{ width: `${Math.min(budgetPercent, 100)}%` }}
+            />
+          </div>
+        </div>
+        
+        <div className="p-4 rounded-lg bg-muted/20 border border-border">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium">Iteration Limit</span>
+            <span className="text-sm text-muted-foreground">
+              {state.iterations} / {state.maxIterations}
+            </span>
+          </div>
+          <div className="h-2 rounded-full bg-muted/30 overflow-hidden">
+            <div 
+              className={cn(
+                "h-full rounded-full transition-all bg-cyan-500"
+              )}
+              style={{ width: `${Math.min(iterationPercent, 100)}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Last action */}
+      <div className="p-3 rounded-lg bg-muted/30 text-sm">
+        <span className="text-muted-foreground">Last action: </span>
+        <span className="text-foreground">{state.lastAction}</span>
+      </div>
+
+      {/* Explanation */}
+      <div className="text-xs text-muted-foreground">
+        The agent runs until it hits a boundary (budget or iterations). External controls stop the agent 
+        automatically—no agent cooperation required.
+      </div>
+    </div>
+  );
+}
 
 export function ExternalControlSection() {
   return (
@@ -25,6 +227,26 @@ export function ExternalControlSection() {
             when, and with what constraints
           </p>
         </Callout>
+
+        {/* Boundary Demo */}
+        <h3 id="boundary-controls" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Boundary Controls
+        </h3>
+
+        <p className="text-muted-foreground">
+          External controls enforce boundaries that agents cannot exceed. Unlike guardrails (which 
+          agents can choose to respect), boundaries are enforced by the runtime environment.
+        </p>
+
+        <InteractiveWrapper
+          title="Interactive: Boundary Enforcement"
+          description="Watch an agent hit budget and iteration limits"
+          icon="🛑"
+          colorTheme="rose"
+          minHeight="auto"
+        >
+          <BoundaryDemo />
+        </InteractiveWrapper>
 
         {/* Human-Controlled AI Pipelines */}
         <h3 id="human-controlled-pipelines" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">

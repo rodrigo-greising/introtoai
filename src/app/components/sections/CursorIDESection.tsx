@@ -1,12 +1,251 @@
+"use client";
+
+import { useState } from "react";
 import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { 
+  Code2, 
+  Database, 
+  FileSearch, 
+  MessageSquare, 
+  Terminal, 
+  Zap,
+  BrainCircuit,
+  FolderTree,
+  GitBranch,
+  Globe,
+  Sparkles,
+} from "lucide-react";
+
+// Interactive Architecture Diagram Component
+function CursorArchitectureDiagram() {
+  const [hoveredComponent, setHoveredComponent] = useState<string | null>(null);
+  const [selectedComponent, setSelectedComponent] = useState<string>("codebase-index");
+
+  const components = [
+    {
+      id: "codebase-index",
+      name: "Codebase Index",
+      icon: Database,
+      color: "cyan",
+      x: 10,
+      y: 15,
+      description: "Semantic index of your entire codebase. Uses embeddings to enable intelligent code retrieval based on meaning, not just keywords.",
+      connections: ["context-engine", "retrieval"],
+    },
+    {
+      id: "context-engine",
+      name: "Context Engine",
+      icon: BrainCircuit,
+      color: "violet",
+      x: 50,
+      y: 15,
+      description: "Orchestrates context assembly. Combines rules, files, conversation history, and retrieved context into optimal prompts for the LLM.",
+      connections: ["llm-api"],
+    },
+    {
+      id: "llm-api",
+      name: "LLM API",
+      icon: Sparkles,
+      color: "amber",
+      x: 90,
+      y: 15,
+      description: "Connection to language models (Claude, GPT-4, etc.). Handles streaming, tool calls, and response parsing.",
+      connections: [],
+    },
+    {
+      id: "rules-system",
+      name: "Rules System",
+      icon: FileSearch,
+      color: "emerald",
+      x: 10,
+      y: 55,
+      description: "Project-specific instructions in .cursor/rules/. Automatically included based on file globs and alwaysApply settings.",
+      connections: ["context-engine"],
+    },
+    {
+      id: "retrieval",
+      name: "Semantic Retrieval",
+      icon: FolderTree,
+      color: "blue",
+      x: 30,
+      y: 35,
+      description: "Finds relevant code based on query semantics. Powers @codebase mentions and automatic context gathering.",
+      connections: ["context-engine"],
+    },
+    {
+      id: "editor-bridge",
+      name: "Editor Bridge",
+      icon: Code2,
+      color: "pink",
+      x: 50,
+      y: 55,
+      description: "Translates LLM outputs into editor operations—diffs, insertions, file creation. Handles the 'apply' workflow.",
+      connections: ["context-engine"],
+    },
+    {
+      id: "terminal-integration",
+      name: "Terminal Integration",
+      icon: Terminal,
+      color: "orange",
+      x: 70,
+      y: 55,
+      description: "Captures terminal output, enables command execution. Powers agent mode's ability to run and iterate on commands.",
+      connections: ["context-engine"],
+    },
+    {
+      id: "external-context",
+      name: "External Context",
+      icon: Globe,
+      color: "rose",
+      x: 90,
+      y: 55,
+      description: "@web searches, @docs documentation fetching, MCP tools. Brings external knowledge into the context window.",
+      connections: ["context-engine"],
+    },
+  ];
+
+  const colorClasses: Record<string, { bg: string; border: string; text: string }> = {
+    cyan: { bg: "bg-cyan-500/10", border: "border-cyan-500/30", text: "text-cyan-400" },
+    violet: { bg: "bg-violet-500/10", border: "border-violet-500/30", text: "text-violet-400" },
+    amber: { bg: "bg-amber-500/10", border: "border-amber-500/30", text: "text-amber-400" },
+    emerald: { bg: "bg-emerald-500/10", border: "border-emerald-500/30", text: "text-emerald-400" },
+    blue: { bg: "bg-blue-500/10", border: "border-blue-500/30", text: "text-blue-400" },
+    pink: { bg: "bg-pink-500/10", border: "border-pink-500/30", text: "text-pink-400" },
+    orange: { bg: "bg-orange-500/10", border: "border-orange-500/30", text: "text-orange-400" },
+    rose: { bg: "bg-rose-500/10", border: "border-rose-500/30", text: "text-rose-400" },
+  };
+
+  const selectedComp = components.find(c => c.id === selectedComponent);
+
+  return (
+    <div className="my-6 p-4 rounded-xl bg-card border border-border">
+      <div className="flex items-center justify-between mb-4">
+        <h4 className="font-medium text-foreground">Cursor Architecture</h4>
+        <span className="text-xs text-muted-foreground">Click components to explore</span>
+      </div>
+
+      {/* Diagram */}
+      <div className="relative aspect-[16/9] bg-muted/30 rounded-lg border border-border overflow-hidden mb-4">
+        {/* Connection lines - drawn first so they appear behind nodes */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none">
+          {components.map((comp) =>
+            comp.connections.map((targetId) => {
+              const target = components.find((c) => c.id === targetId);
+              if (!target) return null;
+              const isActive = selectedComponent === comp.id || selectedComponent === targetId;
+              return (
+                <line
+                  key={`${comp.id}-${targetId}`}
+                  x1={`${comp.x + 5}%`}
+                  y1={`${comp.y + 8}%`}
+                  x2={`${target.x + 5}%`}
+                  y2={`${target.y + 8}%`}
+                  stroke={isActive ? "var(--highlight)" : "hsl(var(--border))"}
+                  strokeWidth={isActive ? 2 : 1}
+                  strokeDasharray={isActive ? "none" : "4,4"}
+                  className="transition-all duration-200"
+                />
+              );
+            })
+          )}
+        </svg>
+
+        {/* Component nodes */}
+        {components.map((comp) => {
+          const Icon = comp.icon;
+          const colors = colorClasses[comp.color];
+          const isSelected = selectedComponent === comp.id;
+          const isHovered = hoveredComponent === comp.id;
+          const isConnected = selectedComp?.connections.includes(comp.id) ||
+            components.find(c => c.id === selectedComponent)?.id === comp.id ||
+            comp.connections.includes(selectedComponent);
+
+          return (
+            <button
+              key={comp.id}
+              className={`
+                absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200
+                p-2 rounded-lg border cursor-pointer
+                ${colors.bg} ${colors.border}
+                ${isSelected ? "ring-2 ring-[var(--highlight)] scale-110" : ""}
+                ${isHovered ? "scale-105" : ""}
+                ${!isSelected && !isConnected ? "opacity-50" : "opacity-100"}
+              `}
+              style={{ left: `${comp.x}%`, top: `${comp.y}%` }}
+              onClick={() => setSelectedComponent(comp.id)}
+              onMouseEnter={() => setHoveredComponent(comp.id)}
+              onMouseLeave={() => setHoveredComponent(null)}
+            >
+              <Icon className={`w-5 h-5 ${colors.text}`} />
+            </button>
+          );
+        })}
+
+        {/* Labels for nodes */}
+        {components.map((comp) => {
+          const colors = colorClasses[comp.color];
+          const isSelected = selectedComponent === comp.id;
+          const isConnected = selectedComp?.connections.includes(comp.id) ||
+            comp.connections.includes(selectedComponent);
+
+          return (
+            <div
+              key={`label-${comp.id}`}
+              className={`
+                absolute transform -translate-x-1/2 text-[10px] font-medium whitespace-nowrap transition-opacity duration-200
+                ${colors.text}
+                ${!isSelected && !isConnected ? "opacity-40" : "opacity-100"}
+              `}
+              style={{ left: `${comp.x}%`, top: `${comp.y + 15}%` }}
+            >
+              {comp.name}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Selected component details */}
+      {selectedComp && (
+        <div className={`p-4 rounded-lg ${colorClasses[selectedComp.color].bg} border ${colorClasses[selectedComp.color].border}`}>
+          <div className="flex items-center gap-2 mb-2">
+            <selectedComp.icon className={`w-5 h-5 ${colorClasses[selectedComp.color].text}`} />
+            <h5 className="font-medium text-foreground">{selectedComp.name}</h5>
+          </div>
+          <p className="text-sm text-muted-foreground m-0">
+            {selectedComp.description}
+          </p>
+          {selectedComp.connections.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-border/50">
+              <span className="text-xs text-muted-foreground">Connects to: </span>
+              {selectedComp.connections.map((connId, i) => {
+                const conn = components.find(c => c.id === connId);
+                return (
+                  <span key={connId}>
+                    <button
+                      onClick={() => setSelectedComponent(connId)}
+                      className="text-xs text-[var(--highlight)] hover:underline"
+                    >
+                      {conn?.name}
+                    </button>
+                    {i < selectedComp.connections.length - 1 && ", "}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function CursorIDESection() {
   return (
-    <section id="cursor-ide" className="scroll-mt-20">
+    <section id="cursor-architecture" className="scroll-mt-20">
       <SectionHeading
-        id="cursor-ide-heading"
-        title="Cursor IDE"
-        subtitle="AI-native IDE features, rules, and workflows"
+        id="cursor-architecture-heading"
+        title="Cursor Architecture"
+        subtitle="Understanding how AI-native IDEs work"
       />
       
       <div className="prose space-y-6">
@@ -24,227 +263,179 @@ export function CursorIDESection() {
           </p>
         </Callout>
 
-        {/* Cursor Architecture and Features */}
-        <h3 id="cursor-architecture" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
-          Cursor Architecture and Features
+        {/* Interactive Architecture Diagram */}
+        <h3 id="architecture-overview" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Architecture Overview
         </h3>
 
         <p className="text-muted-foreground">
-          Cursor is a VS Code fork with deep AI integration. It maintains <strong className="text-foreground">codebase 
-          indexing</strong> for context retrieval, supports <strong className="text-foreground">multiple 
-          interaction modes</strong>, and enables <strong className="text-foreground">project-level 
-          customization</strong> via rules.
+          Cursor is a VS Code fork with deep AI integration. At its core, it has a <strong className="text-foreground">context 
+          engine</strong> that assembles the right information from multiple sources and sends it to the LLM. 
+          Click the components below to explore how they work together.
         </p>
+
+        <CursorArchitectureDiagram />
+
+        {/* Core Features */}
+        <h3 id="core-features" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Core Features
+        </h3>
 
         <div className="grid gap-4 sm:grid-cols-2 mt-6">
           <Card variant="default">
             <CardContent>
-              <h4 className="font-medium text-foreground mb-2">Core Features</h4>
-              <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
-                <li>Codebase indexing and semantic search</li>
-                <li>Tab completion with context</li>
-                <li>Inline edits (Cmd+K)</li>
-                <li>Chat with codebase awareness</li>
-                <li>Composer for multi-file changes</li>
-              </ul>
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center shrink-0">
+                  <Database className="w-5 h-5 text-cyan-400" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-foreground mb-1">Codebase Indexing</h4>
+                  <p className="text-sm text-muted-foreground m-0">
+                    Semantic search across your entire project. Find code by meaning, not just text.
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
           
           <Card variant="default">
             <CardContent>
-              <h4 className="font-medium text-foreground mb-2">Integration Points</h4>
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0">
+                  <Zap className="w-5 h-5 text-violet-400" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-foreground mb-1">Tab Completion</h4>
+                  <p className="text-sm text-muted-foreground m-0">
+                    Context-aware autocomplete that understands your codebase patterns.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <Code2 className="w-5 h-5 text-amber-400" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-foreground mb-1">Inline Edits (Cmd+K)</h4>
+                  <p className="text-sm text-muted-foreground m-0">
+                    Quick edits in context. Select code, describe change, apply.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                  <GitBranch className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-foreground mb-1">Multi-File Composer</h4>
+                  <p className="text-sm text-muted-foreground m-0">
+                    Coordinated changes across multiple files in a single operation.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Integration Points */}
+        <h3 id="integration-points" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Integration Points
+        </h3>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-foreground mb-2">Context Sources</h4>
               <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
+                <li>@-mentioned files and folders</li>
                 <li>Terminal output as context</li>
-                <li>Git integration for diffs</li>
-                <li>Documentation fetching (@docs)</li>
-                <li>Web search integration (@web)</li>
+                <li>Git diffs and history</li>
+                <li>@docs documentation fetching</li>
+                <li>@web internet search results</li>
                 <li>Image/screenshot input</li>
               </ul>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Rules and Context Management */}
-        <h3 id="cursor-rules" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
-          Rules and Context Management
-        </h3>
-
-        <p className="text-muted-foreground">
-          Rules let you <strong className="text-foreground">customize AI behavior per-project</strong>. 
-          They&apos;re injected into the system prompt, ensuring consistent responses aligned with your 
-          codebase patterns, conventions, and constraints.
-        </p>
-
-        <CodeBlock
-          language="markdown"
-          filename=".cursor/rules/development.mdc"
-          code={`---
-description: Development guidelines for this project
-globs: ["src/**/*.ts", "src/**/*.tsx"]
-alwaysApply: false
----
-
-# Development Guidelines
-
-## Code Style
-- Use functional components with hooks
-- Prefer named exports over default exports
-- Use TypeScript strict mode
-
-## Patterns
-- State management: Zustand for global, useState for local
-- Data fetching: React Query with typed responses
-- Styling: Tailwind CSS with design tokens
-
-## Constraints
-- No \`any\` types without explicit comment
-- All API calls must have error handling
-- Components must have prop type definitions`}
-        />
-
-        <Callout variant="tip" title="Rules Organization">
-          <p className="m-0">
-            Use <code>.cursor/rules/</code> directory with multiple rule files. Scope rules with 
-            globs—frontend rules for React files, backend rules for API routes. This keeps context 
-            focused and relevant.
-          </p>
-        </Callout>
-
-        {/* Composer vs Chat vs Agent Mode */}
-        <h3 id="cursor-modes" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
-          Composer vs Chat vs Agent Mode
-        </h3>
-
-        <p className="text-muted-foreground">
-          Cursor offers multiple interaction modes, each suited for different tasks. Choosing the 
-          right mode <strong className="text-foreground">dramatically affects output quality</strong>.
-        </p>
-
-        <div className="grid gap-4 sm:grid-cols-3 mt-6">
-          <Card variant="default">
-            <CardContent>
-              <h4 className="font-medium text-foreground mb-2">Chat</h4>
-              <p className="text-sm text-muted-foreground m-0">
-                Questions, explanations, debugging discussion. Doesn&apos;t directly modify files.
-              </p>
-            </CardContent>
-          </Card>
           
           <Card variant="default">
             <CardContent>
-              <h4 className="font-medium text-foreground mb-2">Composer</h4>
-              <p className="text-sm text-muted-foreground m-0">
-                Multi-file edits in one go. Best for coordinated changes across files.
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card variant="default">
-            <CardContent>
-              <h4 className="font-medium text-foreground mb-2">Agent</h4>
-              <p className="text-sm text-muted-foreground m-0">
-                Autonomous execution. Can run commands, iterate on feedback, chain actions.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Background Agent (Web Version) */}
-        <h3 id="cursor-background-agent" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
-          Background Agent (Web Version)
-        </h3>
-
-        <p className="text-muted-foreground">
-          Cursor&apos;s background agent runs in the cloud, enabling <strong className="text-foreground">autonomous 
-          task execution</strong> while you work on other things. Tasks are queued, executed, and 
-          results are available for review when complete.
-        </p>
-
-        <Card variant="highlight" className="mt-6">
-          <CardContent>
-            <h4 className="font-medium text-foreground mb-2">Background Agent Workflow</h4>
-            <ol className="text-sm text-muted-foreground m-0 pl-4 list-decimal space-y-1">
-              <li>Define task with clear acceptance criteria</li>
-              <li>Submit to background agent queue</li>
-              <li>Agent works in isolated cloud environment</li>
-              <li>Agent can run tests, lint, iterate on failures</li>
-              <li>Results are presented for review when complete</li>
-              <li>Human approves, requests changes, or rejects</li>
-            </ol>
-          </CardContent>
-        </Card>
-
-        <Callout variant="warning" title="Task Scoping">
-          <p className="m-0">
-            Background agents work best with <strong>well-scoped tasks</strong>. &quot;Implement the 
-            entire authentication system&quot; is too broad. &quot;Add password reset endpoint matching 
-            this spec&quot; is appropriately scoped.
-          </p>
-        </Callout>
-
-        {/* Voice and Multi-modal Workflows */}
-        <h3 id="cursor-voice" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
-          Voice and Multi-modal Workflows
-        </h3>
-
-        <p className="text-muted-foreground">
-          Voice input enables <strong className="text-foreground">hands-free coding</strong>—speak 
-          your intent, let AI translate to code. Combined with image input (screenshots, diagrams), 
-          this creates multi-modal workflows that match how developers actually think.
-        </p>
-
-        <div className="grid gap-4 sm:grid-cols-2 mt-6">
-          <Card variant="default">
-            <CardContent>
-              <h4 className="font-medium text-foreground mb-2">Voice Use Cases</h4>
+              <h4 className="font-medium text-foreground mb-2">Output Actions</h4>
               <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
-                <li>Describing changes while hands are busy</li>
-                <li>Rubber duck debugging out loud</li>
-                <li>Quick notes and TODOs</li>
-                <li>Accessibility workflows</li>
-              </ul>
-            </CardContent>
-          </Card>
-          
-          <Card variant="default">
-            <CardContent>
-              <h4 className="font-medium text-foreground mb-2">Image Use Cases</h4>
-              <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
-                <li>Screenshot of desired UI to implement</li>
-                <li>Error message screenshots</li>
-                <li>Architecture diagrams for context</li>
-                <li>Design mockups to code</li>
+                <li>Code diffs with apply/reject</li>
+                <li>File creation and deletion</li>
+                <li>Terminal command execution</li>
+                <li>Multi-file coordinated edits</li>
+                <li>Checkpoints and rollback</li>
+                <li>Background task queuing</li>
               </ul>
             </CardContent>
           </Card>
         </div>
 
-        {/* Effective Usage Patterns */}
-        <h3 id="cursor-patterns" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
-          Effective Usage Patterns
+        <Callout variant="tip" title="Understanding Context Flow">
+          <p className="m-0">
+            The key insight is that Cursor (and similar tools) are <strong>context orchestrators</strong>. 
+            They don&apos;t just send your prompt to the LLM—they assemble a rich context from multiple sources: 
+            your rules, relevant code, conversation history, and external data. The quality of this assembly 
+            directly determines output quality.
+          </p>
+        </Callout>
+
+        {/* Data Flow Example */}
+        <h3 id="data-flow" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Data Flow Example
         </h3>
 
         <p className="text-muted-foreground">
-          Getting the most from Cursor (or any AI IDE) requires adapting your workflow. The best 
-          results come from <strong className="text-foreground">working with the tool&apos;s strengths</strong>, 
-          not fighting against its limitations.
+          When you ask &quot;Fix the bug in handleSubmit&quot;, here&apos;s what happens behind the scenes:
         </p>
 
-        <Card variant="highlight" className="mt-6">
-          <CardContent>
-            <h4 className="font-medium text-foreground mb-2">High-Impact Patterns</h4>
-            <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
-              <li><strong className="text-foreground">@-mention files:</strong> Explicitly include relevant files in context</li>
-              <li><strong className="text-foreground">Break big tasks:</strong> Multiple small prompts beat one huge prompt</li>
-              <li><strong className="text-foreground">Show examples:</strong> Include examples of desired patterns in rules</li>
-              <li><strong className="text-foreground">Use tests as specs:</strong> Let test files guide implementation</li>
-              <li><strong className="text-foreground">Review diffs carefully:</strong> AI makes plausible-looking mistakes</li>
-              <li><strong className="text-foreground">Iterate on feedback:</strong> Don&apos;t accept first output blindly</li>
-            </ul>
-          </CardContent>
-        </Card>
+        <div className="my-6 p-4 rounded-xl bg-card border border-border">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs font-medium shrink-0">1</div>
+              <div className="flex-1 p-2 rounded bg-muted/30 text-sm">
+                <span className="text-muted-foreground">Query the <span className="text-cyan-400">codebase index</span> for &quot;handleSubmit&quot; → finds relevant files</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-medium shrink-0">2</div>
+              <div className="flex-1 p-2 rounded bg-muted/30 text-sm">
+                <span className="text-muted-foreground">Load matching <span className="text-emerald-400">rules</span> based on file paths (e.g., React patterns)</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-violet-500/20 flex items-center justify-center text-violet-400 text-xs font-medium shrink-0">3</div>
+              <div className="flex-1 p-2 rounded bg-muted/30 text-sm">
+                <span className="text-muted-foreground"><span className="text-violet-400">Context engine</span> assembles: rules + code + current file + conversation</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 text-xs font-medium shrink-0">4</div>
+              <div className="flex-1 p-2 rounded bg-muted/30 text-sm">
+                <span className="text-muted-foreground">Send to <span className="text-amber-400">LLM</span> → receive streamed response with code changes</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-400 text-xs font-medium shrink-0">5</div>
+              <div className="flex-1 p-2 rounded bg-muted/30 text-sm">
+                <span className="text-muted-foreground"><span className="text-pink-400">Editor bridge</span> parses response, presents diff for your review</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        <Callout variant="tip" title="Alternative Tools">
+        <Callout variant="info" title="Alternative Tools">
           <p className="m-0">
             <strong>Windsurf:</strong> Similar AI-native IDE with different UX choices • 
             <strong>Zed:</strong> Performance-focused editor with AI features • 

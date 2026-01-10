@@ -1,4 +1,274 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
 import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import {
+  Play,
+  Pause,
+  RotateCcw,
+  CheckCircle,
+  Clock,
+  Loader2,
+  AlertCircle,
+  Terminal,
+  FileCode,
+  GitCommit,
+} from "lucide-react";
+
+// Task Monitor Simulation
+function TaskMonitor() {
+  const [isRunning, setIsRunning] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [logs, setLogs] = useState<Array<{ type: string; message: string; timestamp: string }>>([]);
+
+  const steps = [
+    { 
+      id: "clone", 
+      name: "Cloning Repository", 
+      status: "pending",
+      icon: GitCommit,
+      logs: [
+        "Cloning repository from main branch...",
+        "Setting up workspace environment...",
+        "Repository cloned successfully.",
+      ]
+    },
+    { 
+      id: "analyze", 
+      name: "Analyzing Task", 
+      status: "pending",
+      icon: FileCode,
+      logs: [
+        "Reading task specification...",
+        "Analyzing codebase structure...",
+        "Identifying affected files: UserCard.tsx, userService.ts",
+        "Planning implementation approach...",
+      ]
+    },
+    { 
+      id: "implement", 
+      name: "Implementing Changes", 
+      status: "pending",
+      icon: FileCode,
+      logs: [
+        "Editing src/components/UserCard.tsx...",
+        "Adding loading state to component...",
+        "Editing src/services/userService.ts...",
+        "Adding caching layer to API calls...",
+        "Creating src/components/UserCardSkeleton.tsx...",
+      ]
+    },
+    { 
+      id: "test", 
+      name: "Running Tests", 
+      status: "pending",
+      icon: Terminal,
+      logs: [
+        "$ npm test",
+        "Running test suite...",
+        "PASS src/components/UserCard.test.tsx",
+        "PASS src/services/userService.test.ts",
+        "All 12 tests passed.",
+      ]
+    },
+    { 
+      id: "lint", 
+      name: "Linting & Type Check", 
+      status: "pending",
+      icon: Terminal,
+      logs: [
+        "$ npm run lint",
+        "No ESLint warnings or errors.",
+        "$ npx tsc --noEmit",
+        "TypeScript compilation successful.",
+      ]
+    },
+    { 
+      id: "commit", 
+      name: "Creating Commit", 
+      status: "pending",
+      icon: GitCommit,
+      logs: [
+        "Staging changes...",
+        "Creating commit: 'Add loading state and caching to UserCard'",
+        "Commit created: abc123f",
+        "Ready for review.",
+      ]
+    },
+  ];
+
+  const getStepStatus = useCallback((index: number) => {
+    if (index < currentStep) return "complete";
+    if (index === currentStep && isRunning) return "running";
+    return "pending";
+  }, [currentStep, isRunning]);
+
+  useEffect(() => {
+    if (!isRunning) return;
+
+    const interval = setInterval(() => {
+      setCurrentStep((prev) => {
+        const nextStep = prev + 1;
+        if (nextStep >= steps.length) {
+          setIsRunning(false);
+          return prev;
+        }
+        return nextStep;
+      });
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isRunning, steps.length]);
+
+  useEffect(() => {
+    if (currentStep < steps.length) {
+      const step = steps[currentStep];
+      const newLogs = step.logs.map((log, i) => ({
+        type: log.startsWith("$") ? "command" : log.includes("PASS") ? "success" : "info",
+        message: log,
+        timestamp: new Date().toLocaleTimeString(),
+      }));
+      setLogs((prev) => [...prev, ...newLogs]);
+    }
+  }, [currentStep]);
+
+  const handleStart = () => {
+    setIsRunning(true);
+    setCurrentStep(0);
+    setLogs([]);
+  };
+
+  const handlePause = () => {
+    setIsRunning(false);
+  };
+
+  const handleReset = () => {
+    setIsRunning(false);
+    setCurrentStep(0);
+    setLogs([]);
+  };
+
+  const statusColors = {
+    pending: "text-muted-foreground",
+    running: "text-amber-400",
+    complete: "text-emerald-400",
+  };
+
+  const statusIcons = {
+    pending: Clock,
+    running: Loader2,
+    complete: CheckCircle,
+  };
+
+  return (
+    <div className="my-6 p-4 rounded-xl bg-card border border-border">
+      <div className="flex items-center justify-between mb-4">
+        <h4 className="font-medium text-foreground">Task Monitor Simulation</h4>
+        <div className="flex items-center gap-2">
+          {!isRunning && currentStep === 0 && (
+            <button
+              onClick={handleStart}
+              className="flex items-center gap-1 px-3 py-1.5 text-sm rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors"
+            >
+              <Play className="w-4 h-4" />
+              Start Task
+            </button>
+          )}
+          {isRunning && (
+            <button
+              onClick={handlePause}
+              className="flex items-center gap-1 px-3 py-1.5 text-sm rounded bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-colors"
+            >
+              <Pause className="w-4 h-4" />
+              Pause
+            </button>
+          )}
+          {(currentStep > 0 || !isRunning) && currentStep !== 0 && (
+            <button
+              onClick={handleReset}
+              className="flex items-center gap-1 px-3 py-1.5 text-sm rounded bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Reset
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Task Info */}
+      <div className="mb-4 p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+        <div className="text-xs text-cyan-400 uppercase tracking-wide mb-1">Task</div>
+        <p className="text-sm text-foreground m-0">Add loading state and caching to UserCard component</p>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Steps Progress */}
+        <div className="space-y-2">
+          {steps.map((step, index) => {
+            const status = getStepStatus(index);
+            const StatusIcon = statusIcons[status as keyof typeof statusIcons];
+            
+            return (
+              <div
+                key={step.id}
+                className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
+                  status === "running"
+                    ? "bg-amber-500/10 border-amber-500/30"
+                    : status === "complete"
+                    ? "bg-emerald-500/5 border-emerald-500/20"
+                    : "bg-muted/20 border-border"
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                  status === "running" ? "bg-amber-500/20" : status === "complete" ? "bg-emerald-500/20" : "bg-muted/40"
+                }`}>
+                  <step.icon className={`w-4 h-4 ${statusColors[status as keyof typeof statusColors]}`} />
+                </div>
+                <div className="flex-1">
+                  <div className={`text-sm font-medium ${statusColors[status as keyof typeof statusColors]}`}>
+                    {step.name}
+                  </div>
+                </div>
+                <StatusIcon className={`w-4 h-4 ${statusColors[status as keyof typeof statusColors]} ${status === "running" ? "animate-spin" : ""}`} />
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Log Output */}
+        <div className="rounded-lg bg-background border border-border overflow-hidden">
+          <div className="px-3 py-2 bg-muted/50 border-b border-border flex items-center gap-2">
+            <Terminal className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Agent Logs</span>
+          </div>
+          <div className="h-[280px] overflow-y-auto p-3 font-mono text-xs space-y-1">
+            {logs.length === 0 ? (
+              <div className="text-muted-foreground">Waiting to start...</div>
+            ) : (
+              logs.map((log, i) => (
+                <div key={i} className="flex gap-2">
+                  <span className="text-muted-foreground shrink-0">[{log.timestamp}]</span>
+                  <span className={
+                    log.type === "command" ? "text-cyan-400" : 
+                    log.type === "success" ? "text-emerald-400" : 
+                    "text-muted-foreground"
+                  }>
+                    {log.message}
+                  </span>
+                </div>
+              ))
+            )}
+            {currentStep >= steps.length && !isRunning && (
+              <div className="mt-2 pt-2 border-t border-border text-emerald-400">
+                ✓ Task completed successfully. Ready for review.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function BackgroundAgentsSection() {
   return (
@@ -26,7 +296,7 @@ export function BackgroundAgentsSection() {
         </Callout>
 
         {/* What are Background Coding Agents */}
-        <h3 id="what-are-background-agents" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+        <h3 id="background-overview" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
           What are Background Coding Agents
         </h3>
 
@@ -62,33 +332,20 @@ export function BackgroundAgentsSection() {
           </Card>
         </div>
 
-        {/* Cursor Background Agent */}
-        <h3 id="cursor-background" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
-          Cursor Background Agent (Web Version)
+        {/* Interactive Task Monitor */}
+        <h3 id="task-monitor" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Task Monitor
         </h3>
 
         <p className="text-muted-foreground">
-          Cursor&apos;s web-based background agent runs in <strong className="text-foreground">isolated 
-          cloud environments</strong>. Tasks are queued, executed with full access to tools (terminal, 
-          file system, tests), and results are presented for review.
+          Watch how a background agent progresses through a task. Each step runs autonomously, 
+          logging progress for later review.
         </p>
 
-        <Card variant="highlight" className="mt-6">
-          <CardContent>
-            <h4 className="font-medium text-foreground mb-2">Background Agent Capabilities</h4>
-            <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
-              <li>Clone and work on repository branches</li>
-              <li>Run tests and iterate on failures</li>
-              <li>Execute terminal commands</li>
-              <li>Make multi-file changes</li>
-              <li>Create commits with meaningful messages</li>
-              <li>Surface results for human review</li>
-            </ul>
-          </CardContent>
-        </Card>
+        <TaskMonitor />
 
         {/* Sandboxing and Security */}
-        <h3 id="agent-sandboxing" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+        <h3 id="sandboxing" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
           Sandboxing and Security
         </h3>
 
@@ -136,8 +393,8 @@ export function BackgroundAgentsSection() {
         </Callout>
 
         {/* Agent Capabilities and Limitations */}
-        <h3 id="agent-capabilities" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
-          Agent Capabilities and Limitations
+        <h3 id="capabilities-limits" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Capabilities and Limitations
         </h3>
 
         <p className="text-muted-foreground">
@@ -175,7 +432,7 @@ export function BackgroundAgentsSection() {
         </div>
 
         {/* When to Use Background vs Interactive */}
-        <h3 id="background-vs-interactive" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+        <h3 id="when-to-use" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
           When to Use Background vs Interactive
         </h3>
 

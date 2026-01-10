@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import {
   MessageSquare,
-  FileText,
   Code,
   GitPullRequest,
   CheckCircle,
@@ -25,7 +24,7 @@ function OrchestrationDemo() {
   const [currentStep, setCurrentStep] = useState(-1);
   const [logs, setLogs] = useState<Array<{ phase: string; message: string; icon: string }>>([]);
 
-  const phases = [
+  const phases = useMemo(() => [
     {
       id: "input",
       name: "Input",
@@ -86,7 +85,7 @@ function OrchestrationDemo() {
         { message: "Feedback loop complete", icon: "🔄", actor: "system" },
       ],
     },
-  ];
+  ], []);
 
   const colorClasses: Record<string, { bg: string; border: string; text: string }> = {
     cyan: { bg: "bg-cyan-500/10", border: "border-cyan-500/30", text: "text-cyan-400" },
@@ -96,12 +95,6 @@ function OrchestrationDemo() {
     pink: { bg: "bg-pink-500/10", border: "border-pink-500/30", text: "text-pink-400" },
   };
 
-  const actorIcons = {
-    customer: "👤",
-    ai: "🤖",
-    human: "👷",
-    system: "⚙️",
-  };
 
   const runDemo = useCallback(() => {
     setIsRunning(true);

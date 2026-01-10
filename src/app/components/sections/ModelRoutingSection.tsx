@@ -342,7 +342,7 @@ async function routeRequest(prompt: string): Promise<RouterDecision> {
         </h3>
 
         <p className="text-muted-foreground">
-          Here's the key insight: <strong className="text-foreground">routing doesn't require intelligence, 
+          Here&apos;s the key insight: <strong className="text-foreground">routing doesn&apos;t require intelligence, 
           it requires classification</strong>. A 1.5B or 2B parameter model can classify prompts into 
           categories with remarkable accuracy—and it can do so in milliseconds for fractions of a penny.
         </p>
@@ -356,7 +356,7 @@ async function routeRequest(prompt: string): Promise<RouterDecision> {
         </Callout>
 
         <p className="text-muted-foreground mt-4">
-          Small models excel at tasks that don't require deep reasoning or broad knowledge:
+          Small models excel at tasks that don&apos;t require deep reasoning or broad knowledge:
         </p>
 
         <div className="space-y-4 mt-4">
@@ -364,7 +364,7 @@ async function routeRequest(prompt: string): Promise<RouterDecision> {
             <CardContent>
               <h4 className="font-medium text-foreground mb-2">Intent Classification</h4>
               <p className="text-sm m-0">
-                "Is this a question, a command, a creative request, or something else?" A small model 
+                &quot;Is this a question, a command, a creative request, or something else?&quot; A small model 
                 can answer this instantly, enabling you to route to specialized handlers.
               </p>
             </CardContent>
@@ -374,9 +374,9 @@ async function routeRequest(prompt: string): Promise<RouterDecision> {
             <CardContent>
               <h4 className="font-medium text-foreground mb-2">Complexity Assessment</h4>
               <p className="text-sm m-0">
-                "Does this require multi-step reasoning or is it straightforward?" Small models can 
+                &quot;Does this require multi-step reasoning or is it straightforward?&quot; Small models can 
                 evaluate complexity and route simple tasks to cheap models, saving expensive calls 
-                for when they're truly needed.
+                for when they&apos;re truly needed.
               </p>
             </CardContent>
           </Card>
@@ -396,8 +396,8 @@ async function routeRequest(prompt: string): Promise<RouterDecision> {
               <h4 className="font-medium text-foreground mb-2">Fuzzy Logic & Extraction</h4>
               <p className="text-sm m-0">
                 Extract specific fields from messy text, normalize data formats, or make soft 
-                categorization decisions. Small models provide the "fuzzy logic" layer your 
-                deterministic code can't handle.
+                categorization decisions. Small models provide the &quot;fuzzy logic&quot; layer your 
+                deterministic code can&apos;t handle.
               </p>
             </CardContent>
           </Card>
@@ -459,7 +459,7 @@ function routeByKeywords(prompt: string): string {
 }
 
 // Works for simple cases, but misses nuance:
-// "Tell me a story about debugging" → code-model? creative-model?`}
+// &quot;Tell me a story about debugging&quot; → code-model? creative-model?`}
         />
 
         <h4 className="text-lg font-medium mt-6 mb-3">2. Embedding-Based Routing</h4>
@@ -678,8 +678,8 @@ llm_providers:
                 </a>
               </h4>
               <p className="text-sm m-0 mb-2">
-                OpenRouter's "auto" mode automatically selects models based on prompt analysis. 
-                A hosted solution if you don't want to run your own router.
+                OpenRouter&apos;s &quot;auto&quot; mode automatically selects models based on prompt analysis. 
+                A hosted solution if you don&apos;t want to run your own router.
               </p>
             </CardContent>
           </Card>
@@ -719,7 +719,7 @@ llm_providers:
         </h3>
 
         <p className="text-muted-foreground">
-          Here's a practical example of building your own routing proxy that combines multiple strategies:
+          Here&apos;s a practical example of building your own routing proxy that combines multiple strategies:
         </p>
 
         <CodeBlock

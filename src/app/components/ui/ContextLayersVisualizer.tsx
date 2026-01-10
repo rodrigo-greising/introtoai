@@ -116,7 +116,6 @@ export function ContextLayersVisualizer({ className }: ContextLayersVisualizerPr
         <div className="relative">
           {layers.map((layer, index) => {
             const colors = cacheStatusColors[layer.cacheStatus];
-            const isFirst = index === 0;
             const isLast = index === layers.length - 1;
             
             return (

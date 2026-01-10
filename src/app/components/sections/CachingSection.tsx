@@ -166,9 +166,8 @@ function checkCacheMatch(newPrompt: Token[], cache: CacheEntry[]): CacheResult {
               </span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {changedRequest2.map((part, index) => {
+              {changedRequest2.map((part) => {
                 const isCached = matched.includes(part.id);
-                const isAfterBreak = !isCached && matched.length > 0 && index >= matched.length;
                 const wasCacheBroken = selectedChange === part.id;
 
                 return (
@@ -261,7 +260,7 @@ export function CachingSection() {
       <div className="prose space-y-6">
         <p className="text-lg text-muted-foreground leading-relaxed">
           Remember that LLMs are <strong className="text-foreground">stateless functions</strong>? 
-          Every call rebuilds the model's internal state from scratch. <strong className="text-foreground">Prompt 
+          Every call rebuilds the model&apos;s internal state from scratch. <strong className="text-foreground">Prompt 
           caching</strong> lets providers skip this expensive work when your prompts share identical prefixes.
         </p>
 
@@ -302,7 +301,7 @@ export function CachingSection() {
               <h4 className="font-medium text-foreground mb-2">1. Minimum Token Threshold</h4>
               <p className="text-sm text-muted-foreground m-0">
                 Caching typically turns on automatically for prompts <strong className="text-emerald-500">1,024 tokens or longer</strong>. 
-                Below this threshold, the overhead of caching isn't worth it.
+                Below this threshold, the overhead of caching isn&apos;t worth it.
               </p>
             </CardContent>
           </Card>
@@ -311,7 +310,7 @@ export function CachingSection() {
             <CardContent>
               <h4 className="font-medium text-foreground mb-2">2. Exact Prefix Matches Only</h4>
               <p className="text-sm text-muted-foreground m-0">
-                Cache hits are only possible when the new request's prompt starts with an <strong className="text-foreground">identical prefix</strong>—same 
+                Cache hits are only possible when the new request&apos;s prompt starts with an <strong className="text-foreground">identical prefix</strong>—same 
                 messages, same tool definitions, same images/settings, same structured-output schema, same ordering. 
                 Any change to earlier content <strong className="text-rose-400">breaks the match</strong>.
               </p>
@@ -322,8 +321,8 @@ export function CachingSection() {
             <CardContent>
               <h4 className="font-medium text-foreground mb-2">3. Prefix-Only Caching</h4>
               <p className="text-sm text-muted-foreground m-0">
-                The "new stuff" you append at the end (latest user message, any changed tool list, 
-                any changed image detail, etc.) <strong className="text-foreground">won't be cached for that request</strong>. 
+                The &quot;new stuff&quot; you append at the end (latest user message, any changed tool list, 
+                any changed image detail, etc.) <strong className="text-foreground">won&apos;t be cached for that request</strong>. 
                 Caching applies to the prefix that was already sent before.
               </p>
             </CardContent>
@@ -334,7 +333,7 @@ export function CachingSection() {
               <h4 className="font-medium text-foreground mb-2">4. Caches Expire</h4>
               <p className="text-sm text-muted-foreground m-0">
                 With typical in-memory caching policies, cached prefixes persist for <strong className="text-foreground">5–10 minutes 
-                of inactivity</strong> (sometimes up to ~1 hour). If you pause longer, you'll get a cache miss 
+                of inactivity</strong> (sometimes up to ~1 hour). If you pause longer, you&apos;ll get a cache miss 
                 and pay full price again.
               </p>
             </CardContent>
@@ -361,13 +360,13 @@ export function CachingSection() {
           <strong className="text-foreground"> cacheable prefix</strong>.
         </p>
 
-        <Callout variant="important" title='Not "Everything Is Cached"'>
+        <Callout variant="important" title='Not &quot;Everything Is Cached&quot;'>
           <p className="mb-2">
-            A growing conversation tends to benefit from caching, but it's not as simple as 
-            "all prior messages are always cached":
+            A growing conversation tends to benefit from caching, but it&apos;s not as simple as 
+            &quot;all prior messages are always cached&quot;:
           </p>
           <ul className="space-y-1 text-sm m-0 pl-4 list-disc">
-            <li>The latest user message (the "new stuff") is always processed fresh</li>
+            <li>The latest user message (the &quot;new stuff&quot;) is always processed fresh</li>
             <li>If you modify the system prompt, inject a new tool schema, or reorder messages, you lose the cache</li>
             <li>Long pauses (lunch break, overnight) will cause cache expiration</li>
             <li>Different API routes or high request volumes can cause cache misses</li>
@@ -546,7 +545,7 @@ async function goodApproach(userQuery: string, docs: string[]) {
           <p className="m-0">
             All providers expose cache metrics in their responses. Monitor <code className="text-xs bg-muted px-1 py-0.5 rounded">cached_tokens</code>, 
             <code className="text-xs bg-muted px-1 py-0.5 rounded">cache_read_input_tokens</code>, or equivalent fields. If your cache hit rate 
-            is low, revisit your prompt structure—something in your "stable" prefix is probably varying.
+            is low, revisit your prompt structure—something in your &quot;stable&quot; prefix is probably varying.
           </p>
         </Callout>
       </div>

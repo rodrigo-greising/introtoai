@@ -7,7 +7,6 @@ import {
   Zap,
   TrendingDown,
   Calculator,
-  BarChart2,
 } from "lucide-react";
 
 // Interactive Budget Calculator
@@ -18,14 +17,14 @@ function BudgetCalculator() {
   const [selectedModel, setSelectedModel] = useState("claude-3-5-sonnet");
   const [cacheHitRate, setCacheHitRate] = useState(30);
 
-  const models = [
+  const models = useMemo(() => [
     { id: "claude-3-5-sonnet", name: "Claude 3.5 Sonnet", inputCost: 3, outputCost: 15, cacheCost: 0.3 },
     { id: "claude-3-5-haiku", name: "Claude 3.5 Haiku", inputCost: 0.25, outputCost: 1.25, cacheCost: 0.03 },
     { id: "gpt-4o", name: "GPT-4o", inputCost: 2.5, outputCost: 10, cacheCost: 1.25 },
     { id: "gpt-4o-mini", name: "GPT-4o Mini", inputCost: 0.15, outputCost: 0.6, cacheCost: 0.075 },
     { id: "gemini-1.5-pro", name: "Gemini 1.5 Pro", inputCost: 1.25, outputCost: 5, cacheCost: 0.3125 },
     { id: "gemini-1.5-flash", name: "Gemini 1.5 Flash", inputCost: 0.075, outputCost: 0.3, cacheCost: 0.01875 },
-  ];
+  ], []);
 
   const calculations = useMemo(() => {
     const model = models.find(m => m.id === selectedModel)!;

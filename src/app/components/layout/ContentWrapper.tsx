@@ -5,10 +5,10 @@ import { ReactNode } from "react";
 
 interface ContentWrapperProps {
   children: ReactNode;
-  isSidebarOpen: boolean;
+  isSidebarOpen?: boolean;
 }
 
-export function ContentWrapper({ children, isSidebarOpen }: ContentWrapperProps) {
+export function ContentWrapper({ children }: ContentWrapperProps) {
   return (
     <main
       className={cn(

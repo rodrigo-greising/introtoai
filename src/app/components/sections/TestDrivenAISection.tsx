@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
 import { InteractiveWrapper } from "@/app/components/visualizations/core";
@@ -22,14 +22,6 @@ type TDDPhase = "idle" | "red" | "green-attempt" | "green-fail" | "green-pass" |
 function RedGreenAnimation() {
   const [phase, setPhase] = useState<TDDPhase>("idle");
   const [iteration, setIteration] = useState(0);
-
-  const phases: { phase: TDDPhase; label: string; description: string; actor: "human" | "ai" | "both" }[] = [
-    { phase: "red", label: "RED", description: "Human writes failing test", actor: "human" },
-    { phase: "green-attempt", label: "GREEN", description: "AI attempts implementation...", actor: "ai" },
-    { phase: "green-fail", label: "GREEN", description: "Test still fails. AI iterates...", actor: "ai" },
-    { phase: "green-pass", label: "GREEN", description: "Test passes!", actor: "ai" },
-    { phase: "refactor", label: "REFACTOR", description: "Both review and clean up", actor: "both" },
-  ];
 
   const runCycle = () => {
     setPhase("idle");
@@ -56,7 +48,6 @@ function RedGreenAnimation() {
     return "text-muted-foreground bg-muted/30 border-border";
   };
 
-  const currentPhaseInfo = phases.find(p => phase.startsWith(p.phase.split("-")[0]));
 
   return (
     <div className="space-y-4">

@@ -352,7 +352,7 @@ export function AgenticLoopSection() {
               <Brain className="w-5 h-5 text-violet-400 mb-2" />
               <h4 className="font-medium text-foreground mb-1">Reasoning</h4>
               <p className="text-sm text-muted-foreground m-0">
-                The model's chain-of-thought—visible in assistant messages
+                The model&apos;s chain-of-thought—visible in assistant messages
               </p>
             </CardContent>
           </Card>
@@ -438,7 +438,7 @@ export function AgenticLoopSection() {
             <CardContent>
               <h4 className="font-medium text-foreground mb-2">Stream Intermediate Steps</h4>
               <p className="text-sm text-muted-foreground m-0">
-                Users get anxious waiting for long operations. Stream the model's thinking 
+                Users get anxious waiting for long operations. Stream the model&apos;s thinking 
                 and tool calls to show progress.
               </p>
             </CardContent>
@@ -449,7 +449,7 @@ export function AgenticLoopSection() {
               <h4 className="font-medium text-foreground mb-2">Log Everything</h4>
               <p className="text-sm text-muted-foreground m-0">
                 Agentic systems are hard to debug. Log every iteration: context, tool calls, 
-                results, and decisions. You'll thank yourself later.
+                results, and decisions. You&apos;ll thank yourself later.
               </p>
             </CardContent>
           </Card>
@@ -458,8 +458,8 @@ export function AgenticLoopSection() {
             <CardContent>
               <h4 className="font-medium text-foreground mb-2">Consider ReAct Prompting</h4>
               <p className="text-sm text-muted-foreground m-0">
-                The ReAct pattern makes the loop explicit in the prompt: "Thought: ... 
-                Action: ... Observation: ..." This can improve reliability.
+                The ReAct pattern makes the loop explicit in the prompt: &quot;Thought: ... 
+                Action: ... Observation: ...&quot; This can improve reliability.
               </p>
             </CardContent>
           </Card>
@@ -468,7 +468,7 @@ export function AgenticLoopSection() {
         <Callout variant="tip" title="Coming Up: Workflows vs Agents">
           <p>
             Not every task needs a free-form loop. Sometimes a <strong>deterministic workflow</strong> is 
-            better than an autonomous agent. In the next section, we'll compare these approaches 
+            better than an autonomous agent. In the next section, we&apos;ll compare these approaches 
             and when to use each.
           </p>
         </Callout>

@@ -176,7 +176,9 @@ alwaysApply: true
                 <FileText className="w-3 h-3" />
                 {rule.name}
                 {rule.alwaysApply && (
-                  <Globe className="w-3 h-3 text-amber-400 ml-auto" title="Always Applied" />
+                  <span className="ml-auto" title="Always Applied">
+                    <Globe className="w-3 h-3 text-amber-400" />
+                  </span>
                 )}
               </button>
             ))}

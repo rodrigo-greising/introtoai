@@ -270,7 +270,7 @@ function LearningRoadmap() {
       {/* Hint when nothing selected */}
       {!selectedPart && (
         <p className="text-center text-sm text-muted-foreground">
-          Click on any part to see what you'll learn
+          Click on any part to see what you&apos;ll learn
         </p>
       )}
     </div>
@@ -300,7 +300,7 @@ export function IntroSection() {
         <Callout variant="tip" title="Who This Is For">
           <p>
             Engineers who already know how to code and want to understand how to
-            use LLMs as a tool, not a crutch. We'll cover mental models, practical
+            use LLMs as a tool, not a crutch. We&apos;ll cover mental models, practical
             patterns, and real engineering considerations.
           </p>
         </Callout>
@@ -313,7 +313,7 @@ export function IntroSection() {
         <p className="text-muted-foreground mb-6">
           This guide is organized into <strong className="text-foreground">10 progressive parts</strong>. 
           Each part builds on the previous, taking you from foundational concepts to production-ready patterns. 
-          Explore the roadmap below to see what's ahead.
+          Explore the roadmap below to see what&apos;s ahead.
         </p>
 
         <InteractiveWrapper
@@ -332,7 +332,7 @@ export function IntroSection() {
         </h3>
 
         <p className="text-muted-foreground mb-4">
-          This guide assumes you're comfortable with:
+          This guide assumes you&apos;re comfortable with:
         </p>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -378,7 +378,7 @@ export function IntroSection() {
         <h3 className="text-xl font-semibold mt-10 mb-4">The Core Insight</h3>
 
         <p className="text-muted-foreground">
-          The key to using AI effectively isn't better prompts—it's better <em>context</em>.
+          The key to using AI effectively isn&apos;t better prompts—it&apos;s better <em>context</em>.
           An LLM is a function that transforms context into output:
         </p>
 
@@ -395,8 +395,8 @@ type LLM = (context: Context) => Promise<Output>;
 
         <Callout variant="important">
           <p>
-            Throughout this guide, we'll return to this mental model. When something
-            isn't working, the question is always: "What context is missing or misleading?"
+            Throughout this guide, we&apos;ll return to this mental model. When something
+            isn&apos;t working, the question is always: &quot;What context is missing or misleading?&quot;
           </p>
         </Callout>
 
@@ -418,8 +418,8 @@ type LLM = (context: Context) => Promise<Output>;
             <CardContent>
               <h4 className="font-medium text-foreground mb-2">👁️ View Code</h4>
               <p className="text-sm text-muted-foreground m-0">
-                Interactive elements have a "View Code" button showing the core logic.
-                This isn't the full implementation—it's simplified, educational code
+                Interactive elements have a &quot;View Code&quot; button showing the core logic.
+                This isn&apos;t the full implementation—it&apos;s simplified, educational code
                 that captures the essential algorithm.
               </p>
             </CardContent>
@@ -429,7 +429,7 @@ type LLM = (context: Context) => Promise<Output>;
             <CardContent>
               <h4 className="font-medium text-foreground mb-2">📖 Read Sequentially (First Time)</h4>
               <p className="text-sm text-muted-foreground m-0">
-                The parts build on each other. If you're new to AI engineering, start from
+                The parts build on each other. If you&apos;re new to AI engineering, start from
                 Part 1 and work through in order. Later, use the sidebar to jump to specific topics.
               </p>
             </CardContent>

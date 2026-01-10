@@ -1,7 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { Menu, Sparkles, Github, Moon, Sun } from "lucide-react";
+import { Menu, Sparkles, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,

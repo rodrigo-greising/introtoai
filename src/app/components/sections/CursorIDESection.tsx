@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { 
   Code2, 
   Database, 
   FileSearch, 
-  MessageSquare, 
   Terminal, 
   Zap,
   BrainCircuit,

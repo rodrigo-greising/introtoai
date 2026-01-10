@@ -666,7 +666,6 @@ export function EmbeddingVisualizer({ className }: EmbeddingVisualizerProps) {
                   style={{
                     backgroundColor: color,
                     boxShadow: (isHighlighted || isNewWord) ? `0 0 ${isNewWord ? '20px' : '12px'} ${color}` : "none",
-                    ringColor: color,
                     transform: isHighlighted && !isNewWord ? 'scale(1.2)' : 'scale(1)',
                   }}
                 />

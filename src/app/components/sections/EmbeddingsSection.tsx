@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 import { SectionHeading, Card, CardContent, Callout, EmbeddingVisualizer } from "@/app/components/ui";
 import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
 import { ArrowRight, Layers, Search, Database, Sparkles } from "lucide-react";
@@ -247,7 +246,7 @@ export function EmbeddingsSection() {
 
       <div className="prose space-y-6">
         <p className="text-lg text-muted-foreground leading-relaxed">
-          Embeddings are the foundation of modern AI's ability to understand meaning. They transform 
+          Embeddings are the foundation of modern AI&apos;s ability to understand meaning. They transform 
           text (or images, audio, anything) into <strong className="text-foreground">dense vectors</strong>—lists 
           of numbers that capture semantic meaning in a way computers can process.
         </p>
@@ -267,7 +266,7 @@ export function EmbeddingsSection() {
 
         <p className="text-muted-foreground">
           An embedding is a <strong className="text-foreground">learned representation</strong>—a 
-          neural network's way of encoding the "meaning" of something into numbers. When trained 
+          neural network&apos;s way of encoding the &quot;meaning&quot; of something into numbers. When trained 
           on large amounts of data, these representations capture rich semantic information:
         </p>
 
@@ -275,7 +274,7 @@ export function EmbeddingsSection() {
           <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
             <div className="flex-1 p-4 rounded-lg bg-muted/30">
               <div className="text-sm text-muted-foreground mb-2">Text Input</div>
-              <div className="text-lg font-medium text-foreground">"The cat sat on the mat"</div>
+              <div className="text-lg font-medium text-foreground">&quot;The cat sat on the mat&quot;</div>
             </div>
             <ArrowRight className="w-6 h-6 text-cyan-400 shrink-0 rotate-90 sm:rotate-0" />
             <div className="flex-1 p-4 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
@@ -292,8 +291,8 @@ export function EmbeddingsSection() {
 
         <p className="text-muted-foreground">
           The magic is in how these vectors are arranged: <strong className="text-foreground">semantically 
-          similar items end up close together</strong> in this high-dimensional space. "Cat" and "kitten" 
-          will be near each other; "cat" and "algorithm" will be far apart.
+          similar items end up close together</strong> in this high-dimensional space. &quot;Cat&quot; and &quot;kitten&quot; 
+          will be near each other; &quot;cat&quot; and &quot;algorithm&quot; will be far apart.
         </p>
 
         <div className="grid gap-4 sm:grid-cols-2 mt-6">
@@ -355,8 +354,8 @@ export function EmbeddingsSection() {
 
         <Callout variant="tip" title="Why Cosine Similarity?">
           <p>
-            Cosine similarity is preferred for embeddings because it's <strong>magnitude-invariant</strong>. 
-            Two vectors pointing in the same direction are "similar" regardless of their length. This 
+            Cosine similarity is preferred for embeddings because it&apos;s <strong>magnitude-invariant</strong>. 
+            Two vectors pointing in the same direction are &quot;similar&quot; regardless of their length. This 
             makes it robust for comparing text of different lengths.
           </p>
         </Callout>
@@ -432,8 +431,8 @@ export function EmbeddingsSection() {
             <div>
               <h4 className="font-medium text-cyan-400">Semantic Search</h4>
               <p className="text-sm text-muted-foreground mt-1">
-                Find documents by meaning, not just keywords. "How do I fix authentication?" matches 
-                docs about "login issues" even if they don't share words.
+                Find documents by meaning, not just keywords. &quot;How do I fix authentication?&quot; matches 
+                docs about &quot;login issues&quot; even if they don&apos;t share words.
               </p>
             </div>
           </div>
@@ -443,7 +442,7 @@ export function EmbeddingsSection() {
             <div>
               <h4 className="font-medium text-violet-400">RAG (Retrieval-Augmented Generation)</h4>
               <p className="text-sm text-muted-foreground mt-1">
-                Embed your documents, embed the user's query, find the most similar chunks, 
+                Embed your documents, embed the user&apos;s query, find the most similar chunks, 
                 inject them into the LLM context. Covered in detail in Part 4.
               </p>
             </div>
@@ -465,7 +464,7 @@ export function EmbeddingsSection() {
             <div>
               <h4 className="font-medium text-amber-400">Recommendations</h4>
               <p className="text-sm text-muted-foreground mt-1">
-                "Users who liked X also liked Y"—but based on semantic similarity of content, 
+                &quot;Users who liked X also liked Y&quot;—but based on semantic similarity of content, 
                 not just collaborative filtering.
               </p>
             </div>
@@ -474,8 +473,8 @@ export function EmbeddingsSection() {
 
         <Callout variant="tip" title="Coming Up: RAG">
           <p>
-            In Part 4 (Knowledge & Retrieval), we'll build on embeddings to create full RAG systems. 
-            You'll see how to index documents, perform similarity search at scale, and inject 
+            In Part 4 (Knowledge & Retrieval), we&apos;ll build on embeddings to create full RAG systems. 
+            You&apos;ll see how to index documents, perform similarity search at scale, and inject 
             retrieved context into LLM prompts.
           </p>
         </Callout>

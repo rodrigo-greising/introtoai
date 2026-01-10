@@ -253,8 +253,8 @@ export function ContextPrinciplesSection() {
 
         <Callout variant="tip" title="The Core Philosophy">
           <p>
-            Every token in your context should <strong>earn its place</strong>. Ask: "Does 
-            this information help the model complete the task?" If not, it's noise that 
+            Every token in your context should <strong>earn its place</strong>. Ask: &quot;Does 
+            this information help the model complete the task?&quot; If not, it&apos;s noise that 
             costs money and potentially harms output quality.
           </p>
         </Callout>
@@ -267,7 +267,7 @@ export function ContextPrinciplesSection() {
         <p className="text-muted-foreground">
           The most important principle: <strong className="text-foreground">maximize the signal-to-noise 
           ratio</strong> of your context. High-signal content directly helps the task; noise is 
-          anything that doesn't contribute—or worse, distracts.
+          anything that doesn&apos;t contribute—or worse, distracts.
         </p>
 
         <InteractiveWrapper
@@ -313,7 +313,7 @@ export function ContextPrinciplesSection() {
         </h3>
 
         <p className="text-muted-foreground">
-          LLMs can't read your mind. Information you think is "obvious" may not be obvious 
+          LLMs can&apos;t read your mind. Information you think is &quot;obvious&quot; may not be obvious 
           to the model. <strong className="text-foreground">State things explicitly</strong>—even 
           if it feels redundant.
         </p>
@@ -345,7 +345,7 @@ const prompt = \`
 
         <Callout variant="important">
           <p>
-            The "Lost in the Middle" effect: research shows LLMs pay less attention to content 
+            The &quot;Lost in the Middle&quot; effect: research shows LLMs pay less attention to content 
             in the middle of long contexts. Put the most critical information at the <strong>beginning</strong> or 
             <strong>end</strong> of your prompt.
           </p>
@@ -357,7 +357,7 @@ const prompt = \`
         </h3>
 
         <p className="text-muted-foreground">
-          Don't try to do everything in one giant context. <strong className="text-foreground">Break 
+          Don&apos;t try to do everything in one giant context. <strong className="text-foreground">Break 
           complex tasks into focused sub-tasks</strong>, each with its own minimal, targeted context.
         </p>
 
@@ -380,7 +380,7 @@ const prompt = \`
         </div>
 
         <p className="text-muted-foreground">
-          This principle connects to orchestration patterns we'll cover in Part 5. The key insight: 
+          This principle connects to orchestration patterns we&apos;ll cover in Part 5. The key insight: 
           <strong className="text-foreground"> smaller, focused contexts often outperform larger, 
           all-inclusive ones</strong>—both in quality and cost.
         </p>
@@ -400,7 +400,7 @@ const prompt = \`
               <h4 className="font-medium text-foreground mb-2">Recency Bias</h4>
               <p className="text-sm text-muted-foreground m-0">
                 Models tend to give more weight to recent tokens. Put your most important 
-                instructions near the end, just before the user's message.
+                instructions near the end, just before the user&apos;s message.
               </p>
             </CardContent>
           </Card>
@@ -409,7 +409,7 @@ const prompt = \`
             <CardContent>
               <h4 className="font-medium text-foreground mb-2">Primacy Effect</h4>
               <p className="text-sm text-muted-foreground m-0">
-                The system prompt at the beginning sets the "identity" and often receives 
+                The system prompt at the beginning sets the &quot;identity&quot; and often receives 
                 strong attention. Use it to establish core behaviors and constraints.
               </p>
             </CardContent>
@@ -456,7 +456,7 @@ You are a code review assistant. Be concise but thorough.
 
         <Callout variant="tip" title="Coming Up: Layered Architecture">
           <p>
-            In the next section, we'll apply these principles to build a <strong>layered 
+            In the next section, we&apos;ll apply these principles to build a <strong>layered 
             context architecture</strong>—a practical framework for organizing context 
             from static system prompts to dynamic user messages.
           </p>

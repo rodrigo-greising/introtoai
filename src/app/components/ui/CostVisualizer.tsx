@@ -148,8 +148,6 @@ export function CostVisualizer({ className }: CostVisualizerProps) {
     title,
     valueLabel,
     costLabel,
-    currentValue,
-    currentCost,
   }: {
     data: typeof graphData;
     maxValue: number;
@@ -565,7 +563,6 @@ export function CostVisualizer({ className }: CostVisualizerProps) {
               d={`${graphData
                 .map((point, i) => {
                   const x = (point.n / MAX_TURNS) * 200;
-                  const yBottom = 100 - (point.outputCost / maxTotalCost) * 100;
                   const yTop = 100 - (point.totalCost / maxTotalCost) * 100;
                   return `${i === 0 ? "M" : "L"} ${x} ${yTop}`;
                 })
@@ -658,7 +655,7 @@ export function CostVisualizer({ className }: CostVisualizerProps) {
         <p>
           With naive chat history, each turn resends the system prompt plus <em>all</em> previous messages.
           With your settings ({systemPromptTokens} system + {userMessageTokens} user + {assistantMessageTokens} assistant tokens), 
-          after {chatLength} turns you've sent <strong className="text-[var(--highlight)]">{costs.inputTokens.toLocaleString()} input tokens</strong>.
+          after {chatLength} turns you&apos;ve sent <strong className="text-[var(--highlight)]">{costs.inputTokens.toLocaleString()} input tokens</strong>.
         </p>
         <p className="font-mono text-xs text-muted-foreground/80">
           Each turn k costs: system + k×user + (k-1)×assistant tokens as input

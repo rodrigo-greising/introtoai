@@ -6,7 +6,6 @@ import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/com
 import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
 import { 
   GripVertical, 
-  Plus, 
   Trash2, 
   Zap, 
   Lock, 
@@ -328,7 +327,7 @@ function buildContext(layers: ContextLayer[]): string {
         <div className="p-4 rounded-lg bg-muted/30 border border-border">
           <div className="text-xs text-muted-foreground mb-2">Context Structure</div>
           <div className="h-6 rounded-full overflow-hidden flex">
-            {layers.map((layer, index) => {
+            {layers.map((layer) => {
               const width = (layer.tokens / totalTokens) * 100;
               const colors = {
                 static: "bg-cyan-500",
@@ -384,7 +383,7 @@ export function LayeredContextSection() {
         <p className="text-lg text-muted-foreground leading-relaxed">
           The layered context architecture is a practical framework for organizing context from 
           <strong className="text-foreground"> stable system prompts to variable user messages</strong>. 
-          This ordering isn't arbitrary—it simultaneously optimizes for cache efficiency and attention allocation.
+          This ordering isn&apos;t arbitrary—it simultaneously optimizes for cache efficiency and attention allocation.
         </p>
 
         <Callout variant="tip" title="The Core Principle">
@@ -483,7 +482,7 @@ export function LayeredContextSection() {
                 <div>
                   <h4 className="font-medium text-rose-400 mb-1">Layer 5: Current Request</h4>
                   <p className="text-sm text-muted-foreground m-0">
-                    The user's message this instant. Changes every call—always at the end.
+                    The user&apos;s message this instant. Changes every call—always at the end.
                   </p>
                 </div>
               </div>
@@ -518,7 +517,7 @@ export function LayeredContextSection() {
         </h3>
 
         <p className="text-muted-foreground">
-          The system prompt is your Layer 1—the foundation of your context. It sets the model's 
+          The system prompt is your Layer 1—the foundation of your context. It sets the model&apos;s 
           <strong className="text-foreground"> identity, constraints, and core behaviors</strong>.
         </p>
 
@@ -563,7 +562,7 @@ Output format:
         </h3>
 
         <p className="text-muted-foreground">
-          Understanding what's static vs. dynamic helps you maximize cache efficiency:
+          Understanding what&apos;s static vs. dynamic helps you maximize cache efficiency:
         </p>
 
         <div className="grid gap-4 sm:grid-cols-2 mt-4">
@@ -639,7 +638,7 @@ async function buildContext(request: Request) {
 
         <Callout variant="tip" title="Attention Benefits Too">
           <p>
-            This ordering also optimizes for the "Lost in the Middle" effect. Your critical 
+            This ordering also optimizes for the &quot;Lost in the Middle&quot; effect. Your critical 
             instructions are at the <strong>start</strong> (primacy effect), and the current 
             request is at the <strong>end</strong> (recency effect)—both high-attention positions.
           </p>

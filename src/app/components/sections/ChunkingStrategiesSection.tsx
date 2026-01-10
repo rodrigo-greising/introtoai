@@ -28,25 +28,6 @@ interface ChunkDisplay {
 function ChunkingComparisonVisualizer() {
   const [activeStrategy, setActiveStrategy] = useState<ChunkingStrategy>("fixed");
 
-  const sampleText = `Introduction to Machine Learning
-
-Machine learning is a subset of artificial intelligence that enables systems to learn from data. Unlike traditional programming where rules are explicitly coded, ML systems discover patterns automatically.
-
-Key Concepts
-
-There are three main types of machine learning:
-1. Supervised Learning - Learning from labeled examples
-2. Unsupervised Learning - Finding patterns in unlabeled data
-3. Reinforcement Learning - Learning through trial and error
-
-Supervised Learning Details
-
-In supervised learning, the model is trained on input-output pairs. Common algorithms include linear regression, decision trees, and neural networks. The goal is to learn a mapping function from inputs to outputs.
-
-Unsupervised Learning Details
-
-Unsupervised learning finds hidden structure in data without labels. Clustering algorithms group similar items together, while dimensionality reduction techniques compress high-dimensional data.`;
-
   const strategies: Record<ChunkingStrategy, {
     name: string;
     icon: React.ReactNode;

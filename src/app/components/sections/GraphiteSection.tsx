@@ -6,7 +6,6 @@ import {
   GitBranch,
   GitMerge,
   CheckCircle,
-  Clock,
   MessageSquare,
   ArrowUp,
   ArrowDown,
@@ -107,7 +106,7 @@ function StackVisualizer() {
             <span className="text-sm font-medium text-emerald-400">main</span>
           </div>
 
-          {stack.map((pr, index) => {
+          {stack.map((pr) => {
             const isMerged = mergedPRs.includes(pr.number);
             const status = isMerged ? "merged" : pr.status;
             const colors = statusColors[status as keyof typeof statusColors];

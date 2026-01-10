@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { SectionHeading, Card, CardContent, Callout, CodeBlock, CostVisualizer } from "@/app/components/ui";
 import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
-import { Play, RotateCcw, Plus, Trash2, ArrowRight } from "lucide-react";
+import { Play, RotateCcw, ArrowRight } from "lucide-react";
 
 // =============================================================================
 // Stateless Function Demo
@@ -287,7 +287,7 @@ export function MentalModelSection() {
       <div className="prose space-y-6">
         <p className="text-lg text-muted-foreground leading-relaxed">
           The most important shift in thinking: <strong className="text-foreground">an LLM is 
-          not a conversation partner</strong>. It's a stateless function that takes input and 
+          not a conversation partner</strong>. It&apos;s a stateless function that takes input and 
           produces output. Every call is independent. There is no memory, no continuity, 
           no understanding that persists.
         </p>
@@ -298,7 +298,7 @@ export function MentalModelSection() {
         </h3>
 
         <p className="text-muted-foreground mb-4">
-          Try this interactive demo. Have a "conversation" and watch what actually happens
+          Try this interactive demo. Have a &quot;conversation&quot; and watch what actually happens
           behind the scenes—every message you see is re-sent with each API call.
         </p>
 
@@ -376,9 +376,9 @@ const response3 = await callLLM("Hello" + response1 + "How are you?" + response2
         <h3 id="practical-implications" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Practical Implications</h3>
 
         <p className="text-muted-foreground mb-6">
-          The simplest way to build a "chat" with an LLM is to accumulate messages and send 
-          the entire history each turn. This isn't wrong—it's often the first implementation 
-          you'd write, and for some use cases (short conversations, prototypes, simple assistants) 
+          The simplest way to build a &quot;chat&quot; with an LLM is to accumulate messages and send 
+          the entire history each turn. This isn&apos;t wrong—it&apos;s often the first implementation 
+          you&apos;d write, and for some use cases (short conversations, prototypes, simple assistants) 
           it works fine.
         </p>
 
@@ -397,7 +397,7 @@ const response3 = await callLLM("Hello" + response1 + "How are you?" + response2
         <CostVisualizer className="my-8" />
 
         <p className="text-muted-foreground mb-6">
-          Cost isn't the only concern. <strong className="text-foreground">Latency also scales with input size</strong>. 
+          Cost isn&apos;t the only concern. <strong className="text-foreground">Latency also scales with input size</strong>. 
           The time to first token (TTFT)—the delay before the model starts generating a response—increases 
           linearly with the number of input tokens. Each additional token adds approximately{" "}
           <a 
@@ -416,7 +416,7 @@ const response3 = await callLLM("Hello" + response1 + "How are you?" + response2
           >
             roughly double latency
           </a>
-          . This means longer conversations don't just 
+          . This means longer conversations don&apos;t just 
           cost more—they also feel slower to users, creating a compounding problem of both expense and poor 
           user experience.
         </p>
@@ -455,7 +455,7 @@ async function processRequest(request: Request) {
         <Callout variant="info" title="When to use each approach" className="mt-6">
           <p className="mb-2">
             <strong>Simple chat history</strong> is fine when: conversations are short (&lt;10 turns), 
-            you're prototyping, or cost isn't a concern.
+            you&apos;re prototyping, or cost isn&apos;t a concern.
           </p>
           <p>
             <strong>Self-contained context</strong> is better when: building production features, 

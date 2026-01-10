@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
 import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
@@ -43,7 +43,7 @@ function ANNSearchVisualizer() {
     { id: 3, center: { x: 320, y: 180 }, color: "emerald" },
   ];
 
-  const points: Point[] = [
+  const points: Point[] = useMemo(() => [
     // Cluster 0 (cyan)
     { id: "p1", x: 60, y: 70, label: "doc_1", inCluster: 0 },
     { id: "p2", x: 90, y: 60, label: "doc_2", inCluster: 0 },
@@ -64,7 +64,7 @@ function ANNSearchVisualizer() {
     { id: "p14", x: 310, y: 170, label: "doc_14", inCluster: 3 },
     { id: "p15", x: 330, y: 190, label: "doc_15", inCluster: 3 },
     { id: "p16", x: 340, y: 165, label: "doc_16", inCluster: 3 },
-  ];
+  ], []);
 
   const runSearch = useCallback(() => {
     setSearchPhase("idle");
@@ -98,7 +98,7 @@ function ANNSearchVisualizer() {
       setSearchPhase("complete");
       setResultPoints(new Set(["p10", "p11", "p13"])); // Top 3 closest
     }, 2500);
-  }, []);
+  }, [points]);
 
   const reset = useCallback(() => {
     setSearchPhase("idle");
@@ -669,7 +669,7 @@ topK: 20,
                 <li>Use the same embedding model for ingest and query</li>
                 <li>Store chunk text in metadata for retrieval</li>
                 <li>Batch upserts for better throughput</li>
-                <li>Index metadata fields you'll filter on</li>
+                <li>Index metadata fields you&apos;ll filter on</li>
                 <li>Start with hosted solutions, self-host later</li>
               </ul>
             </CardContent>

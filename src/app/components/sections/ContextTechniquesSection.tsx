@@ -13,7 +13,7 @@ export function ContextTechniquesSection() {
       <div className="prose space-y-6">
         <p className="text-lg text-muted-foreground leading-relaxed">
           The principles we covered establish <strong className="text-foreground">why</strong> context 
-          structure matters. Now let's dive into <strong className="text-foreground">how</strong>—the 
+          structure matters. Now let&apos;s dive into <strong className="text-foreground">how</strong>—the 
           practical techniques and code patterns that put those principles to work.
         </p>
 
@@ -23,7 +23,7 @@ export function ContextTechniquesSection() {
         </h3>
 
         <p className="text-muted-foreground">
-          The most powerful context pattern isn't about managing a single conversation—it's about 
+          The most powerful context pattern isn&apos;t about managing a single conversation—it&apos;s about 
           <strong className="text-foreground"> spawning focused sub-tasks with isolated context</strong>. 
           An orchestrator delegates, workers execute, and only results flow back.
         </p>
@@ -31,7 +31,7 @@ export function ContextTechniquesSection() {
         <Callout variant="tip" title="Why This Works">
           <p className="m-0">
             The orchestrator never sees the 47 tool calls the worker made exploring the codebase. 
-            It sees: <em>"Task: find auth bug. Result: fixed in auth/session.ts line 42."</em> This 
+            It sees: <em>&quot;Task: find auth bug. Result: fixed in auth/session.ts line 42.&quot;</em> This 
             is <strong>signal over noise</strong> applied at the architecture level.
           </p>
         </Callout>
@@ -41,7 +41,7 @@ export function ContextTechniquesSection() {
             <CardContent>
               <h4 className="font-medium text-cyan-400 mb-2">Parallel Delegation</h4>
               <p className="text-sm text-muted-foreground m-0">
-                Independent subtasks run simultaneously. "Research API options" and "audit current usage" 
+                Independent subtasks run simultaneously. &quot;Research API options&quot; and &quot;audit current usage&quot; 
                 can happen in parallel—each with clean, focused context.
               </p>
             </CardContent>
@@ -51,7 +51,7 @@ export function ContextTechniquesSection() {
             <CardContent>
               <h4 className="font-medium text-violet-400 mb-2">Serial Delegation</h4>
               <p className="text-sm text-muted-foreground m-0">
-                Dependent subtasks run in sequence. Worker 1's output becomes part of Worker 2's context. 
+                Dependent subtasks run in sequence. Worker 1&apos;s output becomes part of Worker 2&apos;s context. 
                 Each step gets exactly the context it needs from prior steps.
               </p>
             </CardContent>
@@ -81,7 +81,7 @@ export function ContextTechniquesSection() {
         <h4 className="text-lg font-medium mt-8 mb-4">Cost & Time Analysis: Parallel vs. Linear</h4>
         
         <p className="text-muted-foreground mb-4">
-          So what's the <strong className="text-foreground">actual benefit</strong> of orchestration patterns? 
+          So what&apos;s the <strong className="text-foreground">actual benefit</strong> of orchestration patterns? 
           The comparison below calculates the token counts from the scenarios above and shows what happens 
           when you execute them in parallel (with isolated context) versus linearly (with accumulated context).
         </p>

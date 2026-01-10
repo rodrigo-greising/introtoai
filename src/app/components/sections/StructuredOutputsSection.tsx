@@ -303,7 +303,7 @@ const task = response.choices[0].message.parsed;
               setTestOutput(e.target.value);
               setIsValid(null);
             }}
-            placeholder='{"title": "Test", "priority": 1}'
+            placeholder='{&quot;title&quot;: &quot;Test&quot;, &quot;priority&quot;: 1}'
             className="w-full h-24 px-3 py-2 rounded-lg bg-muted/50 border border-border text-sm font-mono focus:outline-none focus:ring-2 focus:ring-cyan-500/50 resize-none"
           />
           <div className="flex items-center gap-3">
@@ -363,9 +363,9 @@ export function StructuredOutputsSection() {
 
         <Callout variant="tip" title="Why This Matters">
           <p>
-            Without structured outputs, you're playing "parse the LLM output" roulette. With them, 
-            you get <strong>type-safe, validated data</strong> every time. No more "the model 
-            returned a string instead of a number" bugs.
+            Without structured outputs, you&apos;re playing &quot;parse the LLM output&quot; roulette. With them, 
+            you get <strong>type-safe, validated data</strong> every time. No more &quot;the model 
+            returned a string instead of a number&quot; bugs.
           </p>
         </Callout>
 
@@ -425,11 +425,11 @@ Not completed yet.`}
               <h4 className="font-medium text-amber-400 mb-2">JSON Mode</h4>
               <p className="text-sm text-muted-foreground mb-2">
                 Guarantees valid JSON, but not the structure. The model might return 
-                <code className="text-xs bg-muted px-1 rounded">{`{"foo": "bar"}`}</code> when you 
-                expected <code className="text-xs bg-muted px-1 rounded">{`{"title": "..."}`}</code>.
+                <code className="text-xs bg-muted px-1 rounded">{`{&quot;foo&quot;: &quot;bar&quot;}`}</code> when you 
+                expected <code className="text-xs bg-muted px-1 rounded">{`{&quot;title&quot;: &quot;...&quot;}`}</code>.
               </p>
               <div className="text-xs text-muted-foreground/70">
-                Use for: Simple cases, unstructured JSON, or when you'll validate manually
+                Use for: Simple cases, unstructured JSON, or when you&apos;ll validate manually
               </div>
             </CardContent>
           </Card>
@@ -538,7 +538,7 @@ console.log(event.attendees);  // string[]
             <CardContent>
               <h4 className="font-medium text-foreground mb-2">Use Enums When Possible</h4>
               <p className="text-sm text-muted-foreground m-0">
-                <code className="text-xs bg-muted px-1 rounded">z.enum(["low", "medium", "high"])</code> is 
+                <code className="text-xs bg-muted px-1 rounded">z.enum([&quot;low&quot;, &quot;medium&quot;, &quot;high&quot;])</code> is 
                 more reliable than <code className="text-xs bg-muted px-1 rounded">z.string()</code>. 
                 Constrain the output space wherever you can.
               </p>
@@ -560,7 +560,7 @@ console.log(event.attendees);  // string[]
         <Callout variant="tip" title="Coming Up: Tools">
           <p>
             Structured outputs are the foundation for <strong>tools and function calling</strong>. 
-            In the next section, we'll see how to combine schemas with tool definitions to let 
+            In the next section, we&apos;ll see how to combine schemas with tool definitions to let 
             LLMs take actions in the world.
           </p>
         </Callout>

@@ -10,7 +10,6 @@ import {
   ArrowRight, 
   Code, 
   CheckCircle,
-  AlertCircle,
   Zap,
 } from "lucide-react";
 
@@ -255,7 +254,7 @@ export function ToolsSection() {
 
         <Callout variant="tip" title="The Key Insight">
           <p>
-            The LLM doesn't execute tools directly. It <strong>outputs structured data</strong> describing 
+            The LLM doesn&apos;t execute tools directly. It <strong>outputs structured data</strong> describing 
             which function to call and with what arguments. <em>You</em> execute the function and 
             return the result to the model.
           </p>
@@ -434,7 +433,7 @@ const tools = [
               <h4 className="font-medium text-foreground mb-2">Write Clear Descriptions</h4>
               <p className="text-sm text-muted-foreground m-0">
                 The description tells the model <em>when</em> to use the tool. Be specific: 
-                "Search the product catalog by name or SKU" is better than "Search products."
+                &quot;Search the product catalog by name or SKU&quot; is better than &quot;Search products.&quot;
               </p>
             </CardContent>
           </Card>
@@ -464,7 +463,7 @@ const tools = [
           <p>
             Tools become truly powerful when combined with <strong>the agentic loop</strong>—a 
             pattern where the model iteratively calls tools, observes results, and decides 
-            what to do next. That's our next section.
+            what to do next. That&apos;s our next section.
           </p>
         </Callout>
       </div>

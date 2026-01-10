@@ -23,7 +23,7 @@ export function ContextEngineeringSection() {
             while middle content gets significantly less attention.
           </p>
           <p className="m-0">
-            This isn't a bug to work around—it's a fundamental property that shapes how we 
+            This isn&apos;t a bug to work around—it&apos;s a fundamental property that shapes how we 
             should structure context. Several of the principles below directly address this.
           </p>
         </Callout>
@@ -35,12 +35,12 @@ export function ContextEngineeringSection() {
 
         <p className="text-muted-foreground">
           Every token must <strong className="text-foreground">earn its place</strong>. The context 
-          window is finite and expensive—irrelevant information doesn't just waste tokens, it 
-          actively <em>dilutes</em> the model's attention and degrades output quality.
+          window is finite and expensive—irrelevant information doesn&apos;t just waste tokens, it 
+          actively <em>dilutes</em> the model&apos;s attention and degrades output quality.
         </p>
 
         <p className="text-muted-foreground">
-          The "Lost in the Middle" research shows that adding distractor content can <strong className="text-foreground">actively 
+          The &quot;Lost in the Middle&quot; research shows that adding distractor content can <strong className="text-foreground">actively 
           hurt performance</strong>, especially when that content lands in the middle of long contexts. 
           More tokens ≠ better results.
         </p>
@@ -50,8 +50,8 @@ export function ContextEngineeringSection() {
             <CardContent>
               <h4 className="font-medium text-rose-400 mb-2">❌ Low Signal Density</h4>
               <p className="text-sm text-muted-foreground m-0">
-                "Here's all the documentation we have, plus the full codebase, plus every 
-                conversation we've ever had, plus some examples that might be relevant..."
+                &quot;Here&apos;s all the documentation we have, plus the full codebase, plus every 
+                conversation we&apos;ve ever had, plus some examples that might be relevant...&quot;
               </p>
             </CardContent>
           </Card>
@@ -60,8 +60,8 @@ export function ContextEngineeringSection() {
             <CardContent>
               <h4 className="font-medium text-emerald-500 mb-2">✓ High Signal Density</h4>
               <p className="text-sm text-muted-foreground m-0">
-                "Here's the specific function signature, the error message, and the two 
-                most relevant code patterns from our codebase."
+                &quot;Here&apos;s the specific function signature, the error message, and the two 
+                most relevant code patterns from our codebase.&quot;
               </p>
             </CardContent>
           </Card>
@@ -69,8 +69,8 @@ export function ContextEngineeringSection() {
 
         <Callout variant="tip" title="The Core Question">
           <p className="m-0">
-            For every piece of context you include, ask: <strong>"Does this directly help 
-            the model complete this specific task?"</strong> If not, it's noise.
+            For every piece of context you include, ask: <strong>&quot;Does this directly help 
+            the model complete this specific task?&quot;</strong> If not, it&apos;s noise.
           </p>
         </Callout>
 
@@ -81,7 +81,7 @@ export function ContextEngineeringSection() {
 
         <p className="text-muted-foreground">
           Structure your context in <strong className="text-foreground">layers ordered by 
-          volatility</strong>—stable content first, volatile content last. This isn't arbitrary: 
+          volatility</strong>—stable content first, volatile content last. This isn&apos;t arbitrary: 
           it simultaneously optimizes for cache efficiency <em>and</em> attention allocation.
         </p>
 
@@ -90,7 +90,7 @@ export function ContextEngineeringSection() {
         <Callout variant="tip" title="Why This Ordering Works">
           <p className="mb-2">
             <strong>For caching:</strong> Stable prefixes enable cache reuse across requests. 
-            When Layers 1-3 don't change, providers can skip expensive recomputation.
+            When Layers 1-3 don&apos;t change, providers can skip expensive recomputation.
           </p>
           <p className="m-0">
             <strong>For attention:</strong> Critical instructions at the start get the 
@@ -102,7 +102,7 @@ export function ContextEngineeringSection() {
         <Callout variant="warning" title="Provider Variability">
           <p className="m-0">
             Cache behavior differs between providers—TTLs, explicit breakpoints, minimum 
-            token thresholds, and what qualifies as an "identical prefix" all vary. The 
+            token thresholds, and what qualifies as an &quot;identical prefix&quot; all vary. The 
             principle remains constant: <strong>stable tokens first = maximum cache opportunity</strong>.
           </p>
         </Callout>
@@ -113,7 +113,7 @@ export function ContextEngineeringSection() {
         </h3>
 
         <p className="text-muted-foreground">
-          Never assume the model "knows" or "remembers" anything. Every call is independent. 
+          Never assume the model &quot;knows&quot; or &quot;remembers&quot; anything. Every call is independent. 
           <strong className="text-foreground"> If something matters, it must be in the context 
           explicitly.</strong>
         </p>
@@ -121,8 +121,8 @@ export function ContextEngineeringSection() {
         <Callout variant="important" title="Tying Back to the Mental Model">
           <p className="m-0">
             Remember: an LLM is a <strong>stateless function</strong>. There is no persistent 
-            memory between calls. What feels like "memory" is actually the entire conversation 
-            being passed in the context each time. If you don't include it, it doesn't exist.
+            memory between calls. What feels like &quot;memory&quot; is actually the entire conversation 
+            being passed in the context each time. If you don&apos;t include it, it doesn&apos;t exist.
           </p>
         </Callout>
 
@@ -131,7 +131,7 @@ export function ContextEngineeringSection() {
         </p>
 
         <ul className="space-y-2 text-muted-foreground pl-4 list-disc">
-          <li><strong className="text-foreground">Role clarity:</strong> The model should always know what role it's playing</li>
+          <li><strong className="text-foreground">Role clarity:</strong> The model should always know what role it&apos;s playing</li>
           <li><strong className="text-foreground">Task specificity:</strong> Include the exact information needed for this particular task</li>
           <li><strong className="text-foreground">Format requirements:</strong> Explicitly state expected output format</li>
           <li><strong className="text-foreground">Relevant history:</strong> Include conversation history only if the task requires continuity</li>
@@ -143,7 +143,7 @@ export function ContextEngineeringSection() {
         </h3>
 
         <p className="text-muted-foreground">
-          Context isn't static—it must <strong className="text-foreground">evolve as work progresses</strong>. 
+          Context isn&apos;t static—it must <strong className="text-foreground">evolve as work progresses</strong>. 
           The principle: curate actively to preserve information density while respecting token limits.
         </p>
 
@@ -178,7 +178,7 @@ export function ContextEngineeringSection() {
 
         <p className="text-muted-foreground mt-6">
           When compression is needed, <strong className="text-foreground">compress the middle first</strong>. 
-          This aligns with the "Lost in the Middle" findings—middle content gets less attention anyway—and 
+          This aligns with the &quot;Lost in the Middle&quot; findings—middle content gets less attention anyway—and 
           preserves your cache-friendly stable prefix. Intelligent summaries beat naive truncation.
         </p>
 
@@ -203,7 +203,7 @@ export function ContextEngineeringSection() {
         <Callout variant="important" title="The Key Insight">
           <p className="m-0">
             A sub-agent with <strong>a fresh, focused context</strong> often outperforms a single overloaded 
-            context that's trying to do everything. Each delegated task gets exactly the context it needs—no 
+            context that&apos;s trying to do everything. Each delegated task gets exactly the context it needs—no 
             more, no less.
           </p>
         </Callout>
@@ -211,7 +211,7 @@ export function ContextEngineeringSection() {
         <p className="text-muted-foreground mt-4">
           Complex tasks benefit from <strong className="text-foreground">decomposition</strong>—breaking work 
           into focused subtasks, each with its own curated context. The key insight: <em>intermediate work 
-          doesn't need to pollute the main context</em>. Subtasks can explore, iterate, even fail—returning 
+          doesn&apos;t need to pollute the main context</em>. Subtasks can explore, iterate, even fail—returning 
           only the distilled result.
         </p>
 
@@ -231,7 +231,7 @@ export function ContextEngineeringSection() {
 
         <Callout variant="tip" title="Context Boundaries as Architecture">
           <p className="m-0">
-            Delegation creates <strong>natural context boundaries</strong>. Each subtask's context is isolated, 
+            Delegation creates <strong>natural context boundaries</strong>. Each subtask&apos;s context is isolated, 
             preventing cross-contamination. This is <em>separation of concerns</em> applied at the 
             instance level. See <a href="#orchestration-patterns" className="text-cyan-400 hover:underline">Orchestration Patterns</a> for 
             implementation approaches.
@@ -251,7 +251,7 @@ export function ContextEngineeringSection() {
         </p>
 
         <p className="text-muted-foreground">
-          This isn't just about readability—it's <strong className="text-foreground">control-plane 
+          This isn&apos;t just about readability—it&apos;s <strong className="text-foreground">control-plane 
           vs data-plane isolation</strong>:
         </p>
 
@@ -288,7 +288,7 @@ export function ContextEngineeringSection() {
             Clear separation prevents <strong>instruction injection attacks</strong> where 
             retrieved content or user input accidentally (or maliciously) overrides system 
             instructions. Use explicit delimiters—XML tags, markdown sections, or clear 
-            headers—to reinforce boundaries between what you control and what you don't.
+            headers—to reinforce boundaries between what you control and what you don&apos;t.
           </p>
         </Callout>
 

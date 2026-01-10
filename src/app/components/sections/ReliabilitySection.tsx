@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
 import {
   RefreshCw,
-  AlertTriangle,
   CheckCircle,
   XCircle,
   Shield,

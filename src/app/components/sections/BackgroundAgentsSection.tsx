@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import {
   Play,
@@ -9,7 +9,6 @@ import {
   CheckCircle,
   Clock,
   Loader2,
-  AlertCircle,
   Terminal,
   FileCode,
   GitCommit,
@@ -20,8 +19,9 @@ function TaskMonitor() {
   const [isRunning, setIsRunning] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [logs, setLogs] = useState<Array<{ type: string; message: string; timestamp: string }>>([]);
+  const processedStepsRef = useRef<Set<number>>(new Set());
 
-  const steps = [
+  const steps = useMemo(() => [
     { 
       id: "clone", 
       name: "Cloning Repository", 
@@ -95,7 +95,7 @@ function TaskMonitor() {
         "Ready for review.",
       ]
     },
-  ];
+  ], []);
 
   const getStepStatus = useCallback((index: number) => {
     if (index < currentStep) return "complete";
@@ -121,21 +121,23 @@ function TaskMonitor() {
   }, [isRunning, steps.length]);
 
   useEffect(() => {
-    if (currentStep < steps.length) {
+    if (currentStep < steps.length && !processedStepsRef.current.has(currentStep)) {
       const step = steps[currentStep];
-      const newLogs = step.logs.map((log, i) => ({
+      const newLogs = step.logs.map((log) => ({
         type: log.startsWith("$") ? "command" : log.includes("PASS") ? "success" : "info",
         message: log,
         timestamp: new Date().toLocaleTimeString(),
       }));
       setLogs((prev) => [...prev, ...newLogs]);
+      processedStepsRef.current.add(currentStep);
     }
-  }, [currentStep]);
+  }, [currentStep, steps]);
 
   const handleStart = () => {
     setIsRunning(true);
     setCurrentStep(0);
     setLogs([]);
+    processedStepsRef.current.clear();
   };
 
   const handlePause = () => {
@@ -146,6 +148,7 @@ function TaskMonitor() {
     setIsRunning(false);
     setCurrentStep(0);
     setLogs([]);
+    processedStepsRef.current.clear();
   };
 
   const statusColors = {

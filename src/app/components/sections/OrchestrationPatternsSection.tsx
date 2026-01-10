@@ -8,7 +8,6 @@ import {
   ArrowRight,
   GitBranch,
   Repeat,
-  Shuffle,
   Shield,
   Users,
   Zap,

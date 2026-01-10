@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
 import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
@@ -28,14 +28,13 @@ function TimelineComparisonVisualizer() {
   const [mode, setMode] = useState<"sequential" | "parallel">("sequential");
   const [isRunning, setIsRunning] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [maxTime, setMaxTime] = useState(0);
 
-  const tasks: Task[] = [
+  const tasks: Task[] = useMemo(() => [
     { id: "t1", label: "Fetch User Data", duration: 2 },
     { id: "t2", label: "Search Documents", duration: 3 },
     { id: "t3", label: "Analyze Context", duration: 2 },
     { id: "t4", label: "Generate Response", duration: 4 },
-  ];
+  ], []);
 
   // Calculate timeline based on mode
   const getTimeline = useCallback(() => {
@@ -60,7 +59,7 @@ function TimelineComparisonVisualizer() {
         { ...last, startTime: maxParallelEnd, endTime: maxParallelEnd + last.duration },
       ];
     }
-  }, [mode]);
+  }, [mode, tasks]);
 
   const timeline = getTimeline();
   const totalTime = Math.max(...timeline.map(t => t.endTime || 0));
@@ -69,7 +68,6 @@ function TimelineComparisonVisualizer() {
     setIsRunning(true);
     setCurrentTime(0);
     const total = Math.max(...timeline.map(t => t.endTime || 0));
-    setMaxTime(total);
 
     let time = 0;
     const interval = setInterval(() => {
@@ -136,7 +134,6 @@ async function parallelWithLimit(items: Item[], limit = 5) {
 }`;
 
   const timelineWidth = 300;
-  const taskHeight = 32;
   const timeScale = timelineWidth / totalTime;
 
   return (
@@ -200,7 +197,7 @@ async function parallelWithLimit(items: Item[], limit = 5) {
         {/* Timeline visualization */}
         <div className="p-4 rounded-lg bg-muted/20 border border-border">
           <div className="space-y-2">
-            {timeline.map((task, idx) => {
+            {timeline.map((task) => {
               const status = getTaskStatus(task);
               const left = (task.startTime || 0) * timeScale;
               const width = task.duration * timeScale;

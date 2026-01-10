@@ -371,7 +371,7 @@ function predictNextToken(context: string): TokenProbabilities {
               {predictions.map((pred, index) => (
                 <div key={pred.token} className="flex items-center gap-3">
                   <span className="text-sm font-mono text-cyan-400 w-20">
-                    "{pred.token}"
+                    &quot;{pred.token}&quot;
                   </span>
                   <div className="flex-1 h-6 bg-muted/30 rounded-full overflow-hidden">
                     <div
@@ -395,7 +395,7 @@ function predictNextToken(context: string): TokenProbabilities {
         )}
 
         <p className="text-xs text-muted-foreground">
-          Try: "Once upon a", "def calculate", or any text you like
+          Try: &quot;Once upon a&quot;, &quot;def calculate&quot;, or any text you like
         </p>
       </div>
     </ViewCodeToggle>
@@ -426,7 +426,7 @@ export function HowLLMsWorkSection() {
           <p>
             LLMs are trained in stages: first they learn to predict text (pre-training), then to follow 
             instructions (fine-tuning), then to optimize for human preferences (RLHF). The result is a 
-            statistical model that's remarkably good at generating useful text.
+            statistical model that&apos;s remarkably good at generating useful text.
           </p>
         </Callout>
 
@@ -492,7 +492,7 @@ export function HowLLMsWorkSection() {
         <Callout variant="important" title="It's Imitation, Not Understanding">
           <p>
             Pre-training is essentially <strong>sophisticated imitation learning</strong>. The model 
-            learns to produce text that looks like what humans write. This is powerful, but it's 
+            learns to produce text that looks like what humans write. This is powerful, but it&apos;s 
             statistical pattern matching—not genuine understanding or reasoning.
           </p>
         </Callout>
@@ -503,7 +503,7 @@ export function HowLLMsWorkSection() {
         </h3>
 
         <p className="text-muted-foreground">
-          Pre-training creates a powerful but undirected model—it can continue any text, but it doesn't 
+          Pre-training creates a powerful but undirected model—it can continue any text, but it doesn&apos;t 
           know what <em>you</em> want. Fine-tuning and RLHF teach it to be helpful:
         </p>
 
@@ -524,7 +524,7 @@ export function HowLLMsWorkSection() {
 
         <p className="text-muted-foreground">
           Something interesting happens at scale: capabilities <strong className="text-foreground">emerge</strong> that 
-          weren't explicitly programmed. Models trained on enough data start exhibiting:
+          weren&apos;t explicitly programmed. Models trained on enough data start exhibiting:
         </p>
 
         <div className="space-y-3 mt-4">
@@ -533,7 +533,7 @@ export function HowLLMsWorkSection() {
             <div>
               <h4 className="font-medium text-emerald-400">Chain-of-Thought Reasoning</h4>
               <p className="text-sm text-muted-foreground mt-1">
-                When prompted to "think step by step," models produce better answers by working through 
+                When prompted to &quot;think step by step,&quot; models produce better answers by working through 
                 problems explicitly. This pattern was learned from human reasoning in training data.
               </p>
             </div>
@@ -574,8 +574,8 @@ export function HowLLMsWorkSection() {
             <CardContent>
               <h4 className="font-medium text-foreground mb-2">Context Is Everything</h4>
               <p className="text-sm text-muted-foreground m-0">
-                The model generates based on what's in the context window. Better context → better output. 
-                This is why "context engineering" matters more than clever prompts.
+                The model generates based on what&apos;s in the context window. Better context → better output. 
+                This is why &quot;context engineering&quot; matters more than clever prompts.
               </p>
             </CardContent>
           </Card>
@@ -592,7 +592,7 @@ export function HowLLMsWorkSection() {
             <CardContent>
               <h4 className="font-medium text-foreground mb-2">Prompting Is Steering</h4>
               <p className="text-sm text-muted-foreground m-0">
-                Your prompt doesn't "tell" the model what to do—it steers the probability distribution 
+                Your prompt doesn&apos;t &quot;tell&quot; the model what to do—it steers the probability distribution 
                 toward certain types of outputs. Examples and format instructions help aim this steering.
               </p>
             </CardContent>
@@ -610,9 +610,9 @@ export function HowLLMsWorkSection() {
 
         <Callout variant="tip" title="The Bottom Line">
           <p>
-            LLMs are <strong>statistical text generators</strong> optimized to be helpful. They're incredibly 
+            LLMs are <strong>statistical text generators</strong> optimized to be helpful. They&apos;re incredibly 
             powerful when used with that understanding—and frustrating when you expect them to be something 
-            they're not. The rest of this guide builds on this foundation to help you get the most from them.
+            they&apos;re not. The rest of this guide builds on this foundation to help you get the most from them.
           </p>
         </Callout>
       </div>

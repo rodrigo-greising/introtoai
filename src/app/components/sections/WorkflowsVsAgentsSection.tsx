@@ -347,7 +347,7 @@ async function researchAgent(question: string): Promise<string> {
               <h4 className="font-medium text-violet-400 mb-2">✓ Use Agents When</h4>
               <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
                 <li>The task is open-ended or exploratory</li>
-                <li>You can't anticipate all paths</li>
+                <li>You can&apos;t anticipate all paths</li>
                 <li>Adaptability matters more than predictability</li>
                 <li>The user expects conversational interaction</li>
                 <li>Self-correction is valuable</li>
@@ -398,7 +398,7 @@ async function processCustomerRequest(request: Request): Promise<Response> {
         <Callout variant="tip" title="The Pragmatic Approach">
           <p>
             Start with workflows. Add agent capabilities only where you need them. A workflow 
-            with one agent step is often better than a pure agent that's hard to control.
+            with one agent step is often better than a pure agent that&apos;s hard to control.
           </p>
         </Callout>
 
@@ -447,7 +447,7 @@ async function processCustomerRequest(request: Request): Promise<Response> {
         <Callout variant="info" title="Coming Up: RAG">
           <p>
             With the foundations of structured outputs, tools, agentic loops, and workflow patterns 
-            established, we're ready to tackle <strong>RAG (Retrieval-Augmented Generation)</strong>—the 
+            established, we&apos;re ready to tackle <strong>RAG (Retrieval-Augmented Generation)</strong>—the 
             technique that grounds LLM responses in your own data.
           </p>
         </Callout>

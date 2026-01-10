@@ -1,6 +1,6 @@
 "use client";
 
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { 
   Code2, 
   Bot,

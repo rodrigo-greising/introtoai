@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
 import {
   Play,
@@ -8,7 +8,6 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
-  AlertCircle,
   Zap,
   ArrowRight,
 } from "lucide-react";
@@ -17,7 +16,7 @@ import {
 function PipelineVisualizer() {
   const [isRunning, setIsRunning] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const [currentStage, setCurrentStage] = useState(-1);
+  const [, setCurrentStage] = useState(-1);
   const [stageStatuses, setStageStatuses] = useState<Array<"pending" | "running" | "passed" | "failed">>([]);
   const [history, setHistory] = useState<Array<{ attempt: number; stages: string[]; fixed: string[] }>>([]);
 

@@ -214,7 +214,7 @@ export function SkillsProgressiveDiscoverySection() {
       
       <div className="prose space-y-6">
         <p className="text-lg text-muted-foreground leading-relaxed">
-          Building on the delegation principles we've covered, <strong className="text-foreground">Skills</strong> are 
+          Building on the delegation principles we&apos;ve covered, <strong className="text-foreground">Skills</strong> are 
           a powerful pattern for creating modular, reusable agent capabilities. Pioneered by Anthropic in Claude Code, 
           this approach treats specialized capabilities as <em>self-contained packages</em> that agents can discover 
           and load on demand.
@@ -223,7 +223,7 @@ export function SkillsProgressiveDiscoverySection() {
         <Callout variant="info" title="Why This Matters">
           <p className="m-0">
             Skills solve a fundamental tension in agent design: you want agents to be capable of many things, 
-            but you don't want to bloat every context with instructions for everything. Skills let you 
+            but you don&apos;t want to bloat every context with instructions for everything. Skills let you 
             <strong> have both</strong>—broad capability with focused context.
           </p>
         </Callout>
@@ -279,14 +279,14 @@ export function SkillsProgressiveDiscoverySection() {
         </h3>
 
         <p className="text-muted-foreground">
-          In Anthropic's agent skills standard, each skill is organized as a directory with a specific structure. 
+          In Anthropic&apos;s agent skills standard, each skill is organized as a directory with a specific structure. 
           The central component is a <code className="text-cyan-400">SKILL.md</code> file that serves as the 
-          skill's "contract"—defining what it does and how to use it.
+          skill&apos;s &quot;contract&quot;—defining what it does and how to use it.
         </p>
 
         <CodeBlock
           language="plaintext"
-          title="Skill Directory Structure"
+          filename="Skill Directory Structure"
           code={`skills/
 ├── code-review/
 │   ├── SKILL.md           # Purpose, capabilities, usage patterns
@@ -315,7 +315,7 @@ export function SkillsProgressiveDiscoverySection() {
 
         <CodeBlock
           language="markdown"
-          title="Example SKILL.md"
+          filename="Example SKILL.md"
           code={`# Code Review Skill
 
 ## Purpose
@@ -352,7 +352,7 @@ Structured review with:
 
         <Callout variant="tip" title="Skills are Composable">
           <p className="m-0">
-            Skills can reference other skills. A "Full PR Review" skill might compose 
+            Skills can reference other skills. A &quot;Full PR Review&quot; skill might compose 
             code-review, security-audit, and documentation-check skills together, 
             creating higher-level capabilities from atomic units.
           </p>
@@ -430,13 +430,13 @@ Structured review with:
           <p className="m-0">
             Progressive disclosure directly implements the <strong>Signal Over Noise</strong> principle. 
             Rather than front-loading all possible instructions, you maintain high information density 
-            by loading only what's relevant to the current task.
+            by loading only what&apos;s relevant to the current task.
           </p>
         </Callout>
 
         <CodeBlock
           language="typescript"
-          title="Progressive Disclosure Implementation"
+          filename="Progressive Disclosure Implementation"
           code={`interface SkillMetadata {
   id: string;
   name: string;
@@ -493,8 +493,8 @@ class SkillRegistry {
 
         <p className="text-muted-foreground">
           Skills naturally pair with <strong className="text-foreground">subagents</strong>—specialized AI 
-          instances that handle specific task types. When you delegate to a subagent, you're essentially 
-          saying: "Here's a focused task. Take this skill's context, do the work, and return the result."
+          instances that handle specific task types. When you delegate to a subagent, you&apos;re essentially 
+          saying: &quot;Here&apos;s a focused task. Take this skill&apos;s context, do the work, and return the result.&quot;
         </p>
 
         <p className="text-muted-foreground">
@@ -502,7 +502,7 @@ class SkillRegistry {
         </p>
 
         <ul className="space-y-2 text-muted-foreground pl-4 list-disc">
-          <li><strong className="text-foreground">Its own context window:</strong> Fresh, uncluttered by the main agent's conversation</li>
+          <li><strong className="text-foreground">Its own context window:</strong> Fresh, uncluttered by the main agent&apos;s conversation</li>
           <li><strong className="text-foreground">Custom system prompt:</strong> Tailored instructions from the skill definition</li>
           <li><strong className="text-foreground">Scoped tool access:</strong> Only the tools relevant to this specific task</li>
           <li><strong className="text-foreground">Defined output format:</strong> Structured results that the main agent can consume</li>
@@ -535,7 +535,7 @@ class SkillRegistry {
 
         <CodeBlock
           language="typescript"
-          title="Subagent Delegation Pattern"
+          filename="Subagent Delegation Pattern"
           code={`interface SubagentConfig {
   skill: Skill;
   task: string;
@@ -593,7 +593,7 @@ Include confidence levels and any caveats.
 
         <Callout variant="tip" title="Subagents Can Have Subagents">
           <p className="m-0">
-            Complex skills might spawn their own subagents. A "Full Code Review" skill might 
+            Complex skills might spawn their own subagents. A &quot;Full Code Review&quot; skill might 
             delegate to security-scan, performance-analysis, and style-check subagents in parallel, 
             then synthesize their results. This creates a <strong>hierarchical delegation</strong> pattern.
           </p>
@@ -625,7 +625,7 @@ Include confidence levels and any caveats.
             <CardContent>
               <h4 className="font-medium text-emerald-500 mb-2">🧹 Main Context Stays Clean</h4>
               <p className="text-sm text-muted-foreground m-0">
-                Intermediate work, exploration, and iteration happen in the subagent's context. 
+                Intermediate work, exploration, and iteration happen in the subagent&apos;s context. 
                 Only the final result returns to the main conversation.
               </p>
             </CardContent>
@@ -685,7 +685,7 @@ Include confidence levels and any caveats.
             <div className="flex items-center gap-3">
               <span className="text-rose-400">✗</span>
               <span className="text-muted-foreground">
-                <strong className="text-foreground">Quick lookups:</strong> Simple queries don't need full subagent overhead
+                <strong className="text-foreground">Quick lookups:</strong> Simple queries don&apos;t need full subagent overhead
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -724,7 +724,7 @@ Include confidence levels and any caveats.
 
         <p className="text-muted-foreground">
           A well-curated skill library becomes a <strong className="text-foreground">reusable asset</strong> 
-          across projects and teams. Here's how to approach building one:
+          across projects and teams. Here&apos;s how to approach building one:
         </p>
 
         <div className="space-y-4 mt-6">
@@ -743,7 +743,7 @@ Include confidence levels and any caveats.
               <h4 className="font-medium text-foreground mb-2">2. Define Clear Boundaries</h4>
               <p className="text-sm text-muted-foreground m-0">
                 Each skill should have a <strong>single, clear purpose</strong>. If you find yourself 
-                writing "this skill can do X, Y, and Z," consider splitting into multiple skills.
+                writing &quot;this skill can do X, Y, and Z,&quot; consider splitting into multiple skills.
               </p>
             </CardContent>
           </Card>
@@ -753,7 +753,7 @@ Include confidence levels and any caveats.
               <h4 className="font-medium text-foreground mb-2">3. Include Examples and Anti-patterns</h4>
               <p className="text-sm text-muted-foreground m-0">
                 Skills improve dramatically when they include concrete examples of good output 
-                <em> and</em> common mistakes to avoid. These become part of the skill's instructions.
+                <em> and</em> common mistakes to avoid. These become part of the skill&apos;s instructions.
               </p>
             </CardContent>
           </Card>
@@ -781,7 +781,7 @@ Include confidence levels and any caveats.
 
         <CodeBlock
           language="plaintext"
-          title="Example Skill Library Organization"
+          filename="Example Skill Library Organization"
           code={`skills/
 ├── core/                    # Fundamental capabilities
 │   ├── code-review/
@@ -819,7 +819,7 @@ Include confidence levels and any caveats.
 
         <Callout variant="info" title="Further Reading">
           <p className="m-0">
-            This pattern is actively evolving. Anthropic's <strong>Agent Skills Standard</strong> provides 
+            This pattern is actively evolving. Anthropic&apos;s <strong>Agent Skills Standard</strong> provides 
             the canonical reference for skill structure. As the ecosystem matures, expect more tooling 
             for skill discovery, composition, and sharing across agent frameworks.
           </p>

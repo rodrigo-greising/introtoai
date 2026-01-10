@@ -8,7 +8,6 @@ import {
   ChevronRight,
   ChevronDown,
   BookOpen,
-  Brain,
   Layers,
   Workflow,
   Shield,
@@ -259,7 +258,7 @@ export function Sidebar({
                         {/* Sub-sections */}
                         {hasSubSections && isExpanded && (
                           <div className="ml-4 space-y-0.5 border-l border-sidebar-border pl-2">
-                            {section.subSections.map((subSection) => {
+                            {(section.subSections ?? []).map((subSection) => {
                               const isSubActive = activeSection === subSection.id;
                               return (
                                 <button

@@ -5,10 +5,6 @@ import { cn } from "@/lib/utils";
 import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
 import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
-  User, 
-  Bot,
-  ArrowRight,
-  Shield,
   Pause,
   Play,
   RotateCcw,

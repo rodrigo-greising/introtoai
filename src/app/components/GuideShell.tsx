@@ -2,18 +2,57 @@
 
 import { useState, useCallback } from "react";
 import { Header, Sidebar, SidebarToggle, ContentWrapper } from "./layout";
-import { IntroSection, MentalModelSection, CachingSection, ContextEngineeringSection, ContextTechniquesSection, RAGFundamentalsSection, PlaceholderSection } from "./sections";
+import {
+  IntroSection,
+  MentalModelSection,
+  CachingSection,
+  ContextEngineeringSection,
+  ContextTechniquesSection,
+  RAGFundamentalsSection,
+  SkillsProgressiveDiscoverySection,
+  ModelRoutingSection,
+  PlaceholderSection,
+  // Agentic Methodology Sections
+  SpecDrivenDevSection,
+  TestDrivenAISection,
+  HarnessesSection,
+  CICDIterationSection,
+  ExternalControlSection,
+  // Tooling Deep-Dive Sections
+  CursorIDESection,
+  GraphiteSection,
+  LinearSection,
+  BackgroundAgentsSection,
+  E2EPipelineSection,
+} from "./sections";
 import { sections } from "@/app/data/sections";
 import { useActiveSection, scrollToSection } from "@/hooks/useActiveSection";
 
 // Map section IDs to their components
 const sectionComponents: Record<string, React.ComponentType> = {
+  // Foundations
   intro: IntroSection,
   "mental-model": MentalModelSection,
   "llm-caching": CachingSection,
   "context-engineering": ContextEngineeringSection,
   "context-techniques": ContextTechniquesSection,
+  // Retrieval
   "rag-fundamentals": RAGFundamentalsSection,
+  // Architecture
+  "skills-progressive-discovery": SkillsProgressiveDiscoverySection,
+  "model-routing": ModelRoutingSection,
+  // Workflow - Agentic Methodologies
+  "spec-driven-dev": SpecDrivenDevSection,
+  "test-driven-ai": TestDrivenAISection,
+  "harnesses-evaluation": HarnessesSection,
+  "cicd-iteration": CICDIterationSection,
+  "external-control": ExternalControlSection,
+  // Workflow - Tooling Deep-Dives
+  "cursor-ide": CursorIDESection,
+  "graphite-stacked-prs": GraphiteSection,
+  "linear-task-management": LinearSection,
+  "background-agents": BackgroundAgentsSection,
+  "e2e-agentic-pipeline": E2EPipelineSection,
 };
 
 export function GuideShell() {

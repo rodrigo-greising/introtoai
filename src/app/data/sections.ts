@@ -10,11 +10,17 @@
  * 3. Import and add to the sectionComponents map
  */
 
+export interface SubSection {
+  id: string;
+  title: string;
+}
+
 export interface Section {
   id: string;
   title: string;
   part: "foundations" | "retrieval" | "architecture" | "workflow" | "production";
   description?: string;
+  subSections?: SubSection[];
 }
 
 export const sections: Section[] = [
@@ -30,6 +36,38 @@ export const sections: Section[] = [
     title: "The Mental Model",
     part: "foundations",
     description: "LLM as a stateless function, not a chat",
+  },
+  {
+    id: "prompt-caching",
+    title: "Prompt Caching",
+    part: "foundations",
+    description: "How providers optimize the stateless function",
+    subSections: [
+      {
+        id: "what-this-means",
+        title: "What This Means for Context Engineering",
+      },
+      {
+        id: "provider-comparison",
+        title: "Provider Comparison",
+      },
+      {
+        id: "implementing",
+        title: "Implementing Cache-Friendly Prompts",
+      },
+      {
+        id: "break-even",
+        title: "Break-Even Analysis",
+      },
+      {
+        id: "where-caching-delivers",
+        title: "Where Caching Delivers Most Value",
+      },
+      {
+        id: "connection-to-mental-model",
+        title: "Connection to the Mental Model",
+      },
+    ],
   },
   {
     id: "context-engineering",
@@ -115,7 +153,7 @@ export const sections: Section[] = [
     id: "cost-optimization",
     title: "Cost Optimization",
     part: "production",
-    description: "Token budgeting, caching, model selection",
+    description: "Token budgeting, model selection, cost modeling",
   },
   {
     id: "reliability-patterns",

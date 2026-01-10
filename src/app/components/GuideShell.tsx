@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Header, Sidebar, SidebarToggle, ContentWrapper } from "./layout";
-import { IntroSection, MentalModelSection, PlaceholderSection } from "./sections";
+import { IntroSection, MentalModelSection, CachingSection, PlaceholderSection } from "./sections";
 import { sections } from "@/app/data/sections";
 import { useActiveSection, scrollToSection } from "@/hooks/useActiveSection";
 
@@ -10,17 +10,29 @@ import { useActiveSection, scrollToSection } from "@/hooks/useActiveSection";
 const sectionComponents: Record<string, React.ComponentType> = {
   intro: IntroSection,
   "mental-model": MentalModelSection,
+  "prompt-caching": CachingSection,
 };
 
 export function GuideShell() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
-  // Track active section via scroll
-  const sectionIds = sections.map((s) => s.id);
-  const activeSection = useActiveSection({ sectionIds, offset: 100 });
+  // Collect all section and sub-section IDs for tracking
+  const allSectionIds = sections.flatMap((s) => {
+    const ids = [s.id];
+    if (s.subSections) {
+      ids.push(...s.subSections.map((sub) => sub.id));
+    }
+    return ids;
+  });
+  
+  const activeSection = useActiveSection({ sectionIds: allSectionIds, offset: 100 });
 
   const handleSectionClick = useCallback((sectionId: string) => {
     scrollToSection(sectionId, 80);
+  }, []);
+
+  const handleSubSectionClick = useCallback((sectionId: string, subSectionId: string) => {
+    scrollToSection(subSectionId, 80);
   }, []);
 
   const toggleSidebar = useCallback(() => {
@@ -37,6 +49,7 @@ export function GuideShell() {
           activeSection={activeSection}
           sections={sections}
           onSectionClick={handleSectionClick}
+          onSubSectionClick={handleSubSectionClick}
           onClose={() => setSidebarOpen(false)}
         />
         

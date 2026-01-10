@@ -78,14 +78,6 @@ const response3 = await callLLM("Hello" + response1 + "How are you?" + response2
           </Card>
         </div>
 
-        <Callout variant="tip" title="The Stateless Principle">
-          <p>
-            Design AI features as if each call is the first and only call. If your feature 
-            works well with a single, well-crafted prompt, it will scale. If it requires 
-            multi-turn "conversations," you're accumulating technical debt.
-          </p>
-        </Callout>
-
         <h3 className="text-xl font-semibold mt-8 mb-4">Practical Implications</h3>
 
         <p className="text-muted-foreground mb-6">
@@ -108,6 +100,31 @@ const response3 = await callLLM("Hello" + response1 + "How are you?" + response2
         </p>
 
         <CostVisualizer className="my-8" />
+
+        <p className="text-muted-foreground mb-6">
+          Cost isn't the only concern. <strong className="text-foreground">Latency also scales with input size</strong>. 
+          The time to first token (TTFT)—the delay before the model starts generating a response—increases 
+          linearly with the number of input tokens. Each additional token adds approximately{" "}
+          <a 
+            href="https://www.glean.com/blog/glean-input-token-llm-latency" 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            0.24 milliseconds to TTFT
+          </a>
+          , and longer sequences require more prefill computation. For example, increasing input length 
+          from 2,000 to 125,000 tokens can{" "}
+          <a 
+            href="https://my.micron.com/about/blog/applications/ai/top-five-essential-context-window-concepts-in-large-language-models" 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            roughly double latency
+          </a>
+          . This means longer conversations don't just 
+          cost more—they also feel slower to users, creating a compounding problem of both expense and poor 
+          user experience.
+        </p>
 
         <h4 className="text-lg font-medium mt-8 mb-4">The Two Approaches</h4>
 

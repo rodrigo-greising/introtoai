@@ -19,6 +19,7 @@ interface SidebarProps {
   activeSection: string;
   sections: Section[];
   onSectionClick: (sectionId: string) => void;
+  onSubSectionClick?: (sectionId: string, subSectionId: string) => void;
   onClose: () => void;
 }
 
@@ -36,6 +37,7 @@ export function Sidebar({
   activeSection,
   sections,
   onSectionClick,
+  onSubSectionClick,
   onClose,
 }: SidebarProps) {
   // Group sections by part
@@ -61,6 +63,19 @@ export function Sidebar({
 
   const handleSectionClick = (sectionId: string) => {
     onSectionClick(sectionId);
+    // Close sidebar on mobile after selection
+    if (window.innerWidth < 1024) {
+      onClose();
+    }
+  };
+
+  const handleSubSectionClick = (sectionId: string, subSectionId: string) => {
+    if (onSubSectionClick) {
+      onSubSectionClick(sectionId, subSectionId);
+    } else {
+      // Fallback: scroll to sub-section
+      onSectionClick(subSectionId);
+    }
     // Close sidebar on mobile after selection
     if (window.innerWidth < 1024) {
       onClose();
@@ -102,26 +117,53 @@ export function Sidebar({
 
                   {/* Section links */}
                   {partSections.map((section) => {
-                    const isActive = activeSection === section.id;
+                    const isActive = activeSection === section.id || 
+                      (section.subSections && section.subSections.some(sub => activeSection === sub.id));
+                    const hasSubSections = section.subSections && section.subSections.length > 0;
+                    
                     return (
-                      <button
-                        key={section.id}
-                        onClick={() => handleSectionClick(section.id)}
-                        className={cn(
-                          "group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all",
-                          "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                          isActive && "nav-active font-medium"
-                        )}
-                      >
-                        <ChevronRight
+                      <div key={section.id} className="space-y-0.5">
+                        <button
+                          onClick={() => handleSectionClick(section.id)}
                           className={cn(
-                            "size-3 transition-transform",
-                            isActive && "text-[var(--highlight)]",
-                            "group-hover:translate-x-0.5"
+                            "group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all",
+                            "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                            isActive && "nav-active font-medium"
                           )}
-                        />
-                        <span className="truncate">{section.title}</span>
-                      </button>
+                        >
+                          <ChevronRight
+                            className={cn(
+                              "size-3 transition-transform",
+                              isActive && "text-[var(--highlight)]",
+                              "group-hover:translate-x-0.5"
+                            )}
+                          />
+                          <span className="truncate">{section.title}</span>
+                        </button>
+                        
+                        {/* Sub-sections */}
+                        {hasSubSections && (
+                          <div className="ml-4 space-y-0.5 border-l border-sidebar-border pl-2">
+                            {section.subSections.map((subSection) => {
+                              const isSubActive = activeSection === subSection.id;
+                              return (
+                                <button
+                                  key={subSection.id}
+                                  onClick={() => handleSubSectionClick(section.id, subSection.id)}
+                                  className={cn(
+                                    "group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs transition-all",
+                                    "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                    isSubActive && "nav-active font-medium text-[var(--highlight)]"
+                                  )}
+                                >
+                                  <span className="size-1.5 rounded-full bg-muted-foreground/40 group-hover:bg-muted-foreground/60" />
+                                  <span className="truncate">{subSection.title}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>

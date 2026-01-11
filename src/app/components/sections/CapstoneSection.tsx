@@ -18,10 +18,17 @@ import {
   DollarSign,
   Play,
   RotateCcw,
+  Layers,
+  GitBranch,
+  Settings,
+  Search,
+  Lock,
+  RefreshCw,
+  Bot,
 } from "lucide-react";
 
 // =============================================================================
-// D&D Assistant Architecture Visualization
+// Virtual Tabletop Architecture Visualization
 // =============================================================================
 
 interface ArchitectureNode {
@@ -31,25 +38,49 @@ interface ArchitectureNode {
   icon: React.ComponentType<{ className?: string }>;
   color: string;
   concepts: string[];
+  layer: "ingestion" | "storage" | "agents" | "control";
 }
 
 const architectureNodes: ArchitectureNode[] = [
+  // Ingestion Layer
   {
     id: "pdf-parser",
     name: "PDF Parser",
-    description: "Extract rules, monsters, spells from source books",
+    description: "Extract rules, monsters, spells from any rulebook system",
     icon: BookOpen,
     color: "cyan",
     concepts: ["Chunking Strategies", "Document Preprocessing"],
+    layer: "ingestion",
   },
   {
+    id: "schema-generator",
+    name: "Schema Generator",
+    description: "Dynamically create schemas for stat blocks, rules, entities",
+    icon: GitBranch,
+    color: "violet",
+    concepts: ["Structured Outputs", "Dynamic Schema", "Zod"],
+    layer: "ingestion",
+  },
+  // Storage Layer
+  {
     id: "vector-store",
-    name: "Vector Store",
-    description: "pgvector for rules, monsters, session history",
+    name: "Vector Store (pgvector)",
+    description: "Embeddings + SQL queries for rules, monsters, sessions",
     icon: Database,
     color: "emerald",
-    concepts: ["Embeddings", "RAG", "Vector Databases"],
+    concepts: ["Embeddings", "RAG", "Vector Databases", "Hybrid Search"],
+    layer: "storage",
   },
+  {
+    id: "entity-store",
+    name: "Entity Database",
+    description: "Structured storage for creatures, spells, items, NPCs",
+    icon: Layers,
+    color: "amber",
+    concepts: ["Data Structuring", "Ontology", "Relational Data"],
+    layer: "storage",
+  },
+  // Agent Layer
   {
     id: "orchestrator",
     name: "Orchestrator Agent",
@@ -57,6 +88,7 @@ const architectureNodes: ArchitectureNode[] = [
     icon: Sparkles,
     color: "violet",
     concepts: ["Model Routing", "Orchestration Patterns", "Task Decomposition"],
+    layer: "agents",
   },
   {
     id: "rules-agent",
@@ -65,126 +97,135 @@ const architectureNodes: ArchitectureNode[] = [
     icon: BookOpen,
     color: "amber",
     concepts: ["RAG Fundamentals", "Context Engineering", "Structured Outputs"],
+    layer: "agents",
   },
   {
     id: "monster-agent",
-    name: "Monster Agent",
+    name: "Creature Agent",
     description: "Retrieves and formats creature stat blocks",
     icon: Zap,
     color: "rose",
     concepts: ["Skills", "Dynamic Schema", "Parallel Processing"],
+    layer: "agents",
   },
   {
     id: "dm-agent",
-    name: "DM Assistant",
-    description: "Generates encounters, NPCs, plot hooks",
+    name: "GM Assistant",
+    description: "Generates encounters, NPCs, plot hooks, tactics",
     icon: Users,
     color: "sky",
     concepts: ["Agentic Loop", "Creative Generation", "Human-in-Loop"],
+    layer: "agents",
   },
   {
     id: "session-manager",
     name: "Session Manager",
-    description: "Tracks game state, player actions, history",
+    description: "Tracks game state, player actions, campaign history",
     icon: MessageSquare,
     color: "pink",
     concepts: ["Context Lifecycle", "Episodic Summarization", "Evolving Context"],
+    layer: "agents",
   },
+  // Control Layer
   {
     id: "guardrails",
-    name: "Safety & Permissions",
-    description: "Content filtering, player permissions",
+    name: "Permission System",
+    description: "GM-only tools, player content filtering, spoiler protection",
     icon: Shield,
     color: "orange",
     concepts: ["Guardrails", "RBAC", "External Control"],
+    layer: "control",
   },
 ];
 
 function ArchitectureVisualizer() {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
-  const [isRunning, setIsRunning] = useState(false);
-  const [activeFlow, setActiveFlow] = useState<string[]>([]);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [activeLayer, setActiveLayer] = useState<string | null>(null);
 
-  const flowSteps = [
-    { nodes: ["orchestrator"], message: "User: 'What's the AC of a Beholder?'" },
-    { nodes: ["orchestrator", "monster-agent"], message: "Routing to Monster Agent..." },
-    { nodes: ["monster-agent", "vector-store"], message: "Searching vector store for 'Beholder'..." },
-    { nodes: ["monster-agent"], message: "Formatting stat block with dynamic schema..." },
-    { nodes: ["guardrails", "monster-agent"], message: "Checking content permissions..." },
-    { nodes: ["orchestrator"], message: "Response: 'The Beholder has AC 18...'" },
+  const layers = [
+    { id: "ingestion", label: "Ingestion Layer", color: "cyan" },
+    { id: "storage", label: "Storage Layer", color: "emerald" },
+    { id: "agents", label: "Agent Layer", color: "violet" },
+    { id: "control", label: "Control Layer", color: "orange" },
   ];
-
-  const runDemo = () => {
-    setIsRunning(true);
-    setCurrentStep(0);
-    setActiveFlow([]);
-  };
-
-  // Auto-advance flow
-  useState(() => {
-    if (!isRunning) return;
-    if (currentStep >= flowSteps.length) {
-      setIsRunning(false);
-      return;
-    }
-    const timer = setTimeout(() => {
-      setActiveFlow(flowSteps[currentStep].nodes);
-      setCurrentStep(prev => prev + 1);
-    }, 1500);
-    return () => clearTimeout(timer);
-  });
 
   const selected = selectedNode ? architectureNodes.find(n => n.id === selectedNode) : null;
 
+  const colorClasses: Record<string, { bg: string; border: string; text: string }> = {
+    cyan: { bg: "bg-cyan-500/10", border: "border-cyan-500/30", text: "text-cyan-400" },
+    emerald: { bg: "bg-emerald-500/10", border: "border-emerald-500/30", text: "text-emerald-400" },
+    violet: { bg: "bg-violet-500/10", border: "border-violet-500/30", text: "text-violet-400" },
+    amber: { bg: "bg-amber-500/10", border: "border-amber-500/30", text: "text-amber-400" },
+    rose: { bg: "bg-rose-500/10", border: "border-rose-500/30", text: "text-rose-400" },
+    sky: { bg: "bg-sky-500/10", border: "border-sky-500/30", text: "text-sky-400" },
+    pink: { bg: "bg-pink-500/10", border: "border-pink-500/30", text: "text-pink-400" },
+    orange: { bg: "bg-orange-500/10", border: "border-orange-500/30", text: "text-orange-400" },
+  };
+
   return (
     <div className="space-y-6">
+      {/* Layer Filter */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => setActiveLayer(null)}
+          className={cn(
+            "px-3 py-1.5 rounded text-xs transition-all",
+            !activeLayer ? "bg-foreground/10 text-foreground" : "bg-muted/30 text-muted-foreground hover:text-foreground"
+          )}
+        >
+          All Layers
+        </button>
+        {layers.map(layer => (
+          <button
+            key={layer.id}
+            onClick={() => setActiveLayer(activeLayer === layer.id ? null : layer.id)}
+            className={cn(
+              "px-3 py-1.5 rounded text-xs transition-all",
+              activeLayer === layer.id
+                ? `${colorClasses[layer.color].bg} ${colorClasses[layer.color].text}`
+                : "bg-muted/30 text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {layer.label}
+          </button>
+        ))}
+      </div>
+
       {/* Architecture grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {architectureNodes.map((node) => {
-          const Icon = node.icon;
-          const isActive = activeFlow.includes(node.id);
-          const isSelected = selectedNode === node.id;
-          
-          const colorClasses: Record<string, { bg: string; border: string; text: string }> = {
-            cyan: { bg: "bg-cyan-500/10", border: "border-cyan-500/30", text: "text-cyan-400" },
-            emerald: { bg: "bg-emerald-500/10", border: "border-emerald-500/30", text: "text-emerald-400" },
-            violet: { bg: "bg-violet-500/10", border: "border-violet-500/30", text: "text-violet-400" },
-            amber: { bg: "bg-amber-500/10", border: "border-amber-500/30", text: "text-amber-400" },
-            rose: { bg: "bg-rose-500/10", border: "border-rose-500/30", text: "text-rose-400" },
-            sky: { bg: "bg-sky-500/10", border: "border-sky-500/30", text: "text-sky-400" },
-            pink: { bg: "bg-pink-500/10", border: "border-pink-500/30", text: "text-pink-400" },
-            orange: { bg: "bg-orange-500/10", border: "border-orange-500/30", text: "text-orange-400" },
-          };
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        {architectureNodes
+          .filter(node => !activeLayer || node.layer === activeLayer)
+          .map((node) => {
+            const Icon = node.icon;
+            const isSelected = selectedNode === node.id;
+            const colors = colorClasses[node.color];
 
-          const colors = colorClasses[node.color];
-
-          return (
-            <button
-              key={node.id}
-              onClick={() => setSelectedNode(isSelected ? null : node.id)}
-              className={cn(
-                "p-3 rounded-lg border transition-all text-left",
-                colors.bg,
-                isActive ? "ring-2 ring-emerald-500 scale-105" : "",
-                isSelected ? `${colors.border} ring-2 ring-offset-2 ring-offset-background` : colors.border
-              )}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Icon className={cn("w-4 h-4", colors.text)} />
-                <span className={cn("text-xs font-medium", colors.text)}>{node.name}</span>
-              </div>
-              <p className="text-[10px] text-muted-foreground line-clamp-2">{node.description}</p>
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={node.id}
+                onClick={() => setSelectedNode(isSelected ? null : node.id)}
+                className={cn(
+                  "p-3 rounded-lg border transition-all text-left",
+                  colors.bg,
+                  isSelected ? `${colors.border} ring-2 ring-offset-2 ring-offset-background` : colors.border
+                )}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <Icon className={cn("w-4 h-4", colors.text)} />
+                  <span className={cn("text-xs font-medium", colors.text)}>{node.name}</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground line-clamp-2">{node.description}</p>
+              </button>
+            );
+          })}
       </div>
 
       {/* Selected node detail */}
       {selected && (
         <div className={cn(
           "p-4 rounded-lg border animate-in fade-in slide-in-from-top-2",
-          `bg-${selected.color}-500/5 border-${selected.color}-500/20`
+          colorClasses[selected.color].bg,
+          colorClasses[selected.color].border
         )}>
           <h4 className="font-medium text-foreground mb-2">{selected.name}</h4>
           <p className="text-sm text-muted-foreground mb-3">{selected.description}</p>
@@ -198,77 +239,205 @@ function ArchitectureVisualizer() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
 
-      {/* Demo flow */}
-      <div className="p-4 rounded-lg bg-muted/30 border border-border">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-medium text-foreground">Demo: Monster Lookup Flow</span>
-          <div className="flex gap-2">
-            {!isRunning && (
-              <button
-                onClick={runDemo}
-                className="flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
-              >
-                <Play className="w-3 h-3" />
-                Run
-              </button>
+// =============================================================================
+// Query Flow Demo
+// =============================================================================
+
+function QueryFlowDemo() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+
+  const flows = [
+    {
+      name: "Player Rules Query",
+      query: "How does grappling work in 5e?",
+      steps: [
+        { agent: "Orchestrator", action: "Classifies as rules question", color: "violet" },
+        { agent: "Rules Agent", action: "Searches vector store for 'grappling'", color: "amber" },
+        { agent: "Vector Store", action: "Returns relevant rule chunks", color: "emerald" },
+        { agent: "Rules Agent", action: "Synthesizes answer with citations", color: "amber" },
+        { agent: "Orchestrator", action: "Returns formatted response", color: "violet" },
+      ],
+    },
+    {
+      name: "GM Creature Lookup",
+      query: "What are the stats for a Beholder?",
+      steps: [
+        { agent: "Orchestrator", action: "Classifies as creature lookup", color: "violet" },
+        { agent: "Permission Check", action: "Verifies GM role (creature stats hidden from players)", color: "orange" },
+        { agent: "Creature Agent", action: "Queries entity database", color: "rose" },
+        { agent: "Entity DB", action: "Returns structured stat block", color: "emerald" },
+        { agent: "Creature Agent", action: "Formats with dynamic schema", color: "rose" },
+        { agent: "Orchestrator", action: "Returns stat block to GM only", color: "violet" },
+      ],
+    },
+    {
+      name: "Tactical Advice",
+      query: "How should these 3 trolls fight the party?",
+      steps: [
+        { agent: "Orchestrator", action: "Classifies as tactical advice + creature lookup", color: "violet" },
+        { agent: "Permission Check", action: "Verifies GM role", color: "orange" },
+        { agent: "Creature Agent", action: "Parallel lookup: 3x troll stats", color: "rose" },
+        { agent: "Session Manager", action: "Retrieves party composition from session", color: "pink" },
+        { agent: "GM Assistant", action: "Generates tactical recommendations", color: "sky" },
+        { agent: "Human-in-Loop", action: "GM reviews before applying", color: "orange" },
+      ],
+    },
+  ];
+
+  const [selectedFlow, setSelectedFlow] = useState(0);
+  const flow = flows[selectedFlow];
+
+  const runFlow = () => {
+    setIsRunning(true);
+    setCurrentStep(0);
+    
+    const advanceStep = (step: number) => {
+      if (step < flow.steps.length) {
+        setCurrentStep(step);
+        setTimeout(() => advanceStep(step + 1), 1200);
+      } else {
+        setIsRunning(false);
+      }
+    };
+    
+    advanceStep(0);
+  };
+
+  const colorClasses: Record<string, string> = {
+    violet: "bg-violet-500/20 text-violet-400 border-violet-500/40",
+    amber: "bg-amber-500/20 text-amber-400 border-amber-500/40",
+    emerald: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
+    rose: "bg-rose-500/20 text-rose-400 border-rose-500/40",
+    sky: "bg-sky-500/20 text-sky-400 border-sky-500/40",
+    pink: "bg-pink-500/20 text-pink-400 border-pink-500/40",
+    orange: "bg-orange-500/20 text-orange-400 border-orange-500/40",
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Flow Selector */}
+      <div className="flex flex-wrap gap-2">
+        {flows.map((f, i) => (
+          <button
+            key={i}
+            onClick={() => { setSelectedFlow(i); setCurrentStep(0); setIsRunning(false); }}
+            disabled={isRunning}
+            className={cn(
+              "px-3 py-1.5 rounded text-xs transition-all",
+              selectedFlow === i
+                ? "bg-cyan-500/20 text-cyan-400"
+                : "bg-muted/30 text-muted-foreground hover:text-foreground",
+              isRunning && "opacity-50 cursor-not-allowed"
             )}
-            <button
-              onClick={() => {
-                setIsRunning(false);
-                setCurrentStep(0);
-                setActiveFlow([]);
-              }}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-muted text-muted-foreground hover:bg-muted/80"
-            >
-              <RotateCcw className="w-3 h-3" />
-              Reset
-            </button>
+          >
+            {f.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Query Display */}
+      <div className="p-3 rounded-lg bg-muted/30 border border-border">
+        <div className="text-xs text-muted-foreground mb-1">Query:</div>
+        <div className="text-sm font-medium text-foreground">&quot;{flow.query}&quot;</div>
+      </div>
+
+      {/* Flow Steps */}
+      <div className="space-y-2">
+        {flow.steps.map((step, i) => (
+          <div
+            key={i}
+            className={cn(
+              "flex items-center gap-3 p-3 rounded-lg border transition-all",
+              i <= currentStep && isRunning
+                ? colorClasses[step.color]
+                : i < currentStep
+                ? "bg-muted/20 border-border opacity-60"
+                : "bg-muted/10 border-border/50 opacity-30"
+            )}
+          >
+            <div className="w-20 text-xs font-medium">{step.agent}</div>
+            <ArrowRight className="w-3 h-3 shrink-0" />
+            <div className="text-xs flex-1">{step.action}</div>
+            {i < currentStep && <CheckCircle className="w-4 h-4 text-emerald-400" />}
+            {i === currentStep && isRunning && <RefreshCw className="w-4 h-4 animate-spin" />}
           </div>
-        </div>
-        <div className="min-h-[60px] flex items-center">
-          {currentStep > 0 && currentStep <= flowSteps.length ? (
-            <div className="flex items-center gap-2 animate-in fade-in">
-              <ArrowRight className="w-4 h-4 text-emerald-400" />
-              <span className="text-sm text-muted-foreground">{flowSteps[currentStep - 1].message}</span>
-            </div>
-          ) : (
-            <span className="text-sm text-muted-foreground">Click &quot;Run&quot; to see the request flow</span>
-          )}
-        </div>
+        ))}
+      </div>
+
+      {/* Controls */}
+      <div className="flex gap-2">
+        <button
+          onClick={runFlow}
+          disabled={isRunning}
+          className="flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 disabled:opacity-50"
+        >
+          <Play className="w-3 h-3" />
+          Run Flow
+        </button>
+        <button
+          onClick={() => { setCurrentStep(0); setIsRunning(false); }}
+          className="flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-muted text-muted-foreground hover:bg-muted/80"
+        >
+          <RotateCcw className="w-3 h-3" />
+          Reset
+        </button>
       </div>
     </div>
   );
 }
 
 // =============================================================================
-// Cost Calculator for Capstone
+// Cost Architecture Calculator
 // =============================================================================
 
-function CapstoneCostCalculator() {
-  const [queries, setQueries] = useState(1000);
+function CostArchitectureCalculator() {
+  const [queries, setQueries] = useState(5000);
   const [avgContextTokens, setAvgContextTokens] = useState(4000);
   const [avgOutputTokens, setAvgOutputTokens] = useState(500);
-  const [cacheHitRate, setCacheHitRate] = useState(60);
+  const [cacheHitRate, setCacheHitRate] = useState(65);
 
-  // Cost per 1M tokens (illustrative)
-  const inputCost = 3; // $3/1M input
-  const outputCost = 15; // $15/1M output
-  const cachedCost = 0.3; // $0.30/1M cached
+  // Cost tiers per 1M tokens (illustrative - abstract model tiers)
+  const costs = {
+    router: { input: 0.15, output: 0.60 }, // Small/fast model
+    standard: { input: 3.00, output: 15.00 }, // Standard model
+    reasoning: { input: 15.00, output: 60.00 }, // Reasoning model
+    cached: { input: 0.30, output: 0 }, // Cached input
+  };
 
+  // Assume 10% queries need reasoning, 90% standard after routing
+  const reasoningQueries = queries * 0.10;
+  const standardQueries = queries * 0.90;
+
+  // Router cost (runs on all queries)
+  const routerTokens = queries * 200; // ~200 tokens per router call
+  const routerCost = (routerTokens / 1_000_000) * (costs.router.input + costs.router.output);
+
+  // Main model costs
   const totalInputTokens = queries * avgContextTokens;
-  const totalOutputTokens = queries * avgOutputTokens;
   const cachedTokens = totalInputTokens * (cacheHitRate / 100);
   const freshTokens = totalInputTokens - cachedTokens;
+  
+  const standardInputCost = (freshTokens * 0.90 / 1_000_000) * costs.standard.input;
+  const reasoningInputCost = (freshTokens * 0.10 / 1_000_000) * costs.reasoning.input;
+  const cachedCost = (cachedTokens / 1_000_000) * costs.cached.input;
+  
+  const standardOutputCost = (standardQueries * avgOutputTokens / 1_000_000) * costs.standard.output;
+  const reasoningOutputCost = (reasoningQueries * avgOutputTokens / 1_000_000) * costs.reasoning.output;
 
-  const inputCostTotal = (freshTokens / 1_000_000) * inputCost;
-  const cachedCostTotal = (cachedTokens / 1_000_000) * cachedCost;
-  const outputCostTotal = (totalOutputTokens / 1_000_000) * outputCost;
-  const totalCost = inputCostTotal + cachedCostTotal + outputCostTotal;
+  const totalCost = routerCost + standardInputCost + reasoningInputCost + cachedCost + standardOutputCost + reasoningOutputCost;
 
-  const noCacheCost = (totalInputTokens / 1_000_000) * inputCost + outputCostTotal;
-  const savings = noCacheCost - totalCost;
-  const savingsPercent = noCacheCost > 0 ? (savings / noCacheCost) * 100 : 0;
+  // Without routing (all queries to reasoning model)
+  const noRoutingCost = (freshTokens / 1_000_000) * costs.reasoning.input + 
+                       (cachedTokens / 1_000_000) * costs.cached.input +
+                       (queries * avgOutputTokens / 1_000_000) * costs.reasoning.output;
+
+  const routingSavings = noRoutingCost - totalCost;
+  const routingSavingsPercent = noRoutingCost > 0 ? (routingSavings / noRoutingCost) * 100 : 0;
 
   return (
     <div className="space-y-6">
@@ -280,9 +449,9 @@ function CapstoneCostCalculator() {
           </label>
           <input
             type="range"
-            min="100"
-            max="100000"
-            step="100"
+            min="500"
+            max="50000"
+            step="500"
             value={queries}
             onChange={(e) => setQueries(Number(e.target.value))}
             className="w-full accent-cyan-400"
@@ -294,7 +463,7 @@ function CapstoneCostCalculator() {
           </label>
           <input
             type="range"
-            min="500"
+            min="1000"
             max="16000"
             step="500"
             value={avgContextTokens}
@@ -309,7 +478,7 @@ function CapstoneCostCalculator() {
           <input
             type="range"
             min="100"
-            max="4000"
+            max="2000"
             step="100"
             value={avgOutputTokens}
             onChange={(e) => setAvgOutputTokens(Number(e.target.value))}
@@ -340,7 +509,7 @@ function CapstoneCostCalculator() {
             <span className="text-xs text-muted-foreground">Total Tokens</span>
           </div>
           <div className="text-lg font-bold text-cyan-400">
-            {((totalInputTokens + totalOutputTokens) / 1_000_000).toFixed(2)}M
+            {((totalInputTokens + queries * avgOutputTokens) / 1_000_000).toFixed(2)}M
           </div>
         </div>
         <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
@@ -355,29 +524,33 @@ function CapstoneCostCalculator() {
         <div className="p-4 rounded-lg bg-violet-500/10 border border-violet-500/30">
           <div className="flex items-center gap-2 mb-1">
             <CheckCircle className="w-4 h-4 text-violet-400" />
-            <span className="text-xs text-muted-foreground">Cache Savings</span>
+            <span className="text-xs text-muted-foreground">Routing Savings</span>
           </div>
           <div className="text-lg font-bold text-violet-400">
-            {savingsPercent.toFixed(0)}% (${savings.toFixed(2)})
+            {routingSavingsPercent.toFixed(0)}%
           </div>
         </div>
       </div>
 
-      {/* Breakdown */}
+      {/* Cost Breakdown */}
       <div className="p-4 rounded-lg bg-muted/30 border border-border">
-        <h4 className="text-sm font-medium text-foreground mb-3">Cost Breakdown</h4>
+        <h4 className="text-sm font-medium text-foreground mb-3">Cost Breakdown by Component</h4>
         <div className="space-y-2 text-xs text-muted-foreground">
           <div className="flex justify-between">
-            <span>Fresh input tokens ({((freshTokens / 1_000_000)).toFixed(2)}M @ ${inputCost}/1M)</span>
-            <span>${inputCostTotal.toFixed(2)}</span>
+            <span>Router (small model)</span>
+            <span>${routerCost.toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span>Cached tokens ({((cachedTokens / 1_000_000)).toFixed(2)}M @ ${cachedCost}/1M)</span>
-            <span>${cachedCostTotal.toFixed(2)}</span>
+            <span>Standard tier (90% of queries)</span>
+            <span>${(standardInputCost + standardOutputCost).toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span>Output tokens ({((totalOutputTokens / 1_000_000)).toFixed(2)}M @ ${outputCost}/1M)</span>
-            <span>${outputCostTotal.toFixed(2)}</span>
+            <span>Reasoning tier (10% of queries)</span>
+            <span>${(reasoningInputCost + reasoningOutputCost).toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Cached tokens ({cacheHitRate}% hit rate)</span>
+            <span>${cachedCost.toFixed(2)}</span>
           </div>
           <div className="flex justify-between pt-2 border-t border-border text-foreground font-medium">
             <span>Total</span>
@@ -385,6 +558,11 @@ function CapstoneCostCalculator() {
           </div>
         </div>
       </div>
+
+      <p className="text-xs text-muted-foreground">
+        Costs are illustrative. Actual costs vary by provider and model. The key insight: routing + caching 
+        can reduce costs by 60-80% compared to using reasoning models for everything.
+      </p>
     </div>
   );
 }
@@ -398,149 +576,405 @@ export function CapstoneSection() {
     <section id="capstone" className="scroll-mt-20">
       <SectionHeading
         id="capstone-heading"
-        title="Capstone: D&D Game Assistant"
-        subtitle="A production-ready example combining all guide concepts"
+        title="Capstone: Virtual Tabletop Assistant"
+        subtitle="Architectural deep-dive combining all guide concepts"
       />
 
       <div className="prose space-y-6">
         <p className="text-lg text-muted-foreground leading-relaxed">
-          Let&apos;s bring everything together with a <strong className="text-foreground">real-world example</strong>: 
-          a D&D Game Assistant that helps Dungeon Masters run sessions. This project uses every major concept 
-          from the guide—RAG, orchestration, tools, guardrails, and cost optimization.
+          Let&apos;s bring everything together with a <strong className="text-foreground">comprehensive architectural 
+          example</strong>: a Virtual Tabletop Assistant that works with <em>any</em> tabletop RPG system—D&D 5e, 
+          Pathfinder, Call of Cthulhu, or your homebrew rules. This project demonstrates every major concept 
+          from the guide in a cohesive, production-ready architecture.
         </p>
 
-        <Callout variant="tip" title="Why D&D?">
+        <Callout variant="tip" title="Why Virtual Tabletop?">
           <p className="m-0">
-            A tabletop RPG assistant is an ideal capstone because it requires: PDF parsing (rulebooks), 
-            RAG (rules lookup), dynamic schemas (stat blocks), parallel processing (multiple lookups), 
-            human-in-loop (DM approval), and session memory (game state). It&apos;s a microcosm of 
-            production AI systems.
+            A VTT assistant is an ideal capstone because it requires: <strong>PDF parsing</strong> (any rulebook), 
+            <strong> dynamic schemas</strong> (stat blocks differ by system), <strong>RAG</strong> (rules lookup), 
+            <strong> parallel processing</strong> (multiple creatures), <strong>human-in-loop</strong> (GM approval), 
+            <strong> session memory</strong> (campaign state), and <strong>permissions</strong> (GM vs player). 
+            It&apos;s a microcosm of production AI systems.
           </p>
         </Callout>
 
-        {/* Architecture Overview */}
-        <h3 id="architecture" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
-          System Architecture
+        {/* System Overview */}
+        <h3 id="vtt-overview" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          System Overview
         </h3>
 
         <p className="text-muted-foreground">
-          The assistant uses an orchestrator pattern with specialized sub-agents. Click each component 
-          to see which guide concepts it applies.
+          The assistant uses a <strong className="text-foreground">layered architecture</strong> with four distinct 
+          layers: Ingestion (processing rulebooks), Storage (vector + relational), Agents (specialized handlers), 
+          and Control (permissions and safety). Click each component to explore related concepts.
         </p>
 
         <InteractiveWrapper
-          title="Interactive: D&D Assistant Architecture"
-          description="Click components to explore related concepts"
-          icon="🎲"
+          title="Interactive: System Architecture"
+          description="Explore the layered architecture—filter by layer or click components"
+          icon="🏗️"
           colorTheme="violet"
           minHeight="auto"
         >
           <ArchitectureVisualizer />
         </InteractiveWrapper>
 
-        {/* Key Implementation Details */}
-        <h3 id="implementation-details" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
-          Key Implementation Details
+        {/* Multi-System Support */}
+        <h3 id="multi-system-support" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Multi-System Support
         </h3>
 
-        <div className="space-y-4">
+        <p className="text-muted-foreground">
+          The key architectural challenge: different game systems have completely different rules, stat blocks, 
+          and mechanics. D&D 5e creatures have Challenge Rating; Pathfinder 2e uses Level. Call of Cthulhu 
+          doesn&apos;t even have &quot;creatures&quot; in the same sense.
+        </p>
+
+        <div className="grid gap-4 sm:grid-cols-2 mt-4">
           <Card variant="default">
             <CardContent>
-              <h4 className="font-medium text-cyan-400 mb-2">1. PDF Parsing & Chunking</h4>
-              <p className="text-sm text-muted-foreground m-0 mb-2">
-                Rulebooks are parsed into chunks optimized for retrieval:
+              <div className="flex items-center gap-2 mb-2">
+                <GitBranch className="w-4 h-4 text-cyan-400" />
+                <h4 className="font-medium text-foreground">Dynamic Schema Generation</h4>
+              </div>
+              <p className="text-sm text-muted-foreground m-0">
+                When a new rulebook is ingested, the system analyzes its structure and generates appropriate 
+                Zod schemas for entities. A D&D Monster schema differs from a Pathfinder Creature schema.
               </p>
-              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                <li>Semantic chunking for rules (keep related rules together)</li>
-                <li>Structured extraction for stat blocks (monsters, spells)</li>
-                <li>Metadata tagging (source book, page number, category)</li>
-                <li>Chunk size: ~500 tokens for rules, structured JSON for stat blocks</li>
-              </ul>
             </CardContent>
           </Card>
 
           <Card variant="default">
             <CardContent>
-              <h4 className="font-medium text-emerald-400 mb-2">2. RAG Pipeline</h4>
-              <p className="text-sm text-muted-foreground m-0 mb-2">
-                Multi-index RAG with query routing:
+              <div className="flex items-center gap-2 mb-2">
+                <Layers className="w-4 h-4 text-violet-400" />
+                <h4 className="font-medium text-foreground">System-Specific Skills</h4>
+              </div>
+              <p className="text-sm text-muted-foreground m-0">
+                Each game system gets specialized skills: &quot;D&D Combat&quot;, &quot;Pathfinder Actions&quot;, 
+                &quot;CoC Sanity Mechanics&quot;. Skills are loaded dynamically based on the active campaign.
               </p>
-              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                <li>Separate indexes: rules, monsters, spells, session history</li>
-                <li>HyDE for ambiguous queries (&quot;how does grappling work?&quot;)</li>
-                <li>Hybrid search: keyword for exact terms + semantic for concepts</li>
-                <li>Re-ranking with cross-encoder for precision</li>
-              </ul>
             </CardContent>
           </Card>
 
           <Card variant="default">
             <CardContent>
-              <h4 className="font-medium text-violet-400 mb-2">3. Agent Orchestration</h4>
-              <p className="text-sm text-muted-foreground m-0 mb-2">
-                The orchestrator routes to specialized agents:
+              <div className="flex items-center gap-2 mb-2">
+                <Database className="w-4 h-4 text-emerald-400" />
+                <h4 className="font-medium text-foreground">Unified Entity Model</h4>
+              </div>
+              <p className="text-sm text-muted-foreground m-0">
+                A base entity model with system-specific extensions. All entities have name, description, source. 
+                System-specific fields (AC, HP, Sanity) stored in typed JSON columns.
               </p>
-              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                <li>Small router model classifies intent (rules, monster, creative)</li>
-                <li>Each sub-agent has focused context and tools</li>
-                <li>Parallel execution for multi-part queries</li>
-                <li>Results synthesized by orchestrator before response</li>
-              </ul>
             </CardContent>
           </Card>
 
           <Card variant="default">
             <CardContent>
-              <h4 className="font-medium text-amber-400 mb-2">4. Session Memory</h4>
-              <p className="text-sm text-muted-foreground m-0 mb-2">
-                Long-running game sessions need careful context management:
+              <div className="flex items-center gap-2 mb-2">
+                <Search className="w-4 h-4 text-amber-400" />
+                <h4 className="font-medium text-foreground">Cross-System RAG</h4>
+              </div>
+              <p className="text-sm text-muted-foreground m-0">
+                Vector search works across systems. &quot;How does flanking work?&quot; retrieves from whichever 
+                system is active. Metadata filtering ensures system-appropriate results.
               </p>
-              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                <li>Episodic summarization after each major event</li>
-                <li>Entity extraction: NPCs, locations, plot points</li>
-                <li>Rolling context window with important facts preserved</li>
-                <li>Session persistence in database for multi-session campaigns</li>
-              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* PDF Parsing Strategy */}
+        <h3 id="pdf-parsing-strategy" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          PDF Parsing Strategy
+        </h3>
+
+        <p className="text-muted-foreground">
+          Rulebooks are complex documents: multi-column layouts, tables, stat blocks, sidebars, and artwork. 
+          A naive &quot;extract all text&quot; approach produces garbage. Instead:
+        </p>
+
+        <div className="my-6 p-5 rounded-xl bg-cyan-500/10 border border-cyan-500/30">
+          <h4 className="text-lg font-semibold text-cyan-400 mb-3">Three-Pass Parsing Pipeline</h4>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-bold shrink-0">1</div>
+              <div>
+                <div className="text-sm font-medium text-foreground">Layout Analysis</div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Detect document structure: chapters, sections, sidebars, tables. Use vision models or 
+                  specialized PDF layout tools. Tag regions by type.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-bold shrink-0">2</div>
+              <div>
+                <div className="text-sm font-medium text-foreground">Structured Extraction</div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Extract stat blocks into structured JSON. Tables become arrays. Rules text becomes 
+                  semantic chunks with cross-references preserved.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-bold shrink-0">3</div>
+              <div>
+                <div className="text-sm font-medium text-foreground">Validation & Enrichment</div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Validate extracted entities against schema. Enrich with embeddings. Link related 
+                  entities (spells referenced by creatures, rules referenced by abilities).
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Callout variant="important" title="Human-in-the-Loop for Ingestion">
+          <p className="m-0">
+            PDF parsing is imperfect. The system flags low-confidence extractions for human review. 
+            A GM reviews &quot;Did we correctly parse this stat block?&quot; before it enters the database. 
+            This prevents garbage from contaminating the knowledge base.
+          </p>
+        </Callout>
+
+        {/* Dynamic Schema Generation */}
+        <h3 id="dynamic-schema-generation" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Dynamic Schema Generation
+        </h3>
+
+        <p className="text-muted-foreground">
+          When ingesting a new game system, the assistant analyzes example entities and generates appropriate 
+          schemas. This is <strong className="text-foreground">meta-programming via AI</strong>:
+        </p>
+
+        <div className="space-y-4 mt-4">
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-violet-400 mb-2">Step 1: Sample Analysis</h4>
+              <p className="text-sm text-muted-foreground m-0">
+                Extract 5-10 example stat blocks from the rulebook. Use vision models if PDFs have 
+                non-standard formatting. The examples teach the system what fields exist.
+              </p>
             </CardContent>
           </Card>
 
           <Card variant="default">
             <CardContent>
-              <h4 className="font-medium text-rose-400 mb-2">5. Safety & Permissions</h4>
-              <p className="text-sm text-muted-foreground m-0 mb-2">
-                Content filtering and access control:
+              <h4 className="font-medium text-violet-400 mb-2">Step 2: Schema Inference</h4>
+              <p className="text-sm text-muted-foreground m-0">
+                An LLM analyzes the samples and generates a Zod schema. Output includes field names, 
+                types, optionality, and validation rules. Human reviews before acceptance.
               </p>
-              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                <li>DM-only tools (encounter generation, plot spoilers)</li>
-                <li>Content filter for player-facing outputs</li>
-                <li>Human-in-loop for generated encounters (DM approval)</li>
-                <li>Rate limiting and cost caps per session</li>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-violet-400 mb-2">Step 3: Schema Versioning</h4>
+              <p className="text-sm text-muted-foreground m-0">
+                Schemas are versioned. When a new sourcebook adds fields (like &quot;Mythic Actions&quot;), 
+                create a new schema version. Old entities migrate or remain on old version.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <p className="text-muted-foreground mt-6">
+          The schema inference prompt asks the LLM to analyze sample stat blocks, identify all fields, 
+          generate a Zod schema with appropriate types and validation, and include comments explaining 
+          each field. The human reviews the generated schema and can edit before committing.
+        </p>
+
+        {/* Permission System Design */}
+        <h3 id="permission-system" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Permission System Design
+        </h3>
+
+        <p className="text-muted-foreground">
+          A VTT has critical permission requirements: players shouldn&apos;t see monster stats, GMs need 
+          access to spoilers, certain content requires age verification. The permission system is 
+          <strong className="text-foreground"> enforced at the API layer</strong>, not just the UI.
+        </p>
+
+        <div className="grid gap-4 sm:grid-cols-2 mt-4">
+          <Card variant="highlight">
+            <CardContent>
+              <div className="flex items-center gap-2 mb-2">
+                <Lock className="w-4 h-4 text-orange-400" />
+                <h4 className="font-medium text-foreground">Role-Based Access</h4>
+              </div>
+              <ul className="text-sm text-muted-foreground m-0 space-y-1">
+                <li>• <strong>GM:</strong> Full access to all content</li>
+                <li>• <strong>Player:</strong> Rules, own character, revealed NPCs</li>
+                <li>• <strong>Spectator:</strong> Public campaign info only</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card variant="highlight">
+            <CardContent>
+              <div className="flex items-center gap-2 mb-2">
+                <Shield className="w-4 h-4 text-orange-400" />
+                <h4 className="font-medium text-foreground">Content Filtering</h4>
+              </div>
+              <ul className="text-sm text-muted-foreground m-0 space-y-1">
+                <li>• Stat blocks hidden from players</li>
+                <li>• Plot spoilers require GM role</li>
+                <li>• Generated content reviewed by GM</li>
               </ul>
             </CardContent>
           </Card>
         </div>
 
-        {/* Cost Calculator */}
-        <h3 id="cost-estimation" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
-          Cost Estimation
+        <div className="my-6 p-5 rounded-xl bg-orange-500/10 border border-orange-500/30">
+          <h4 className="text-lg font-semibold text-orange-400 mb-3">Permission Check Flow</h4>
+          <div className="flex items-center justify-between text-xs overflow-x-auto gap-2 pb-2">
+            <div className="flex flex-col items-center gap-1 p-2 min-w-[80px]">
+              <Bot className="w-5 h-5 text-violet-400" />
+              <span className="text-muted-foreground">Agent Request</span>
+            </div>
+            <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+            <div className="flex flex-col items-center gap-1 p-2 min-w-[80px]">
+              <Settings className="w-5 h-5 text-orange-400" />
+              <span className="text-muted-foreground">Permission Layer</span>
+            </div>
+            <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+            <div className="flex flex-col items-center gap-1 p-2 min-w-[80px]">
+              <Database className="w-5 h-5 text-emerald-400" />
+              <span className="text-muted-foreground">Data Layer</span>
+            </div>
+            <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+            <div className="flex flex-col items-center gap-1 p-2 min-w-[80px]">
+              <CheckCircle className="w-5 h-5 text-emerald-400" />
+              <span className="text-muted-foreground">Filtered Result</span>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Every data access goes through the permission layer. Even if an agent tries to retrieve 
+            monster stats, the permission layer filters based on the requesting user&apos;s role.
+          </p>
+        </div>
+
+        {/* Query Architecture */}
+        <h3 id="query-architecture" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Query Architecture
         </h3>
 
         <p className="text-muted-foreground">
-          Estimate the monthly cost of running your D&D assistant based on usage patterns:
+          Different query types require different processing paths. The orchestrator routes based on 
+          intent classification, then specialized agents handle each type:
+        </p>
+
+        <InteractiveWrapper
+          title="Interactive: Query Flow Demo"
+          description="See how different queries flow through the system"
+          icon="🔀"
+          colorTheme="cyan"
+          minHeight="auto"
+        >
+          <QueryFlowDemo />
+        </InteractiveWrapper>
+
+        <div className="space-y-4 mt-6">
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-amber-400 mb-2">Rules Queries</h4>
+              <p className="text-sm text-muted-foreground m-0">
+                &quot;How does concentration work?&quot; → RAG search → Synthesize answer with page citations. 
+                Uses HyDE for ambiguous queries. Available to all users.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-rose-400 mb-2">Creature Lookups</h4>
+              <p className="text-sm text-muted-foreground m-0">
+                &quot;Beholder stats&quot; → Permission check → Entity database query → Format with dynamic schema. 
+                GM-only for unrevealed creatures. Parallel lookup for multiple creatures.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-sky-400 mb-2">Tactical/Creative</h4>
+              <p className="text-sm text-muted-foreground m-0">
+                &quot;How should these goblins fight?&quot; → Creature lookup + Session context → GM Assistant 
+                generates tactics. Human-in-loop: GM reviews before using.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-pink-400 mb-2">Session Queries</h4>
+              <p className="text-sm text-muted-foreground m-0">
+                &quot;What happened last session?&quot; → Session Manager retrieves episodic summaries. 
+                &quot;Who is Lord Vance?&quot; → Entity lookup in session context + campaign notes.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Cost Architecture */}
+        <h3 id="cost-architecture" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Cost Architecture
+        </h3>
+
+        <p className="text-muted-foreground">
+          A production VTT assistant needs careful cost management. The architecture uses multiple 
+          strategies: <strong className="text-foreground">model routing</strong>, <strong className="text-foreground">caching</strong>, 
+          and <strong className="text-foreground">tiered processing</strong>.
         </p>
 
         <InteractiveWrapper
           title="Interactive: Cost Calculator"
-          description="Estimate monthly costs based on usage"
+          description="Estimate monthly costs with routing and caching"
           icon="💰"
           colorTheme="emerald"
           minHeight="auto"
         >
-          <CapstoneCostCalculator />
+          <CostArchitectureCalculator />
         </InteractiveWrapper>
 
-        {/* What You've Learned */}
-        <h3 id="concepts-applied" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+        <div className="my-6 p-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+          <h4 className="text-lg font-semibold text-emerald-400 mb-3">Cost Optimization Strategies</h4>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="p-3 rounded-lg bg-background/50">
+              <div className="text-sm font-medium text-foreground mb-1">Model Routing</div>
+              <p className="text-xs text-muted-foreground">
+                Simple queries (90%) → Standard model. Complex queries (10%) → Reasoning model. 
+                Router cost is negligible.
+              </p>
+            </div>
+            <div className="p-3 rounded-lg bg-background/50">
+              <div className="text-sm font-medium text-foreground mb-1">Aggressive Caching</div>
+              <p className="text-xs text-muted-foreground">
+                System prompts, skill definitions, and frequently-accessed rules all cache. 
+                65%+ cache hit rate is achievable.
+              </p>
+            </div>
+            <div className="p-3 rounded-lg bg-background/50">
+              <div className="text-sm font-medium text-foreground mb-1">Precomputed Responses</div>
+              <p className="text-xs text-muted-foreground">
+                Common queries (&quot;how does advantage work?&quot;) have precomputed answers. 
+                Only novel queries hit the LLM.
+              </p>
+            </div>
+            <div className="p-3 rounded-lg bg-background/50">
+              <div className="text-sm font-medium text-foreground mb-1">User Quotas</div>
+              <p className="text-xs text-muted-foreground">
+                Rate limits per user/session. Prevents runaway costs from abuse or bugs. 
+                GM gets higher limits than players.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Concepts Applied */}
+        <h3 id="concepts-applied" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
           Concepts Applied
         </h3>
 
@@ -554,8 +988,8 @@ export function CapstoneSection() {
               <h4 className="font-medium text-foreground mb-2">Foundations</h4>
               <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
                 <li>Embeddings for semantic search</li>
-                <li>LLM caching for repeated queries</li>
-                <li>Stateless function model</li>
+                <li>LLM caching for cost efficiency</li>
+                <li>Stateless function mental model</li>
               </ul>
             </CardContent>
           </Card>
@@ -564,8 +998,8 @@ export function CapstoneSection() {
               <h4 className="font-medium text-foreground mb-2">Context Engineering</h4>
               <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
                 <li>Layered context architecture</li>
-                <li>Episodic summarization</li>
-                <li>Signal over noise principles</li>
+                <li>Episodic summarization for sessions</li>
+                <li>Signal over noise in retrieval</li>
               </ul>
             </CardContent>
           </Card>
@@ -573,9 +1007,9 @@ export function CapstoneSection() {
             <CardContent>
               <h4 className="font-medium text-foreground mb-2">Capabilities</h4>
               <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
-                <li>Structured outputs for stat blocks</li>
+                <li>Dynamic schema generation</li>
                 <li>Tool use for database queries</li>
-                <li>Agentic loop for complex tasks</li>
+                <li>Streaming for responsive UX</li>
               </ul>
             </CardContent>
           </Card>
@@ -583,24 +1017,52 @@ export function CapstoneSection() {
             <CardContent>
               <h4 className="font-medium text-foreground mb-2">Orchestration</h4>
               <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
-                <li>Model routing for efficiency</li>
-                <li>Parallel processing</li>
-                <li>Delegation to sub-agents</li>
+                <li>Model routing for cost optimization</li>
+                <li>Parallel processing for lookups</li>
+                <li>Delegation to specialized agents</li>
+              </ul>
+            </CardContent>
+          </Card>
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-foreground mb-2">Safety & Control</h4>
+              <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
+                <li>RBAC for GM vs player access</li>
+                <li>Human-in-loop for generated content</li>
+                <li>API-level permission enforcement</li>
+              </ul>
+            </CardContent>
+          </Card>
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-foreground mb-2">Production</h4>
+              <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
+                <li>Observability and tracing</li>
+                <li>Cost monitoring and quotas</li>
+                <li>Graceful degradation</li>
               </ul>
             </CardContent>
           </Card>
         </div>
 
-        <Callout variant="important" title="Build Your Own">
+        <Callout variant="important" title="Adapt to Your Domain">
           <p className="mb-2">
-            This capstone is a template. Adapt it to your domain: replace D&D rules with 
-            legal documents, medical guidelines, or company documentation. The architecture 
-            patterns transfer directly.
+            This architecture is a <strong>template</strong>. Replace rulebooks with legal documents, 
+            medical guidelines, or enterprise documentation. The patterns transfer directly:
           </p>
+          <ul className="list-disc list-inside space-y-1 text-sm mt-2">
+            <li>PDF parsing → Document ingestion</li>
+            <li>Creatures → Entities in your domain</li>
+            <li>GM/Player → Admin/User roles</li>
+            <li>Sessions → User contexts or projects</li>
+          </ul>
+        </Callout>
+
+        <Callout variant="tip" title="Start Simple, Scale Up">
           <p className="m-0">
-            The key is <strong>starting simple</strong>: begin with basic RAG, add orchestration 
-            when needed, then layer on advanced features like caching and parallel processing 
-            as you scale.
+            Don&apos;t build all of this at once. Start with basic RAG for rules lookup. Add orchestration 
+            when query types diverge. Layer on caching and routing as you scale. The architecture should 
+            evolve with your needs—premature optimization is the root of all evil, even in AI systems.
           </p>
         </Callout>
       </div>

@@ -160,9 +160,22 @@ export const sections: Section[] = [
       { id: "compression-techniques", title: "Compression Techniques" },
     ],
   },
+  {
+    id: "episodic-summarization",
+    title: "Episodic Summarization & Retrospectives",
+    part: "context",
+    description: "Evolving context through learnings and error analysis",
+    subSections: [
+      { id: "episodic-overview", title: "What is Episodic Summarization?" },
+      { id: "building-retrospectives", title: "Building Retrospectives" },
+      { id: "learning-from-failures", title: "Learning from Failures" },
+      { id: "embedding-similar-situations", title: "Embedding Similar Situations" },
+      { id: "integrating-learnings", title: "Integrating Learnings into Context" },
+    ],
+  },
 
   // ==========================================================================
-  // Part 3: Capabilities (4 sections)
+  // Part 3: Capabilities (6 sections)
   // ==========================================================================
   {
     id: "structured-outputs",
@@ -211,6 +224,33 @@ export const sections: Section[] = [
       { id: "agents-defined", title: "What are Agents?" },
       { id: "comparison", title: "When to Use Each" },
       { id: "hybrid-patterns", title: "Hybrid Patterns" },
+    ],
+  },
+  {
+    id: "data-structuring",
+    title: "Structuring Data for AI",
+    part: "capabilities",
+    description: "Making data actionable through ontologies and schemas",
+    subSections: [
+      { id: "data-structure-problem", title: "The Data Structure Problem" },
+      { id: "ontology-action-planes", title: "Ontology and Action Planes" },
+      { id: "deterministic-api-layer", title: "Deterministic API Layer" },
+      { id: "ai-validation", title: "AI Validation Against APIs" },
+      { id: "data-driven-skills", title: "Data-Driven Skills" },
+      { id: "agents-as-data", title: "Agents as Data Structures" },
+    ],
+  },
+  {
+    id: "streaming-voice",
+    title: "Streaming & Voice Agents",
+    part: "capabilities",
+    description: "Real-time responses and voice agent architecture",
+    subSections: [
+      { id: "streaming-fundamentals", title: "Streaming Fundamentals" },
+      { id: "live-call-flows", title: "Live Call Flows" },
+      { id: "voice-agent-architecture", title: "Voice Agent Architecture" },
+      { id: "realtime-patterns", title: "Real-time Patterns" },
+      { id: "streaming-best-practices", title: "Streaming Best Practices" },
     ],
   },
 
@@ -399,6 +439,19 @@ export const sections: Section[] = [
       { id: "tdd-animation", title: "Interactive: TDD Cycle" },
     ],
   },
+  {
+    id: "observability",
+    title: "Observability & Monitoring",
+    part: "evaluation",
+    description: "Tracking, labeling, and learning from agent behavior",
+    subSections: [
+      { id: "why-observability", title: "Why Observability Matters" },
+      { id: "labeling-langfuse", title: "Labeling with Langfuse" },
+      { id: "failure-pattern-analysis", title: "Failure Pattern Analysis" },
+      { id: "prompt-iteration", title: "Prompt Iteration from Data" },
+      { id: "automated-learning", title: "Automated Learning Systems" },
+    ],
+  },
 
   // ==========================================================================
   // Part 8: Coding Agents (6 sections)
@@ -573,13 +626,17 @@ export const sections: Section[] = [
   // ==========================================================================
   {
     id: "capstone",
-    title: "D&D Game Assistant",
+    title: "Virtual Tabletop Assistant",
     part: "capstone",
-    description: "A production-ready example combining all guide concepts",
+    description: "Architectural deep-dive combining all guide concepts",
     subSections: [
-      { id: "architecture", title: "System Architecture" },
-      { id: "implementation-details", title: "Implementation Details" },
-      { id: "cost-estimation", title: "Cost Estimation" },
+      { id: "vtt-overview", title: "System Overview" },
+      { id: "multi-system-support", title: "Multi-System Support" },
+      { id: "pdf-parsing-strategy", title: "PDF Parsing Strategy" },
+      { id: "dynamic-schema-generation", title: "Dynamic Schema Generation" },
+      { id: "permission-system", title: "Permission System Design" },
+      { id: "query-architecture", title: "Query Architecture" },
+      { id: "cost-architecture", title: "Cost Architecture" },
       { id: "concepts-applied", title: "Concepts Applied" },
     ],
   },

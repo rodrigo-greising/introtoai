@@ -383,10 +383,10 @@ export function IntroSection() {
               <Dices className="w-6 h-6 text-violet-400" />
             </div>
             <div className="flex-1">
-              <h4 className="font-semibold text-foreground mb-1">Capstone Project: D&D Game Assistant</h4>
+              <h4 className="font-semibold text-foreground mb-1">Capstone Project: Virtual Tabletop Assistant</h4>
               <p className="text-sm text-muted-foreground mb-3">
-                See all guide concepts combined in a real-world example: a production-ready D&D assistant 
-                with RAG, orchestration, tools, guardrails, and cost optimization.
+                See all guide concepts combined in a comprehensive architectural example: a VTT assistant 
+                that works with any rulebook system, featuring RAG, orchestration, dynamic schemas, and cost optimization.
               </p>
               <a
                 href="#capstone"

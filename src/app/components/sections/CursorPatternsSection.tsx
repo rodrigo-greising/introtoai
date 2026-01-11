@@ -199,7 +199,7 @@ This change correctly extracts the user from the API response structure.`
           {selectedPrompt === "poor" ? "Issues" : "Strengths"}
         </div>
         <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
-          {(selectedPrompt === "poor" ? current.issues : current.strengths)?.map((item, i) => (
+          {(selectedPrompt === "poor" ? prompts.poor.issues : prompts.good.strengths).map((item, i) => (
             <li key={i}>{item}</li>
           ))}
         </ul>

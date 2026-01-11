@@ -10,12 +10,15 @@ export { ContextPrinciplesSection } from "./ContextPrinciplesSection";
 export { LayeredContextSection } from "./LayeredContextSection";
 export { ContextEngineeringSection } from "./ContextEngineeringSection"; // Legacy - kept for reference
 export { ContextTechniquesSection } from "./ContextTechniquesSection"; // Legacy - contains lifecycle patterns
+export { EpisodicSummarizationSection } from "./EpisodicSummarizationSection";
 
 // Part 3: Capabilities
 export { StructuredOutputsSection } from "./StructuredOutputsSection";
 export { ToolsSection } from "./ToolsSection";
 export { AgenticLoopSection } from "./AgenticLoopSection";
 export { WorkflowsVsAgentsSection } from "./WorkflowsVsAgentsSection";
+export { DataStructuringSection } from "./DataStructuringSection";
+export { StreamingVoiceSection } from "./StreamingVoiceSection";
 
 // Part 4: Retrieval
 export { RAGFundamentalsSection } from "./RAGFundamentalsSection";
@@ -38,6 +41,7 @@ export { ExternalControlSection } from "./ExternalControlSection";
 // Part 7: Evaluation
 export { HarnessesSection } from "./HarnessesSection";
 export { TestDrivenAISection } from "./TestDrivenAISection";
+export { ObservabilitySection } from "./ObservabilitySection";
 
 // Part 8: Coding Agents
 export { CodingAgentsIntroSection } from "./CodingAgentsIntroSection";

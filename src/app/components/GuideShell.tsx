@@ -11,11 +11,14 @@ import {
   ContextPrinciplesSection,
   LayeredContextSection,
   ContextTechniquesSection,
+  EpisodicSummarizationSection,
   // Capabilities
   StructuredOutputsSection,
   ToolsSection,
   AgenticLoopSection,
   WorkflowsVsAgentsSection,
+  DataStructuringSection,
+  StreamingVoiceSection,
   // Retrieval
   RAGFundamentalsSection,
   VectorDatabasesSection,
@@ -31,6 +34,7 @@ import {
   // Evaluation
   HarnessesSection,
   TestDrivenAISection,
+  ObservabilitySection,
   // Safety
   GuardrailsSection,
   HumanInLoopSection,
@@ -87,12 +91,15 @@ const sectionComponents: Record<string, React.ComponentType> = {
   "context-principles": ContextPrinciplesSection,
   "layered-context": LayeredContextSection,
   "context-lifecycle": ContextTechniquesSection, // Has lifecycle content
+  "episodic-summarization": EpisodicSummarizationSection,
 
   // Part 3: Capabilities
   "structured-outputs": StructuredOutputsSection,
   "tools": ToolsSection,
   "agentic-loop": AgenticLoopSection,
   "workflows-vs-agents": WorkflowsVsAgentsSection,
+  "data-structuring": DataStructuringSection,
+  "streaming-voice": StreamingVoiceSection,
 
   // Part 4: Knowledge & Retrieval
   "rag-fundamentals": RAGFundamentalsSection,
@@ -115,6 +122,7 @@ const sectionComponents: Record<string, React.ComponentType> = {
   // Part 7: Evaluation
   "harnesses": HarnessesSection,
   "tdd-ai": TestDrivenAISection,
+  "observability": ObservabilitySection,
 
   // Part 8: Coding Agents
   "coding-agents-intro": CodingAgentsIntroSection,

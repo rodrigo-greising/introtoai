@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import {
   ChevronRight,
   ChevronDown,
@@ -18,6 +19,8 @@ import {
   Code,
   TestTube,
   Settings,
+  Search,
+  X,
 } from "lucide-react";
 import type { Section } from "@/app/data/sections";
 
@@ -44,6 +47,59 @@ const partIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   production: Settings,
 };
 
+// Highlight matching text in a string
+function highlightMatch(text: string, query: string): React.ReactNode {
+  if (!query.trim()) return text;
+  
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  const parts = text.split(regex);
+  
+  return parts.map((part, i) => 
+    regex.test(part) ? (
+      <mark key={i} className="bg-[var(--highlight-muted)] text-[var(--highlight)] rounded-sm px-0.5">
+        {part}
+      </mark>
+    ) : part
+  );
+}
+
+// Filter sections based on search query
+function filterSections(sections: Section[], query: string): Section[] {
+  if (!query.trim()) return sections;
+  
+  const lowerQuery = query.toLowerCase();
+  
+  return sections.reduce<Section[]>((acc, section) => {
+    const titleMatch = section.title.toLowerCase().includes(lowerQuery);
+    const descMatch = section.description?.toLowerCase().includes(lowerQuery);
+    
+    // Filter matching sub-sections
+    const matchingSubSections = section.subSections?.filter(sub =>
+      sub.title.toLowerCase().includes(lowerQuery)
+    );
+    
+    // Include section if title/description matches or has matching sub-sections
+    if (titleMatch || descMatch || (matchingSubSections && matchingSubSections.length > 0)) {
+      acc.push({
+        ...section,
+        // If section title matches, show all sub-sections; otherwise show only matching ones
+        subSections: titleMatch || descMatch 
+          ? section.subSections 
+          : matchingSubSections,
+      });
+    }
+    
+    return acc;
+  }, []);
+}
+
+// Count total results
+function countResults(sections: Section[]): number {
+  return sections.reduce((count, section) => {
+    return count + 1 + (section.subSections?.length || 0);
+  }, 0);
+}
+
 export function Sidebar({
   isOpen,
   activeSection,
@@ -52,10 +108,25 @@ export function Sidebar({
   onSubSectionClick,
   onClose,
 }: SidebarProps) {
+  // Search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  
   // Track which sections the user has manually expanded
   const [manuallyExpanded, setManuallyExpanded] = useState<Set<string>>(new Set());
   
-  // Compute expanded sections: active section + manually expanded ones
+  // Filter sections based on search query
+  const filteredSections = useMemo(() => 
+    filterSections(sections, searchQuery),
+    [sections, searchQuery]
+  );
+  
+  const resultCount = useMemo(() => 
+    searchQuery.trim() ? countResults(filteredSections) : 0,
+    [filteredSections, searchQuery]
+  );
+  
+  // Compute expanded sections: active section + manually expanded ones + search matches
   const [expandedSections, setExpandedSections] = useState<Set<string>>(() => {
     const expanded = new Set<string>();
     sections.forEach((section) => {
@@ -66,8 +137,33 @@ export function Sidebar({
     });
     return expanded;
   });
+  
+  // Clear search handler
+  const clearSearch = useCallback(() => {
+    setSearchQuery("");
+    searchInputRef.current?.focus();
+  }, []);
+  
+  // Handle keyboard shortcuts
+  const handleSearchKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") {
+      clearSearch();
+    } else if (e.key === "Enter" && filteredSections.length === 1) {
+      // Navigate to the single result
+      const section = filteredSections[0];
+      if (section.subSections?.length === 1) {
+        onSectionClick(section.subSections[0].id);
+      } else {
+        onSectionClick(section.id);
+      }
+      clearSearch();
+      if (window.innerWidth < 1024) {
+        onClose();
+      }
+    }
+  }, [filteredSections, onSectionClick, onClose, clearSearch]);
 
-  // When activeSection changes, update expanded to only include active section + manually expanded
+  // When activeSection changes or search query changes, update expanded sections
   useEffect(() => {
     const newExpanded = new Set<string>(manuallyExpanded);
     
@@ -79,11 +175,20 @@ export function Sidebar({
       }
     });
     
+    // Auto-expand all sections when searching
+    if (searchQuery.trim()) {
+      filteredSections.forEach((section) => {
+        if (section.subSections && section.subSections.length > 0) {
+          newExpanded.add(section.id);
+        }
+      });
+    }
+    
     setExpandedSections(newExpanded);
-  }, [activeSection, sections, manuallyExpanded]);
+  }, [activeSection, sections, manuallyExpanded, searchQuery, filteredSections]);
 
-  // Group sections by part
-  const groupedSections = sections.reduce(
+  // Group filtered sections by part
+  const groupedSections = filteredSections.reduce(
     (acc, section) => {
       const part = section.part || "other";
       if (!acc[part]) {
@@ -190,7 +295,56 @@ export function Sidebar({
         )}
       >
         <ScrollArea className="h-full py-4">
+          {/* Search Input */}
+          <div className="px-3 mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+              <Input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search sections..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                className="pl-9 pr-8 h-8 bg-sidebar-accent/50 border-sidebar-border focus-visible:ring-[var(--highlight)] focus-visible:border-[var(--highlight)]"
+              />
+              {searchQuery && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-sidebar-accent transition-colors"
+                  aria-label="Clear search"
+                >
+                  <X className="size-3.5 text-muted-foreground" />
+                </button>
+              )}
+            </div>
+            {/* Result count */}
+            {searchQuery.trim() && (
+              <p className="text-xs text-muted-foreground mt-2 px-1">
+                {resultCount === 0 
+                  ? "No results found" 
+                  : `${resultCount} result${resultCount === 1 ? '' : 's'} found`}
+              </p>
+            )}
+          </div>
+
           <nav className="px-3 space-y-6">
+            {/* No results message */}
+            {searchQuery.trim() && filteredSections.length === 0 && (
+              <div className="text-center py-8 px-4">
+                <Search className="size-8 text-muted-foreground/50 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">
+                  No sections match &ldquo;{searchQuery}&rdquo;
+                </p>
+                <button
+                  onClick={clearSearch}
+                  className="mt-2 text-xs text-[var(--highlight)] hover:underline"
+                >
+                  Clear search
+                </button>
+              </div>
+            )}
+            
             {Object.entries(groupedSections).map(([part, partSections]) => {
               const Icon = partIcons[part] || Rocket;
               return (
@@ -251,7 +405,9 @@ export function Sidebar({
                               isActive && "nav-active font-medium"
                             )}
                           >
-                            <span className="truncate">{section.title}</span>
+                            <span className="truncate">
+                              {searchQuery ? highlightMatch(section.title, searchQuery) : section.title}
+                            </span>
                           </button>
                         </div>
                         
@@ -278,7 +434,9 @@ export function Sidebar({
                                         : "bg-muted-foreground/40 group-hover:bg-muted-foreground/60"
                                     )} 
                                   />
-                                  <span className="truncate">{subSection.title}</span>
+                                  <span className="truncate">
+                                    {searchQuery ? highlightMatch(subSection.title, searchQuery) : subSection.title}
+                                  </span>
                                 </button>
                               );
                             })}

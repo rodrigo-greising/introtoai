@@ -238,6 +238,8 @@ export const sections: Section[] = [
       { id: "ai-validation", title: "AI Validation Against APIs" },
       { id: "data-driven-skills", title: "Data-Driven Skills" },
       { id: "agents-as-data", title: "Agents as Data Structures" },
+      { id: "production-schema-patterns", title: "Production Schema Patterns" },
+      { id: "dynamic-tool-generation", title: "Dynamic Tool Generation" },
     ],
   },
   {
@@ -634,6 +636,9 @@ export const sections: Section[] = [
       { id: "multi-system-support", title: "Multi-System Support" },
       { id: "pdf-parsing-strategy", title: "PDF Parsing Strategy" },
       { id: "dynamic-schema-generation", title: "Dynamic Schema Generation" },
+      { id: "intake-agent-pipeline", title: "Intake Agent Pipeline" },
+      { id: "agents-building-agents", title: "Agents Building Agents" },
+      { id: "player-assistant-demo", title: "Player Assistant in Action" },
       { id: "permission-system", title: "Permission System Design" },
       { id: "query-architecture", title: "Query Architecture" },
       { id: "cost-architecture", title: "Cost Architecture" },

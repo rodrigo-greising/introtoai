@@ -392,176 +392,872 @@ function QueryFlowDemo() {
 }
 
 // =============================================================================
-// Cost Architecture Calculator
+// Enhanced Cost Architecture Calculator
 // =============================================================================
 
-function CostArchitectureCalculator() {
-  const [queries, setQueries] = useState(5000);
-  const [avgContextTokens, setAvgContextTokens] = useState(4000);
-  const [avgOutputTokens, setAvgOutputTokens] = useState(500);
-  const [cacheHitRate, setCacheHitRate] = useState(65);
+interface QueryType {
+  id: string;
+  name: string;
+  description: string;
+  avgContextTokens: number;
+  avgOutputTokens: number;
+  modelTier: "router" | "standard" | "reasoning";
+  cacheablePercent: number;
+  color: string;
+}
 
-  // Cost tiers per 1M tokens (illustrative - abstract model tiers)
-  const costs = {
-    router: { input: 0.15, output: 0.60 }, // Small/fast model
-    standard: { input: 3.00, output: 15.00 }, // Standard model
-    reasoning: { input: 15.00, output: 60.00 }, // Reasoning model
-    cached: { input: 0.30, output: 0 }, // Cached input
+function EnhancedCostCalculator() {
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+  
+  // Monthly query volume
+  const [monthlyQueries, setMonthlyQueries] = useState(10000);
+  
+  // Query distribution (percentages that sum to 100)
+  const [rulesQueriesPercent, setRulesQueriesPercent] = useState(50);
+  const [creatureLookupPercent, setCreatureLookupPercent] = useState(30);
+  const [tacticalPercent, setTacticalPercent] = useState(15);
+  const sessionPercent = 100 - rulesQueriesPercent - creatureLookupPercent - tacticalPercent;
+  
+  // Model pricing ($/M tokens)
+  const [routerInputPrice, setRouterInputPrice] = useState(0.15);
+  const [routerOutputPrice, setRouterOutputPrice] = useState(0.60);
+  const [standardInputPrice, setStandardInputPrice] = useState(3.00);
+  const [standardOutputPrice, setStandardOutputPrice] = useState(15.00);
+  const [reasoningInputPrice, setReasoningInputPrice] = useState(15.00);
+  const [reasoningOutputPrice, setReasoningOutputPrice] = useState(60.00);
+  
+  // Caching settings
+  const [cacheReadDiscount, setCacheReadDiscount] = useState(10); // 10% of normal price
+  const [globalCacheHitRate, setGlobalCacheHitRate] = useState(70);
+  
+  // Query type configurations
+  const queryTypes: QueryType[] = [
+    {
+      id: "rules",
+      name: "Rules Queries",
+      description: "How does grappling work?",
+      avgContextTokens: 4000,
+      avgOutputTokens: 400,
+      modelTier: "standard",
+      cacheablePercent: 80,
+      color: "amber",
+    },
+    {
+      id: "creature",
+      name: "Creature Lookups",
+      description: "What are the stats for a Troll?",
+      avgContextTokens: 2000,
+      avgOutputTokens: 600,
+      modelTier: "standard",
+      cacheablePercent: 90,
+      color: "rose",
+    },
+    {
+      id: "tactical",
+      name: "Tactical Advice",
+      description: "How should these trolls fight the party?",
+      avgContextTokens: 8000,
+      avgOutputTokens: 1200,
+      modelTier: "reasoning",
+      cacheablePercent: 40,
+      color: "sky",
+    },
+    {
+      id: "session",
+      name: "Session Queries",
+      description: "What happened last session?",
+      avgContextTokens: 6000,
+      avgOutputTokens: 800,
+      modelTier: "standard",
+      cacheablePercent: 60,
+      color: "pink",
+    },
+  ];
+  
+  // Calculate costs for each query type
+  const calculateQueryTypeCost = (
+    queryType: QueryType,
+    queryCount: number,
+    cacheHitRate: number
+  ) => {
+    const prices = {
+      router: { input: routerInputPrice, output: routerOutputPrice },
+      standard: { input: standardInputPrice, output: standardOutputPrice },
+      reasoning: { input: reasoningInputPrice, output: reasoningOutputPrice },
+    };
+    
+    const modelPrices = prices[queryType.modelTier];
+    const cachedPrice = modelPrices.input * (cacheReadDiscount / 100);
+    
+    // Router cost (all queries go through router)
+    const routerTokens = queryCount * 200;
+    const routerCost = (routerTokens / 1_000_000) * (prices.router.input + prices.router.output);
+    
+    // Input tokens
+    const totalInputTokens = queryCount * queryType.avgContextTokens;
+    const cachedInputTokens = totalInputTokens * (queryType.cacheablePercent / 100) * (cacheHitRate / 100);
+    const freshInputTokens = totalInputTokens - cachedInputTokens;
+    
+    const freshInputCost = (freshInputTokens / 1_000_000) * modelPrices.input;
+    const cachedInputCost = (cachedInputTokens / 1_000_000) * cachedPrice;
+    
+    // Output tokens
+    const totalOutputTokens = queryCount * queryType.avgOutputTokens;
+    const outputCost = (totalOutputTokens / 1_000_000) * modelPrices.output;
+    
+    return {
+      queryCount,
+      routerCost,
+      inputCost: freshInputCost + cachedInputCost,
+      outputCost,
+      totalCost: routerCost + freshInputCost + cachedInputCost + outputCost,
+      totalTokens: totalInputTokens + totalOutputTokens,
+      cachedTokens: cachedInputTokens,
+    };
   };
-
-  // Assume 10% queries need reasoning, 90% standard after routing
-  const reasoningQueries = queries * 0.10;
-  const standardQueries = queries * 0.90;
-
-  // Router cost (runs on all queries)
-  const routerTokens = queries * 200; // ~200 tokens per router call
-  const routerCost = (routerTokens / 1_000_000) * (costs.router.input + costs.router.output);
-
-  // Main model costs
-  const totalInputTokens = queries * avgContextTokens;
-  const cachedTokens = totalInputTokens * (cacheHitRate / 100);
-  const freshTokens = totalInputTokens - cachedTokens;
   
-  const standardInputCost = (freshTokens * 0.90 / 1_000_000) * costs.standard.input;
-  const reasoningInputCost = (freshTokens * 0.10 / 1_000_000) * costs.reasoning.input;
-  const cachedCost = (cachedTokens / 1_000_000) * costs.cached.input;
+  // Calculate costs for all query types
+  const queryDistribution = [rulesQueriesPercent, creatureLookupPercent, tacticalPercent, sessionPercent];
+  const costBreakdown = queryTypes.map((qt, i) => {
+    const queryCount = Math.round(monthlyQueries * (queryDistribution[i] / 100));
+    return {
+      ...qt,
+      ...calculateQueryTypeCost(qt, queryCount, globalCacheHitRate),
+    };
+  });
   
-  const standardOutputCost = (standardQueries * avgOutputTokens / 1_000_000) * costs.standard.output;
-  const reasoningOutputCost = (reasoningQueries * avgOutputTokens / 1_000_000) * costs.reasoning.output;
-
-  const totalCost = routerCost + standardInputCost + reasoningInputCost + cachedCost + standardOutputCost + reasoningOutputCost;
-
-  // Without routing (all queries to reasoning model)
-  const noRoutingCost = (freshTokens / 1_000_000) * costs.reasoning.input + 
-                       (cachedTokens / 1_000_000) * costs.cached.input +
-                       (queries * avgOutputTokens / 1_000_000) * costs.reasoning.output;
-
-  const routingSavings = noRoutingCost - totalCost;
-  const routingSavingsPercent = noRoutingCost > 0 ? (routingSavings / noRoutingCost) * 100 : 0;
+  const totalCost = costBreakdown.reduce((sum, cb) => sum + cb.totalCost, 0);
+  const totalTokens = costBreakdown.reduce((sum, cb) => sum + cb.totalTokens, 0);
+  const totalCachedTokens = costBreakdown.reduce((sum, cb) => sum + cb.cachedTokens, 0);
+  
+  // Calculate baseline (everything to reasoning model, no caching)
+  const baselineCost = costBreakdown.reduce((sum, cb) => {
+    const routerTokens = cb.queryCount * 200;
+    const routerCost = (routerTokens / 1_000_000) * (routerInputPrice + routerOutputPrice);
+    const inputCost = (cb.queryCount * queryTypes.find(qt => qt.id === cb.id)!.avgContextTokens / 1_000_000) * reasoningInputPrice;
+    const outputCost = (cb.queryCount * queryTypes.find(qt => qt.id === cb.id)!.avgOutputTokens / 1_000_000) * reasoningOutputPrice;
+    return sum + routerCost + inputCost + outputCost;
+  }, 0);
+  
+  const savingsPercent = baselineCost > 0 ? ((baselineCost - totalCost) / baselineCost) * 100 : 0;
+  const maxCost = Math.max(...costBreakdown.map(cb => cb.totalCost), 0.01);
+  
+  const colorClasses: Record<string, { bg: string; border: string; text: string; bar: string }> = {
+    amber: { bg: "bg-amber-500/10", border: "border-amber-500/30", text: "text-amber-400", bar: "bg-amber-500" },
+    rose: { bg: "bg-rose-500/10", border: "border-rose-500/30", text: "text-rose-400", bar: "bg-rose-500" },
+    sky: { bg: "bg-sky-500/10", border: "border-sky-500/30", text: "text-sky-400", bar: "bg-sky-500" },
+    pink: { bg: "bg-pink-500/10", border: "border-pink-500/30", text: "text-pink-400", bar: "bg-pink-500" },
+  };
 
   return (
     <div className="space-y-6">
-      {/* Inputs */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      {/* Main Controls */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <label className="text-sm font-medium text-foreground">
+              Monthly Queries
+          </label>
+            <button
+              onClick={() => setIsConfigOpen(!isConfigOpen)}
+              className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md transition-all duration-200",
+                isConfigOpen 
+                  ? "bg-cyan-500/20 text-cyan-400" 
+                  : "bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80"
+              )}
+            >
+              <Settings className={cn("w-3.5 h-3.5 transition-transform duration-300", isConfigOpen && "rotate-90")} />
+              Configure
+            </button>
+          </div>
+          <span className="text-2xl font-bold text-cyan-400 tabular-nums">
+            {monthlyQueries.toLocaleString()}
+          </span>
+        </div>
+        
+          <input
+            type="range"
+          min="1000"
+          max="100000"
+          step="1000"
+          value={monthlyQueries}
+          onChange={(e) => setMonthlyQueries(Number(e.target.value))}
+          className="w-full h-2 bg-muted rounded-full appearance-none cursor-pointer
+            [&::-webkit-slider-thumb]:appearance-none
+            [&::-webkit-slider-thumb]:w-5
+            [&::-webkit-slider-thumb]:h-5
+            [&::-webkit-slider-thumb]:rounded-full
+            [&::-webkit-slider-thumb]:bg-cyan-400
+            [&::-webkit-slider-thumb]:shadow-lg
+            [&::-webkit-slider-thumb]:cursor-grab"
+          />
+        </div>
+
+      {/* Configuration Panel */}
+      <div 
+        className={cn(
+          "overflow-hidden transition-all duration-300 ease-out",
+          isConfigOpen ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"
+        )}
+      >
+        <div className="bg-card border border-border rounded-xl p-5 space-y-6">
+          {/* Query Distribution */}
         <div>
-          <label className="block text-sm text-muted-foreground mb-2">
-            Monthly Queries: <span className="text-foreground font-medium">{queries.toLocaleString()}</span>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+              Query Distribution
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div>
+                <label className="text-xs text-amber-400 block mb-1.5">Rules Queries</label>
+                <div className="flex items-center gap-2">
+          <input
+            type="range"
+                    min="0"
+                    max="100"
+                    value={rulesQueriesPercent}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      const remaining = 100 - val - tacticalPercent;
+                      if (remaining >= 0) {
+                        setRulesQueriesPercent(val);
+                        setCreatureLookupPercent(Math.max(0, remaining - sessionPercent));
+                      }
+                    }}
+                    className="w-full h-1.5 bg-muted rounded-full appearance-none cursor-pointer
+                      [&::-webkit-slider-thumb]:appearance-none
+                      [&::-webkit-slider-thumb]:w-3
+                      [&::-webkit-slider-thumb]:h-3
+                      [&::-webkit-slider-thumb]:rounded-full
+                      [&::-webkit-slider-thumb]:bg-amber-400"
+                  />
+                  <span className="text-xs text-amber-400 font-medium w-8">{rulesQueriesPercent}%</span>
+                </div>
+        </div>
+        <div>
+                <label className="text-xs text-rose-400 block mb-1.5">Creature Lookups</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={creatureLookupPercent}
+                    onChange={(e) => setCreatureLookupPercent(Math.min(Number(e.target.value), 100 - rulesQueriesPercent - tacticalPercent))}
+                    className="w-full h-1.5 bg-muted rounded-full appearance-none cursor-pointer
+                      [&::-webkit-slider-thumb]:appearance-none
+                      [&::-webkit-slider-thumb]:w-3
+                      [&::-webkit-slider-thumb]:h-3
+                      [&::-webkit-slider-thumb]:rounded-full
+                      [&::-webkit-slider-thumb]:bg-rose-400"
+                  />
+                  <span className="text-xs text-rose-400 font-medium w-8">{creatureLookupPercent}%</span>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-sky-400 block mb-1.5">Tactical (Reasoning)</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={tacticalPercent}
+                    onChange={(e) => setTacticalPercent(Math.min(Number(e.target.value), 100 - rulesQueriesPercent - creatureLookupPercent))}
+                    className="w-full h-1.5 bg-muted rounded-full appearance-none cursor-pointer
+                      [&::-webkit-slider-thumb]:appearance-none
+                      [&::-webkit-slider-thumb]:w-3
+                      [&::-webkit-slider-thumb]:h-3
+                      [&::-webkit-slider-thumb]:rounded-full
+                      [&::-webkit-slider-thumb]:bg-sky-400"
+                  />
+                  <span className="text-xs text-sky-400 font-medium w-8">{tacticalPercent}%</span>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-pink-400 block mb-1.5">Session Queries</label>
+                <div className="flex items-center gap-2">
+                  <div className="w-full h-1.5 bg-pink-500/30 rounded-full" />
+                  <span className="text-xs text-pink-400 font-medium w-8">{sessionPercent}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Model Pricing */}
+          <div>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+              Model Pricing ($/M tokens)
+            </p>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2 p-3 rounded-lg bg-muted/20">
+                <div className="text-xs font-medium text-muted-foreground">Router (Small)</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Input</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={routerInputPrice}
+                      onChange={(e) => setRouterInputPrice(Number(e.target.value))}
+                      className="w-full px-2 py-1 bg-muted border border-border rounded text-xs tabular-nums"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Output</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={routerOutputPrice}
+                      onChange={(e) => setRouterOutputPrice(Number(e.target.value))}
+                      className="w-full px-2 py-1 bg-muted border border-border rounded text-xs tabular-nums"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2 p-3 rounded-lg bg-muted/20">
+                <div className="text-xs font-medium text-muted-foreground">Standard</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Input</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={standardInputPrice}
+                      onChange={(e) => setStandardInputPrice(Number(e.target.value))}
+                      className="w-full px-2 py-1 bg-muted border border-border rounded text-xs tabular-nums"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Output</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={standardOutputPrice}
+                      onChange={(e) => setStandardOutputPrice(Number(e.target.value))}
+                      className="w-full px-2 py-1 bg-muted border border-border rounded text-xs tabular-nums"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2 p-3 rounded-lg bg-muted/20">
+                <div className="text-xs font-medium text-muted-foreground">Reasoning</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Input</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={reasoningInputPrice}
+                      onChange={(e) => setReasoningInputPrice(Number(e.target.value))}
+                      className="w-full px-2 py-1 bg-muted border border-border rounded text-xs tabular-nums"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground">Output</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={reasoningOutputPrice}
+                      onChange={(e) => setReasoningOutputPrice(Number(e.target.value))}
+                      className="w-full px-2 py-1 bg-muted border border-border rounded text-xs tabular-nums"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Caching Settings */}
+          <div>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+              Caching Economics
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs text-emerald-400 block mb-1.5">
+                  Cache Read Price (% of input price): <span className="font-medium">{cacheReadDiscount}%</span>
           </label>
           <input
             type="range"
-            min="500"
-            max="50000"
-            step="500"
-            value={queries}
-            onChange={(e) => setQueries(Number(e.target.value))}
-            className="w-full accent-cyan-400"
+                  min="5"
+                  max="50"
+                  value={cacheReadDiscount}
+                  onChange={(e) => setCacheReadDiscount(Number(e.target.value))}
+                  className="w-full h-1.5 bg-muted rounded-full appearance-none cursor-pointer
+                    [&::-webkit-slider-thumb]:appearance-none
+                    [&::-webkit-slider-thumb]:w-3
+                    [&::-webkit-slider-thumb]:h-3
+                    [&::-webkit-slider-thumb]:rounded-full
+                    [&::-webkit-slider-thumb]:bg-emerald-400"
           />
         </div>
         <div>
-          <label className="block text-sm text-muted-foreground mb-2">
-            Avg Context Tokens: <span className="text-foreground font-medium">{avgContextTokens.toLocaleString()}</span>
-          </label>
-          <input
-            type="range"
-            min="1000"
-            max="16000"
-            step="500"
-            value={avgContextTokens}
-            onChange={(e) => setAvgContextTokens(Number(e.target.value))}
-            className="w-full accent-cyan-400"
-          />
-        </div>
-        <div>
-          <label className="block text-sm text-muted-foreground mb-2">
-            Avg Output Tokens: <span className="text-foreground font-medium">{avgOutputTokens.toLocaleString()}</span>
-          </label>
-          <input
-            type="range"
-            min="100"
-            max="2000"
-            step="100"
-            value={avgOutputTokens}
-            onChange={(e) => setAvgOutputTokens(Number(e.target.value))}
-            className="w-full accent-cyan-400"
-          />
-        </div>
-        <div>
-          <label className="block text-sm text-muted-foreground mb-2">
-            Cache Hit Rate: <span className="text-foreground font-medium">{cacheHitRate}%</span>
+                <label className="text-xs text-emerald-400 block mb-1.5">
+                  Global Cache Hit Rate: <span className="font-medium">{globalCacheHitRate}%</span>
           </label>
           <input
             type="range"
             min="0"
-            max="90"
-            step="5"
-            value={cacheHitRate}
-            onChange={(e) => setCacheHitRate(Number(e.target.value))}
-            className="w-full accent-emerald-400"
-          />
+                  max="95"
+                  value={globalCacheHitRate}
+                  onChange={(e) => setGlobalCacheHitRate(Number(e.target.value))}
+                  className="w-full h-1.5 bg-muted rounded-full appearance-none cursor-pointer
+                    [&::-webkit-slider-thumb]:appearance-none
+                    [&::-webkit-slider-thumb]:w-3
+                    [&::-webkit-slider-thumb]:h-3
+                    [&::-webkit-slider-thumb]:rounded-full
+                    [&::-webkit-slider-thumb]:bg-emerald-400"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Results */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      {/* Summary Cards */}
+      <div className="grid gap-4 sm:grid-cols-4">
         <div className="p-4 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
           <div className="flex items-center gap-2 mb-1">
             <Clock className="w-4 h-4 text-cyan-400" />
             <span className="text-xs text-muted-foreground">Total Tokens</span>
           </div>
-          <div className="text-lg font-bold text-cyan-400">
-            {((totalInputTokens + queries * avgOutputTokens) / 1_000_000).toFixed(2)}M
+          <div className="text-lg font-bold text-cyan-400 tabular-nums">
+            {(totalTokens / 1_000_000).toFixed(2)}M
           </div>
         </div>
         <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
           <div className="flex items-center gap-2 mb-1">
-            <DollarSign className="w-4 h-4 text-emerald-400" />
-            <span className="text-xs text-muted-foreground">Monthly Cost</span>
+            <Database className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs text-muted-foreground">Cached Tokens</span>
           </div>
-          <div className="text-lg font-bold text-emerald-400">
-            ${totalCost.toFixed(2)}
+          <div className="text-lg font-bold text-emerald-400 tabular-nums">
+            {(totalCachedTokens / 1_000_000).toFixed(2)}M
           </div>
         </div>
         <div className="p-4 rounded-lg bg-violet-500/10 border border-violet-500/30">
           <div className="flex items-center gap-2 mb-1">
-            <CheckCircle className="w-4 h-4 text-violet-400" />
-            <span className="text-xs text-muted-foreground">Routing Savings</span>
+            <DollarSign className="w-4 h-4 text-violet-400" />
+            <span className="text-xs text-muted-foreground">Monthly Cost</span>
           </div>
-          <div className="text-lg font-bold text-violet-400">
-            {routingSavingsPercent.toFixed(0)}%
+          <div className="text-lg font-bold text-violet-400 tabular-nums">
+            ${totalCost.toFixed(2)}
+          </div>
+        </div>
+        <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+          <div className="flex items-center gap-2 mb-1">
+            <CheckCircle className="w-4 h-4 text-amber-400" />
+            <span className="text-xs text-muted-foreground">vs Baseline</span>
+          </div>
+          <div className="text-lg font-bold text-amber-400 tabular-nums">
+            {savingsPercent.toFixed(0)}% saved
           </div>
         </div>
       </div>
 
-      {/* Cost Breakdown */}
+      {/* Cost by Query Type */}
       <div className="p-4 rounded-lg bg-muted/30 border border-border">
-        <h4 className="text-sm font-medium text-foreground mb-3">Cost Breakdown by Component</h4>
-        <div className="space-y-2 text-xs text-muted-foreground">
-          <div className="flex justify-between">
-            <span>Router (small model)</span>
-            <span>${routerCost.toFixed(2)}</span>
+        <h4 className="text-sm font-medium text-foreground mb-4">Cost Breakdown by Query Type</h4>
+        <div className="space-y-3">
+          {costBreakdown.map((cb) => {
+            const colors = colorClasses[cb.color];
+            return (
+              <div key={cb.id} className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className={cn("font-medium", colors.text)}>{cb.name}</span>
+                    <span className="text-muted-foreground">
+                      {cb.queryCount.toLocaleString()} queries · {cb.modelTier}
+                    </span>
           </div>
-          <div className="flex justify-between">
-            <span>Standard tier (90% of queries)</span>
-            <span>${(standardInputCost + standardOutputCost).toFixed(2)}</span>
+                  <span className="font-medium text-foreground tabular-nums">${cb.totalCost.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between">
-            <span>Reasoning tier (10% of queries)</span>
-            <span>${(reasoningInputCost + reasoningOutputCost).toFixed(2)}</span>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className={cn("h-full rounded-full transition-all duration-500", colors.bar)}
+                    style={{ width: `${(cb.totalCost / maxCost) * 100}%`, opacity: 0.6 }}
+                  />
           </div>
-          <div className="flex justify-between">
-            <span>Cached tokens ({cacheHitRate}% hit rate)</span>
-            <span>${cachedCost.toFixed(2)}</span>
+                <div className="flex gap-4 text-[10px] text-muted-foreground">
+                  <span>Router: ${cb.routerCost.toFixed(2)}</span>
+                  <span>Input: ${cb.inputCost.toFixed(2)}</span>
+                  <span>Output: ${cb.outputCost.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between pt-2 border-t border-border text-foreground font-medium">
-            <span>Total</span>
-            <span>${totalCost.toFixed(2)}/month</span>
           </div>
+            );
+          })}
+        </div>
+        
+        <div className="mt-4 pt-4 border-t border-border flex justify-between items-center">
+          <span className="text-sm font-medium text-foreground">Total Monthly Cost</span>
+          <span className="text-lg font-bold text-emerald-400 tabular-nums">${totalCost.toFixed(2)}</span>
+        </div>
+      </div>
+
+      {/* Comparison */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="p-4 rounded-lg bg-rose-500/10 border border-rose-500/30">
+          <div className="text-xs text-muted-foreground mb-1">Without Optimization</div>
+          <div className="text-xl font-bold text-rose-400 tabular-nums">${baselineCost.toFixed(2)}/mo</div>
+          <p className="text-xs text-muted-foreground mt-2">
+            All queries to reasoning model, no caching
+          </p>
+        </div>
+        <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+          <div className="text-xs text-muted-foreground mb-1">With Routing + Caching</div>
+          <div className="text-xl font-bold text-emerald-400 tabular-nums">${totalCost.toFixed(2)}/mo</div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Smart routing, {globalCacheHitRate}% cache hit rate
+          </p>
         </div>
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Costs are illustrative. Actual costs vary by provider and model. The key insight: routing + caching 
-        can reduce costs by 60-80% compared to using reasoning models for everything.
+        Costs are illustrative. Adjust pricing in the config panel to match your provider. 
+        Key insight: routing simple queries to standard models + aggressive caching = 60-80% cost reduction.
+      </p>
+    </div>
+  );
+}
+
+// =============================================================================
+// Intake Agent Pipeline Visualization
+// =============================================================================
+
+interface PipelineStep {
+  id: string;
+  name: string;
+  description: string;
+  status: "pending" | "active" | "complete";
+  output?: string;
+}
+
+function IntakeAgentPipeline() {
+  const [currentStep, setCurrentStep] = useState(-1);
+  const [isRunning, setIsRunning] = useState(false);
+  const [proposedSchema, setProposedSchema] = useState<object | null>(null);
+  const [isApproved, setIsApproved] = useState(false);
+
+  const steps: PipelineStep[] = [
+    { id: "parse", name: "PDF Parsing", description: "Extract raw content from rulebook", status: currentStep >= 0 ? (currentStep === 0 ? "active" : "complete") : "pending" },
+    { id: "classify", name: "Content Classification", description: "Identify rules, entities, actions", status: currentStep >= 1 ? (currentStep === 1 ? "active" : "complete") : "pending" },
+    { id: "extract", name: "Schema Inference", description: "AI proposes schema structure", status: currentStep >= 2 ? (currentStep === 2 ? "active" : "complete") : "pending" },
+    { id: "review", name: "Human Review", description: "Approve or edit proposed schema", status: currentStep >= 3 ? (currentStep === 3 ? "active" : "complete") : "pending" },
+    { id: "store", name: "Database Storage", description: "Save versioned schema + instances", status: currentStep >= 4 ? (currentStep === 4 ? "active" : "complete") : "pending" },
+    { id: "tool", name: "Tool Generation", description: "Create callable tools from schema", status: currentStep >= 5 ? (currentStep === 5 ? "active" : "complete") : "pending" },
+  ];
+
+  const sampleGrappleSchema = {
+    name: "Grapple",
+    type: "action",
+    version: "1.0",
+    schema: {
+      attacker: "CreatureRef",
+      target: "CreatureRef",
+      check: "d20 + STR + proficiency",
+      contest: "target.Athletics or Acrobatics",
+      effect: "target gains 'grappled' condition",
+    },
+    validators: ["attacker_within_reach", "target_not_huge"],
+  };
+
+  const runPipeline = () => {
+    setIsRunning(true);
+    setCurrentStep(-1);
+    setProposedSchema(null);
+    setIsApproved(false);
+
+    const advance = (step: number) => {
+      if (step <= 5) {
+        setCurrentStep(step);
+        if (step === 2) {
+          setTimeout(() => setProposedSchema(sampleGrappleSchema), 600);
+        }
+        if (step < 3 || (step >= 3 && isApproved)) {
+          setTimeout(() => advance(step + 1), 1500);
+        } else if (step === 3) {
+          setIsRunning(false);
+        }
+      } else {
+        setIsRunning(false);
+      }
+    };
+
+    setTimeout(() => advance(0), 500);
+  };
+
+  const approveSchema = () => {
+    setIsApproved(true);
+    setCurrentStep(4);
+    setTimeout(() => setCurrentStep(5), 1500);
+    setTimeout(() => setIsRunning(false), 3000);
+  };
+
+  const statusColors = {
+    pending: "bg-muted/20 border-border text-muted-foreground",
+    active: "bg-cyan-500/20 border-cyan-500/40 text-cyan-400",
+    complete: "bg-emerald-500/20 border-emerald-500/40 text-emerald-400",
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Pipeline Steps */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+        {steps.map((step, i) => (
+          <div
+            key={step.id}
+            className={cn(
+              "p-3 rounded-lg border transition-all duration-300",
+              statusColors[step.status]
+            )}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <span className={cn(
+                "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold",
+                step.status === "complete" ? "bg-emerald-500/30" : 
+                step.status === "active" ? "bg-cyan-500/30" : "bg-muted"
+              )}>
+                {step.status === "complete" ? "✓" : i + 1}
+              </span>
+              <span className="text-xs font-medium truncate">{step.name}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground line-clamp-2">{step.description}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Proposed Schema Preview */}
+      {proposedSchema && currentStep >= 2 && (
+        <div className={cn(
+          "p-4 rounded-lg border animate-in fade-in slide-in-from-top-2",
+          isApproved ? "bg-emerald-500/10 border-emerald-500/30" : "bg-amber-500/10 border-amber-500/30"
+        )}>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className={cn("font-medium", isApproved ? "text-emerald-400" : "text-amber-400")}>
+              {isApproved ? "Approved Schema: Grapple Action" : "Proposed Schema: Grapple Action"}
+            </h4>
+            {!isApproved && currentStep === 3 && (
+              <button
+                onClick={approveSchema}
+                className="px-3 py-1.5 rounded bg-emerald-500/20 text-emerald-400 text-xs hover:bg-emerald-500/30 transition-all"
+              >
+                Approve Schema
+              </button>
+            )}
+          </div>
+          <div className="font-mono text-xs p-3 rounded bg-background/50 space-y-1">
+            <div><span className="text-muted-foreground">name: </span><span className="text-cyan-400">&quot;Grapple&quot;</span></div>
+            <div><span className="text-muted-foreground">type: </span><span className="text-violet-400">&quot;action&quot;</span></div>
+            <div><span className="text-muted-foreground">check: </span><span className="text-amber-400">&quot;d20 + STR + proficiency&quot;</span></div>
+            <div><span className="text-muted-foreground">contest: </span><span className="text-amber-400">&quot;Athletics or Acrobatics&quot;</span></div>
+            <div><span className="text-muted-foreground">effect: </span><span className="text-emerald-400">&quot;target gains grappled&quot;</span></div>
+          </div>
+          {currentStep === 3 && !isApproved && (
+            <p className="text-xs text-amber-400 mt-2">
+              ⚠️ Awaiting human approval before storing schema
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Tool Generated Notification */}
+      {currentStep >= 5 && (
+        <div className="p-4 rounded-lg bg-violet-500/10 border border-violet-500/30 animate-in fade-in slide-in-from-bottom-2">
+          <div className="flex items-center gap-2 mb-2">
+            <Zap className="w-4 h-4 text-violet-400" />
+            <span className="font-medium text-violet-400">Tool Generated</span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            <span className="font-mono text-violet-400">execute_grapple(attacker, target)</span> is now available 
+            in the tool registry. Player Assistant can call this when players attempt to grapple.
+          </p>
+        </div>
+      )}
+
+      {/* Controls */}
+      <div className="flex gap-2">
+        <button
+          onClick={runPipeline}
+          disabled={isRunning && currentStep !== 3}
+          className="flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 disabled:opacity-50"
+        >
+          {isRunning && currentStep !== 3 ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
+          {currentStep === -1 ? "Run Pipeline" : isRunning ? "Processing..." : "Run Again"}
+        </button>
+        <button
+          onClick={() => { setCurrentStep(-1); setProposedSchema(null); setIsApproved(false); setIsRunning(false); }}
+          className="flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-muted text-muted-foreground hover:bg-muted/80"
+        >
+          <RotateCcw className="w-3 h-3" />
+          Reset
+        </button>
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        The pipeline pauses at human review—schemas require approval before they become live tools.
+      </p>
+    </div>
+  );
+}
+
+// =============================================================================
+// Player Assistant Demo
+// =============================================================================
+
+interface ChatMessage {
+  role: "user" | "assistant" | "system";
+  content: string;
+  toolCall?: { name: string; args: object; result?: string };
+}
+
+function PlayerAssistantDemo() {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentPhase, setCurrentPhase] = useState<"idle" | "thinking" | "tool" | "result">("idle");
+
+  const sampleConversation: ChatMessage[] = [
+    { role: "user", content: "I want to grapple the goblin!" },
+    { role: "system", content: "Tool lookup: execute_grapple found in registry" },
+    { 
+      role: "assistant", 
+      content: "Rolling grapple check for Thorin against Goblin...",
+      toolCall: {
+        name: "execute_grapple",
+        args: { attacker: "thorin", target: "goblin_1", attacker_str: 3, attacker_prof: 2 },
+      }
+    },
+    { 
+      role: "system", 
+      content: "Tool result",
+      toolCall: {
+        name: "execute_grapple",
+        args: {},
+        result: "Roll: 14 + 3 (STR) + 2 (prof) = 19 vs Goblin Acrobatics: 12. SUCCESS!"
+      }
+    },
+    { role: "assistant", content: "Thorin's powerful hands clamp down on the goblin! You rolled 19 vs the goblin's 12 Acrobatics check. The goblin is now grappled and can't move away from you. What do you want to do next?" },
+  ];
+
+  const runDemo = () => {
+    setIsProcessing(true);
+    setMessages([]);
+    setCurrentPhase("idle");
+
+    sampleConversation.forEach((msg, i) => {
+      setTimeout(() => {
+        setMessages(prev => [...prev, msg]);
+        if (i === 0) setCurrentPhase("thinking");
+        if (i === 1) setCurrentPhase("tool");
+        if (i === 3) setCurrentPhase("result");
+        if (i === sampleConversation.length - 1) {
+          setCurrentPhase("idle");
+          setIsProcessing(false);
+        }
+      }, i * 1200);
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Chat Display */}
+      <div className="h-[300px] overflow-y-auto rounded-lg border border-border bg-muted/10 p-4 space-y-3">
+        {messages.length === 0 && (
+          <div className="text-sm text-muted-foreground text-center py-8">
+            Click &quot;Run Demo&quot; to see the Player Assistant use dynamically-created tools
+          </div>
+        )}
+        {messages.map((msg, i) => (
+          <div
+            key={i}
+            className={cn(
+              "p-3 rounded-lg animate-in fade-in slide-in-from-bottom-2",
+              msg.role === "user" ? "bg-cyan-500/10 border border-cyan-500/30 ml-8" :
+              msg.role === "system" ? "bg-amber-500/10 border border-amber-500/30 mx-4" :
+              "bg-violet-500/10 border border-violet-500/30 mr-8"
+            )}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              {msg.role === "user" && <Users className="w-3 h-3 text-cyan-400" />}
+              {msg.role === "assistant" && <Bot className="w-3 h-3 text-violet-400" />}
+              {msg.role === "system" && <Settings className="w-3 h-3 text-amber-400" />}
+              <span className={cn(
+                "text-[10px] font-medium uppercase",
+                msg.role === "user" ? "text-cyan-400" :
+                msg.role === "system" ? "text-amber-400" : "text-violet-400"
+              )}>
+                {msg.role === "user" ? "Player (Thorin)" : msg.role === "system" ? "System" : "Assistant"}
+              </span>
+            </div>
+            
+            {msg.toolCall && (
+              <div className="font-mono text-[10px] p-2 rounded bg-background/50 mb-2">
+                {msg.toolCall.result ? (
+                  <span className="text-emerald-400">{msg.toolCall.result}</span>
+                ) : (
+                  <>
+                    <span className="text-violet-400">{msg.toolCall.name}</span>
+                    <span className="text-muted-foreground">(</span>
+                    <span className="text-amber-400">{JSON.stringify(msg.toolCall.args)}</span>
+                    <span className="text-muted-foreground">)</span>
+                  </>
+                )}
+              </div>
+            )}
+            
+            <p className="text-xs text-foreground">{msg.content}</p>
+          </div>
+        ))}
+        
+        {isProcessing && currentPhase === "thinking" && (
+          <div className="flex items-center gap-2 p-3 text-xs text-muted-foreground">
+            <RefreshCw className="w-3 h-3 animate-spin" />
+            Assistant is thinking...
+          </div>
+        )}
+      </div>
+
+      {/* Phase Indicator */}
+      <div className="flex items-center gap-2 text-xs">
+        <span className="text-muted-foreground">Phase:</span>
+        {["idle", "thinking", "tool", "result"].map((phase) => (
+          <span
+            key={phase}
+            className={cn(
+              "px-2 py-0.5 rounded",
+              currentPhase === phase ? "bg-cyan-500/20 text-cyan-400" : "bg-muted/30 text-muted-foreground"
+            )}
+          >
+            {phase}
+          </span>
+        ))}
+      </div>
+
+      {/* Controls */}
+      <div className="flex gap-2">
+        <button
+          onClick={runDemo}
+          disabled={isProcessing}
+          className="flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 disabled:opacity-50"
+        >
+          <Play className="w-3 h-3" />
+          Run Demo
+        </button>
+        <button
+          onClick={() => { setMessages([]); setCurrentPhase("idle"); }}
+          className="flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-muted text-muted-foreground hover:bg-muted/80"
+        >
+          <RotateCcw className="w-3 h-3" />
+          Clear
+        </button>
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        The <span className="text-violet-400">execute_grapple</span> tool was dynamically created from the 
+        parsed rules. The assistant looks up player stats, calls the tool, and narrates the result.
       </p>
     </div>
   );
@@ -786,6 +1482,207 @@ export function CapstoneSection() {
           each field. The human reviews the generated schema and can edit before committing.
         </p>
 
+        {/* Intake Agent Pipeline */}
+        <h3 id="intake-agent-pipeline" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Intake Agent Pipeline
+        </h3>
+
+        <p className="text-muted-foreground">
+          After parsing PDFs, an <strong className="text-foreground">Intake Agent</strong> processes the 
+          extracted content. This agent doesn&apos;t just store data—it <em>creates the infrastructure</em> 
+          for that data: schemas, validators, and callable tools.
+        </p>
+
+        <InteractiveWrapper
+          title="Interactive: Intake Agent Pipeline"
+          description="Watch the full pipeline from PDF to callable tool"
+          icon="⚙️"
+          colorTheme="cyan"
+          minHeight="auto"
+        >
+          <IntakeAgentPipeline />
+        </InteractiveWrapper>
+
+        <div className="my-6 p-5 rounded-xl bg-violet-500/10 border border-violet-500/30">
+          <h4 className="text-lg font-semibold text-violet-400 mb-3">What the Intake Agent Does</h4>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="p-3 rounded-lg bg-background/50">
+              <div className="text-sm font-medium text-foreground mb-1">Schema Inference</div>
+              <p className="text-xs text-muted-foreground">
+                Analyzes parsed content to propose schemas. &quot;Grappling&quot; becomes an Action type 
+                with check formulas, effects, and constraints.
+              </p>
+            </div>
+            <div className="p-3 rounded-lg bg-background/50">
+              <div className="text-sm font-medium text-foreground mb-1">Tool Generation</div>
+              <p className="text-xs text-muted-foreground">
+                Automatically creates tools from approved schemas. execute_grapple() is generated 
+                with validation against the Action schema.
+              </p>
+            </div>
+            <div className="p-3 rounded-lg bg-background/50">
+              <div className="text-sm font-medium text-foreground mb-1">Skill Attachment</div>
+              <p className="text-xs text-muted-foreground">
+                Links generated tools to appropriate agents. Combat tools go to the Combat Agent, 
+                magic tools to the Spellcasting Agent.
+              </p>
+            </div>
+            <div className="p-3 rounded-lg bg-background/50">
+              <div className="text-sm font-medium text-foreground mb-1">Index & Embed</div>
+              <p className="text-xs text-muted-foreground">
+                Creates embeddings for semantic search. &quot;How do I grab someone?&quot; finds the 
+                grappling rules via vector similarity.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <Callout variant="important" title="Human-in-the-Loop Gate">
+          <p className="m-0">
+            The pipeline <strong>pauses for human approval</strong> before schemas become live. This 
+            prevents AI mistakes from polluting your tool registry. The GM reviews proposed schemas, 
+            can edit field names or types, and only then does the system generate the actual tool.
+          </p>
+        </Callout>
+
+        {/* Agents Building Agents */}
+        <h3 id="agents-building-agents" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Agents Building Agents
+        </h3>
+
+        <p className="text-muted-foreground">
+          The most powerful pattern: the Intake Agent doesn&apos;t just create tools—it <strong className="text-foreground">creates 
+          specialized agents</strong> for each game system. When you ingest D&D 5e, you get a D&D Combat Agent. 
+          Ingest Pathfinder, get a Pathfinder Actions Agent.
+        </p>
+
+        <div className="grid gap-4 sm:grid-cols-2 mt-4">
+          <Card variant="default">
+            <CardContent>
+              <div className="flex items-center gap-2 mb-2">
+                <Bot className="w-4 h-4 text-violet-400" />
+                <h4 className="font-medium text-foreground">Agent as Data</h4>
+              </div>
+              <p className="text-sm text-muted-foreground m-0">
+                Agents are stored as database rows: name, system prompt template, available tools, 
+                model config, constraints. No code changes needed to add new agents.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <div className="flex items-center gap-2 mb-2">
+                <GitBranch className="w-4 h-4 text-cyan-400" />
+                <h4 className="font-medium text-foreground">System-Specific</h4>
+              </div>
+              <p className="text-sm text-muted-foreground m-0">
+                D&D Agent gets D&D tools and D&D system prompts. Pathfinder Agent gets Pathfinder 
+                equivalents. Same player query routes to the appropriate specialized agent.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <div className="flex items-center gap-2 mb-2">
+                <Shield className="w-4 h-4 text-amber-400" />
+                <h4 className="font-medium text-foreground">Human Approval</h4>
+              </div>
+              <p className="text-sm text-muted-foreground m-0">
+                New agents go through a review queue. GM verifies the system prompt makes sense, 
+                tools are appropriate, constraints are reasonable before activation.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <div className="flex items-center gap-2 mb-2">
+                <RefreshCw className="w-4 h-4 text-emerald-400" />
+                <h4 className="font-medium text-foreground">Hot Reload</h4>
+              </div>
+              <p className="text-sm text-muted-foreground m-0">
+                Agent definitions load dynamically. Update a system prompt in the database, it&apos;s 
+                live immediately. No deployment, no restart.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="my-6 p-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+          <h4 className="text-lg font-semibold text-emerald-400 mb-3">Dynamic Agent Configuration</h4>
+          <div className="font-mono text-xs p-3 rounded bg-background/50 space-y-1">
+            <div className="text-muted-foreground">{"// Agent stored as data in database"}</div>
+            <div><span className="text-cyan-400">id:</span> <span className="text-amber-400">&quot;dnd5e-combat-agent&quot;</span></div>
+            <div><span className="text-cyan-400">name:</span> <span className="text-amber-400">&quot;D&D 5e Combat Assistant&quot;</span></div>
+            <div><span className="text-cyan-400">system:</span> <span className="text-amber-400">&quot;dnd5e&quot;</span></div>
+            <div><span className="text-cyan-400">tools:</span> <span className="text-violet-400">[&quot;execute_grapple&quot;, &quot;roll_attack&quot;, &quot;apply_condition&quot;]</span></div>
+            <div><span className="text-cyan-400">model:</span> <span className="text-amber-400">&quot;standard&quot;</span></div>
+            <div><span className="text-cyan-400">prompt:</span> <span className="text-amber-400">&quot;You help players with D&D 5e combat...&quot;</span></div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            New game system = new agent row. All configuration is data, not code.
+          </p>
+        </div>
+
+        {/* Player Assistant in Action */}
+        <h3 id="player-assistant-demo" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Player Assistant in Action
+        </h3>
+
+        <p className="text-muted-foreground">
+          See how the <strong className="text-foreground">dynamically created tools</strong> work in practice. 
+          When a player says &quot;I want to grapple the goblin&quot;, the assistant uses the execute_grapple tool 
+          that was generated from the parsed rules.
+        </p>
+
+        <InteractiveWrapper
+          title="Interactive: Player Assistant Demo"
+          description="Watch the assistant use dynamically-generated tools"
+          icon="🎮"
+          colorTheme="violet"
+          minHeight="auto"
+        >
+          <PlayerAssistantDemo />
+        </InteractiveWrapper>
+
+        <div className="my-6 p-5 rounded-xl bg-cyan-500/10 border border-cyan-500/30">
+          <h4 className="text-lg font-semibold text-cyan-400 mb-3">The Full Loop</h4>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-3 p-2 rounded bg-background/30">
+              <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs font-bold">1</span>
+              <span className="text-muted-foreground">
+                <strong className="text-foreground">PDF parsed</strong> → Grappling rules extracted
+              </span>
+            </div>
+            <div className="flex items-center gap-3 p-2 rounded bg-background/30">
+              <span className="w-6 h-6 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center text-xs font-bold">2</span>
+              <span className="text-muted-foreground">
+                <strong className="text-foreground">Schema inferred</strong> → Grapple action type created
+              </span>
+            </div>
+            <div className="flex items-center gap-3 p-2 rounded bg-background/30">
+              <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold">3</span>
+              <span className="text-muted-foreground">
+                <strong className="text-foreground">Human approves</strong> → Schema versioned and stored
+              </span>
+            </div>
+            <div className="flex items-center gap-3 p-2 rounded bg-background/30">
+              <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">4</span>
+              <span className="text-muted-foreground">
+                <strong className="text-foreground">Tool generated</strong> → execute_grapple in registry
+              </span>
+            </div>
+            <div className="flex items-center gap-3 p-2 rounded bg-background/30">
+              <span className="w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-xs font-bold">5</span>
+              <span className="text-muted-foreground">
+                <strong className="text-foreground">Player uses it</strong> → &quot;I grapple the goblin&quot; → tool called
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* Permission System Design */}
         <h3 id="permission-system" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
           Permission System Design
@@ -936,7 +1833,7 @@ export function CapstoneSection() {
           colorTheme="emerald"
           minHeight="auto"
         >
-          <CostArchitectureCalculator />
+          <EnhancedCostCalculator />
         </InteractiveWrapper>
 
         <div className="my-6 p-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30">

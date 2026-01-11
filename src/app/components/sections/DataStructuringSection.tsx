@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { InteractiveWrapper } from "@/app/components/visualizations/core";
@@ -18,6 +18,14 @@ import {
   Settings,
   Play,
   RefreshCw,
+  Table,
+  Hash,
+  Link2,
+  Clock,
+  FileJson,
+  Braces,
+  Wrench,
+  ChevronRight,
 } from "lucide-react";
 
 // =============================================================================
@@ -354,6 +362,580 @@ function AgentDataStructureDemo() {
 
       <p className="text-xs text-muted-foreground">
         Agents defined as data: skills, tools, and constraints are configurable without code changes
+      </p>
+    </div>
+  );
+}
+
+// =============================================================================
+// Production Schema Tables Visualizer
+// =============================================================================
+
+interface ObjectType {
+  id: string;
+  name: string;
+  version: string;
+  description: string;
+  schema: Record<string, string>;
+  embedding_dim: number;
+  created_at: string;
+}
+
+interface ObjectInstance {
+  id: string;
+  type_id: string;
+  type_version: string;
+  name: string;
+  data: Record<string, unknown>;
+  created_at: string;
+}
+
+interface Relation {
+  id: string;
+  from_type: string;
+  to_type: string;
+  relation_type: string;
+  cardinality: string;
+}
+
+const sampleObjectTypes: ObjectType[] = [
+  {
+    id: "creature",
+    name: "Creature",
+    version: "1.2",
+    description: "Any creature or monster in the game",
+    schema: {
+      name: "string",
+      hit_points: "number",
+      armor_class: "number",
+      challenge_rating: "number",
+      abilities: "AbilityScores",
+      actions: "Action[]",
+    },
+    embedding_dim: 1536,
+    created_at: "2024-01-15",
+  },
+  {
+    id: "action",
+    name: "Action",
+    version: "1.0",
+    description: "A game action like grappling, casting, or attacking",
+    schema: {
+      name: "string",
+      type: "'attack' | 'spell' | 'skill'",
+      dice_roll: "DiceExpression",
+      modifiers: "Modifier[]",
+      description: "string",
+    },
+    embedding_dim: 1536,
+    created_at: "2024-01-15",
+  },
+  {
+    id: "rule",
+    name: "Rule",
+    version: "2.1",
+    description: "A game rule or mechanic",
+    schema: {
+      name: "string",
+      category: "string",
+      text: "string",
+      examples: "string[]",
+      related_rules: "string[]",
+    },
+    embedding_dim: 1536,
+    created_at: "2024-02-01",
+  },
+];
+
+const sampleInstances: ObjectInstance[] = [
+  {
+    id: "goblin-001",
+    type_id: "creature",
+    type_version: "1.2",
+    name: "Goblin",
+    data: { hit_points: 7, armor_class: 15, challenge_rating: 0.25 },
+    created_at: "2024-03-10",
+  },
+  {
+    id: "troll-001",
+    type_id: "creature",
+    type_version: "1.2",
+    name: "Troll",
+    data: { hit_points: 84, armor_class: 15, challenge_rating: 5 },
+    created_at: "2024-03-10",
+  },
+  {
+    id: "grapple-001",
+    type_id: "action",
+    type_version: "1.0",
+    name: "Grapple",
+    data: { type: "skill", dice_roll: "1d20 + STR + proficiency" },
+    created_at: "2024-03-10",
+  },
+];
+
+const sampleRelations: Relation[] = [
+  { id: "rel-1", from_type: "creature", to_type: "action", relation_type: "has_action", cardinality: "1:N" },
+  { id: "rel-2", from_type: "action", to_type: "rule", relation_type: "governed_by", cardinality: "N:M" },
+  { id: "rel-3", from_type: "creature", to_type: "creature", relation_type: "summons", cardinality: "1:N" },
+];
+
+function ProductionSchemaVisualizer() {
+  const [activeTable, setActiveTable] = useState<"types" | "instances" | "relations">("types");
+  const [selectedType, setSelectedType] = useState<ObjectType | null>(null);
+  const [selectedInstance, setSelectedInstance] = useState<ObjectInstance | null>(null);
+
+  const tables = [
+    { id: "types", label: "object_types", count: sampleObjectTypes.length, color: "cyan" },
+    { id: "instances", label: "object_instances", count: sampleInstances.length, color: "violet" },
+    { id: "relations", label: "relations", count: sampleRelations.length, color: "amber" },
+  ] as const;
+
+  return (
+    <div className="space-y-4">
+      {/* Table Selector */}
+      <div className="flex flex-wrap gap-2">
+        {tables.map(table => (
+          <button
+            key={table.id}
+            onClick={() => {
+              setActiveTable(table.id);
+              setSelectedType(null);
+              setSelectedInstance(null);
+            }}
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono transition-all border",
+              activeTable === table.id
+                ? table.color === "cyan"
+                  ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/40"
+                  : table.color === "violet"
+                  ? "bg-violet-500/20 text-violet-400 border-violet-500/40"
+                  : "bg-amber-500/20 text-amber-400 border-amber-500/40"
+                : "bg-muted/20 text-muted-foreground border-border hover:bg-muted/30"
+            )}
+          >
+            <Table className="w-3 h-3" />
+            {table.label}
+            <span className="px-1.5 py-0.5 rounded bg-muted/50 text-[10px]">{table.count}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Table View */}
+      <div className="rounded-lg border border-border overflow-hidden">
+        {/* Table Header */}
+        <div className={cn(
+          "px-4 py-2 text-xs font-medium border-b",
+          activeTable === "types" ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30" :
+          activeTable === "instances" ? "bg-violet-500/10 text-violet-400 border-violet-500/30" :
+          "bg-amber-500/10 text-amber-400 border-amber-500/30"
+        )}>
+          {activeTable === "types" && (
+            <div className="grid grid-cols-6 gap-2">
+              <span>id</span>
+              <span>name</span>
+              <span>version</span>
+              <span>schema (JSONB)</span>
+              <span>embedding</span>
+              <span>created_at</span>
+            </div>
+          )}
+          {activeTable === "instances" && (
+            <div className="grid grid-cols-6 gap-2">
+              <span>id</span>
+              <span>type_id</span>
+              <span>type_version</span>
+              <span>name</span>
+              <span>data (JSONB)</span>
+              <span>created_at</span>
+            </div>
+          )}
+          {activeTable === "relations" && (
+            <div className="grid grid-cols-5 gap-2">
+              <span>id</span>
+              <span>from_type</span>
+              <span>to_type</span>
+              <span>relation_type</span>
+              <span>cardinality</span>
+            </div>
+          )}
+        </div>
+
+        {/* Table Body */}
+        <div className="divide-y divide-border bg-card">
+          {activeTable === "types" && sampleObjectTypes.map(type => (
+            <button
+              key={type.id}
+              onClick={() => setSelectedType(selectedType?.id === type.id ? null : type)}
+              className={cn(
+                "w-full px-4 py-2 text-xs font-mono text-left transition-all hover:bg-muted/30",
+                selectedType?.id === type.id && "bg-cyan-500/10"
+              )}
+            >
+              <div className="grid grid-cols-6 gap-2 items-center">
+                <span className="text-cyan-400">{type.id}</span>
+                <span className="text-foreground">{type.name}</span>
+                <span className="flex items-center gap-1">
+                  <GitBranch className="w-3 h-3 text-emerald-400" />
+                  <span className="text-emerald-400">v{type.version}</span>
+                </span>
+                <span className="text-muted-foreground truncate flex items-center gap-1">
+                  <FileJson className="w-3 h-3" />
+                  {Object.keys(type.schema).length} fields
+                </span>
+                <span className="text-muted-foreground">{type.embedding_dim}d</span>
+                <span className="text-muted-foreground">{type.created_at}</span>
+              </div>
+            </button>
+          ))}
+
+          {activeTable === "instances" && sampleInstances.map(instance => (
+            <button
+              key={instance.id}
+              onClick={() => setSelectedInstance(selectedInstance?.id === instance.id ? null : instance)}
+              className={cn(
+                "w-full px-4 py-2 text-xs font-mono text-left transition-all hover:bg-muted/30",
+                selectedInstance?.id === instance.id && "bg-violet-500/10"
+              )}
+            >
+              <div className="grid grid-cols-6 gap-2 items-center">
+                <span className="text-violet-400">{instance.id}</span>
+                <span className="text-cyan-400">{instance.type_id}</span>
+                <span className="flex items-center gap-1">
+                  <GitBranch className="w-3 h-3 text-emerald-400" />
+                  <span className="text-emerald-400">v{instance.type_version}</span>
+                </span>
+                <span className="text-foreground">{instance.name}</span>
+                <span className="text-muted-foreground truncate flex items-center gap-1">
+                  <FileJson className="w-3 h-3" />
+                  {Object.keys(instance.data).length} fields
+                </span>
+                <span className="text-muted-foreground">{instance.created_at}</span>
+              </div>
+            </button>
+          ))}
+
+          {activeTable === "relations" && sampleRelations.map(rel => (
+            <div key={rel.id} className="px-4 py-2 text-xs font-mono">
+              <div className="grid grid-cols-5 gap-2 items-center">
+                <span className="text-amber-400">{rel.id}</span>
+                <span className="text-cyan-400">{rel.from_type}</span>
+                <span className="text-cyan-400">{rel.to_type}</span>
+                <span className="text-foreground">{rel.relation_type}</span>
+                <span className="text-muted-foreground">{rel.cardinality}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Selected Type Detail */}
+      {selectedType && (
+        <div className="p-4 rounded-lg bg-cyan-500/10 border border-cyan-500/30 animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-medium text-cyan-400">{selectedType.name} Schema</h4>
+            <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
+              v{selectedType.version}
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">{selectedType.description}</p>
+          <div className="font-mono text-xs p-3 rounded bg-background/50 space-y-1">
+            {Object.entries(selectedType.schema).map(([key, value]) => (
+              <div key={key} className="flex gap-2">
+                <span className="text-cyan-400">{key}:</span>
+                <span className="text-amber-400">{value}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-3">
+            Instances must match this schema version. Version mismatch → validation error.
+          </p>
+        </div>
+      )}
+
+      {/* Selected Instance Detail */}
+      {selectedInstance && (
+        <div className="p-4 rounded-lg bg-violet-500/10 border border-violet-500/30 animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-medium text-violet-400">{selectedInstance.name}</h4>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Type:</span>
+              <span className="text-xs px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400">
+                {selectedInstance.type_id}
+              </span>
+              <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
+                v{selectedInstance.type_version}
+              </span>
+            </div>
+          </div>
+          <div className="font-mono text-xs p-3 rounded bg-background/50 space-y-1">
+            {Object.entries(selectedInstance.data).map(([key, value]) => (
+              <div key={key} className="flex gap-2">
+                <span className="text-violet-400">{key}:</span>
+                <span className="text-foreground">{JSON.stringify(value)}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-3">
+            Data validated against {selectedInstance.type_id} v{selectedInstance.type_version} schema
+          </p>
+        </div>
+      )}
+
+      <p className="text-xs text-muted-foreground">
+        Click rows to see schema/data details. Version matching ensures data integrity.
+      </p>
+    </div>
+  );
+}
+
+// =============================================================================
+// Dynamic Tool Generation Demo
+// =============================================================================
+
+interface ToolGenerationStep {
+  id: string;
+  label: string;
+  description: string;
+  color: string;
+}
+
+const toolGenerationSteps: ToolGenerationStep[] = [
+  { id: "schema", label: "Schema Definition", description: "Object type defines structure", color: "cyan" },
+  { id: "validator", label: "Zod Validator", description: "Generated from schema", color: "violet" },
+  { id: "tool", label: "Tool Definition", description: "Function with validation", color: "amber" },
+  { id: "registry", label: "Tool Registry", description: "Available to agents", color: "emerald" },
+];
+
+function DynamicToolGenerationDemo() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [selectedAction, setSelectedAction] = useState<"grapple" | "attack" | "cast">("grapple");
+
+  const actionSchemas = {
+    grapple: {
+      name: "Grapple",
+      schema: {
+        attacker_id: "string",
+        target_id: "string",
+        attacker_str: "number",
+        attacker_proficiency: "number",
+      },
+      diceRoll: "1d20 + STR + proficiency",
+      toolName: "execute_grapple",
+    },
+    attack: {
+      name: "Melee Attack",
+      schema: {
+        attacker_id: "string",
+        target_id: "string",
+        weapon: "string",
+        attacker_str: "number",
+      },
+      diceRoll: "1d20 + STR + proficiency (hit), weapon dice + STR (damage)",
+      toolName: "execute_melee_attack",
+    },
+    cast: {
+      name: "Spell Cast",
+      schema: {
+        caster_id: "string",
+        spell_name: "string",
+        targets: "string[]",
+        spell_level: "number",
+      },
+      diceRoll: "varies by spell",
+      toolName: "cast_spell",
+    },
+  };
+
+  const currentAction = actionSchemas[selectedAction];
+
+  useEffect(() => {
+    if (isPlaying) {
+      const timer = setTimeout(() => {
+        if (currentStep < toolGenerationSteps.length - 1) {
+          setCurrentStep(prev => prev + 1);
+        } else {
+          setIsPlaying(false);
+        }
+      }, 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [isPlaying, currentStep]);
+
+  const runAnimation = () => {
+    setCurrentStep(0);
+    setIsPlaying(true);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Action Selector */}
+      <div className="flex flex-wrap gap-2">
+        {(Object.keys(actionSchemas) as Array<keyof typeof actionSchemas>).map(action => (
+          <button
+            key={action}
+            onClick={() => {
+              setSelectedAction(action);
+              setCurrentStep(0);
+              setIsPlaying(false);
+            }}
+            className={cn(
+              "px-3 py-1.5 rounded text-xs transition-all",
+              selectedAction === action
+                ? "bg-cyan-500/20 text-cyan-400"
+                : "bg-muted/30 text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {actionSchemas[action].name}
+          </button>
+        ))}
+      </div>
+
+      {/* Pipeline Visualization */}
+      <div className="flex items-center justify-between gap-2 p-4 rounded-lg bg-muted/20 border border-border overflow-x-auto">
+        {toolGenerationSteps.map((step, i) => (
+          <div key={step.id} className="flex items-center gap-2">
+            <div
+              className={cn(
+                "flex flex-col items-center gap-2 p-3 rounded-lg border transition-all min-w-[100px]",
+                i <= currentStep
+                  ? step.color === "cyan"
+                    ? "bg-cyan-500/20 border-cyan-500/40"
+                    : step.color === "violet"
+                    ? "bg-violet-500/20 border-violet-500/40"
+                    : step.color === "amber"
+                    ? "bg-amber-500/20 border-amber-500/40"
+                    : "bg-emerald-500/20 border-emerald-500/40"
+                  : "bg-muted/10 border-border opacity-40"
+              )}
+            >
+              <div className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
+                i <= currentStep
+                  ? step.color === "cyan"
+                    ? "bg-cyan-500/30 text-cyan-400"
+                    : step.color === "violet"
+                    ? "bg-violet-500/30 text-violet-400"
+                    : step.color === "amber"
+                    ? "bg-amber-500/30 text-amber-400"
+                    : "bg-emerald-500/30 text-emerald-400"
+                  : "bg-muted text-muted-foreground"
+              )}>
+                {i + 1}
+              </div>
+              <span className={cn(
+                "text-xs font-medium",
+                i <= currentStep ? "text-foreground" : "text-muted-foreground"
+              )}>
+                {step.label}
+              </span>
+              <span className="text-[10px] text-muted-foreground text-center">
+                {step.description}
+              </span>
+            </div>
+            {i < toolGenerationSteps.length - 1 && (
+              <ChevronRight className={cn(
+                "w-4 h-4 shrink-0 transition-all",
+                i < currentStep ? "text-emerald-400" : "text-muted-foreground/30"
+              )} />
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Step Details */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        {/* Schema / Input */}
+        <div className={cn(
+          "p-4 rounded-lg border transition-all",
+          currentStep >= 0 ? "bg-cyan-500/10 border-cyan-500/30" : "bg-muted/10 border-border opacity-40"
+        )}>
+          <div className="flex items-center gap-2 mb-3">
+            <Braces className="w-4 h-4 text-cyan-400" />
+            <h4 className="text-sm font-medium text-cyan-400">Schema Definition</h4>
+          </div>
+          <div className="font-mono text-xs p-3 rounded bg-background/50 space-y-1">
+            <div className="text-muted-foreground">{`// ${currentAction.name} schema`}</div>
+            {Object.entries(currentAction.schema).map(([key, type]) => (
+              <div key={key}>
+                <span className="text-cyan-400">{key}</span>
+                <span className="text-muted-foreground">: </span>
+                <span className="text-amber-400">{type}</span>
+              </div>
+            ))}
+            <div className="mt-2 pt-2 border-t border-border">
+              <span className="text-muted-foreground">dice: </span>
+              <span className="text-emerald-400">&quot;{currentAction.diceRoll}&quot;</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Generated Tool */}
+        <div className={cn(
+          "p-4 rounded-lg border transition-all",
+          currentStep >= 2 ? "bg-amber-500/10 border-amber-500/30" : "bg-muted/10 border-border opacity-40"
+        )}>
+          <div className="flex items-center gap-2 mb-3">
+            <Wrench className="w-4 h-4 text-amber-400" />
+            <h4 className="text-sm font-medium text-amber-400">Generated Tool</h4>
+          </div>
+          <div className="font-mono text-xs p-3 rounded bg-background/50 space-y-1">
+            <div className="text-violet-400">function {currentAction.toolName}(</div>
+            <div className="pl-4">
+              <span className="text-cyan-400">params</span>
+              <span className="text-muted-foreground">: </span>
+              <span className="text-amber-400">{currentAction.name}Input</span>
+            </div>
+            <div className="text-violet-400">): <span className="text-amber-400">DiceResult</span> {`{`}</div>
+            <div className="pl-4 text-muted-foreground">{"// Validated against schema"}</div>
+            <div className="pl-4 text-muted-foreground">{"// Executes dice roll logic"}</div>
+            <div className="pl-4 text-muted-foreground">{"// Returns structured result"}</div>
+            <div className="text-violet-400">{`}`}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Registry Status */}
+      {currentStep >= 3 && (
+        <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 animate-in fade-in slide-in-from-bottom-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-400" />
+              <span className="text-sm font-medium text-emerald-400">Tool Registered</span>
+            </div>
+            <span className="text-xs font-mono px-2 py-1 rounded bg-emerald-500/20 text-emerald-400">
+              {currentAction.toolName}()
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Tool is now available to all agents with appropriate permissions. Player Assistant can call 
+            this tool when a player wants to {currentAction.name.toLowerCase()}.
+          </p>
+        </div>
+      )}
+
+      {/* Controls */}
+      <div className="flex gap-2">
+        <button
+          onClick={runAnimation}
+          disabled={isPlaying}
+          className="flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 disabled:opacity-50"
+        >
+          <Play className="w-3 h-3" />
+          Generate Tool
+        </button>
+        <button
+          onClick={() => { setCurrentStep(0); setIsPlaying(false); }}
+          className="flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-muted text-muted-foreground hover:bg-muted/80"
+        >
+          <RefreshCw className="w-3 h-3" />
+          Reset
+        </button>
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        Tools are generated automatically from object type schemas. No code changes needed—just define the schema.
       </p>
     </div>
   );
@@ -753,6 +1335,199 @@ export function DataStructuringSection() {
           </Card>
         </div>
 
+        {/* Production Schema Patterns */}
+        <h3 id="production-schema-patterns" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Production Schema Patterns
+        </h3>
+
+        <p className="text-muted-foreground">
+          In production, your ontology lives in a database with <strong className="text-foreground">three core 
+          tables</strong>: object types (schemas), object instances (data), and relations (connections). This 
+          structure gives you versioning, validation, and semantic search—all in one system.
+        </p>
+
+        <InteractiveWrapper
+          title="Interactive: Production Database Schema"
+          description="Explore the three core tables: object_types, object_instances, and relations"
+          icon="🗄️"
+          colorTheme="cyan"
+          minHeight="auto"
+        >
+          <ProductionSchemaVisualizer />
+        </InteractiveWrapper>
+
+        <div className="my-6 p-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+          <h4 className="text-lg font-semibold text-emerald-400 mb-3">Why Three Tables?</h4>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-start gap-3">
+              <Table className="w-4 h-4 text-cyan-400 mt-0.5 shrink-0" />
+              <div>
+                <span className="font-medium text-foreground">object_types:</span>{" "}
+                <span className="text-muted-foreground">
+                  Define <em>what can exist</em>. Each type has a versioned JSON schema, an embedding for 
+                  semantic discovery, and validators. When you parse a new action like &quot;grappling&quot;, 
+                  you create a type for it.
+                </span>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Hash className="w-4 h-4 text-violet-400 mt-0.5 shrink-0" />
+              <div>
+                <span className="font-medium text-foreground">object_instances:</span>{" "}
+                <span className="text-muted-foreground">
+                  Concrete data that <em>matches a type</em>. Each instance references a type and version. 
+                  The JSONB data column is validated against the type&apos;s schema. A &quot;Goblin&quot; is an instance 
+                  of the &quot;Creature&quot; type.
+                </span>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Link2 className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+              <div>
+                <span className="font-medium text-foreground">relations:</span>{" "}
+                <span className="text-muted-foreground">
+                  Define <em>how types connect</em>. Creatures &quot;have_action&quot; Actions. Actions are 
+                  &quot;governed_by&quot; Rules. This enables AI to navigate your domain graph and understand 
+                  dependencies.
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 mt-6">
+          <Card variant="default">
+            <CardContent>
+              <div className="flex items-center gap-2 mb-2">
+                <GitBranch className="w-4 h-4 text-emerald-400" />
+                <h4 className="font-medium text-foreground">Schema Versioning</h4>
+              </div>
+              <p className="text-sm text-muted-foreground m-0">
+                Types have versions (v1.0, v1.2). Instances lock to a version. Update a type? 
+                Old instances stay valid. Migrate when ready. No breaking changes.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <div className="flex items-center gap-2 mb-2">
+                <Database className="w-4 h-4 text-cyan-400" />
+                <h4 className="font-medium text-foreground">JSONB + pgvector</h4>
+              </div>
+              <p className="text-sm text-muted-foreground m-0">
+                Flexible JSON storage with full SQL querying. Embeddings enable semantic search. 
+                &quot;Find creatures similar to a dragon&quot; works via vector similarity.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <div className="flex items-center gap-2 mb-2">
+                <Shield className="w-4 h-4 text-rose-400" />
+                <h4 className="font-medium text-foreground">Validation on Insert</h4>
+              </div>
+              <p className="text-sm text-muted-foreground m-0">
+                Database triggers validate JSONB data against the referenced type&apos;s schema. 
+                Invalid data is rejected. AI can&apos;t create malformed instances.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="w-4 h-4 text-amber-400" />
+                <h4 className="font-medium text-foreground">Audit Trail</h4>
+              </div>
+              <p className="text-sm text-muted-foreground m-0">
+                created_at, updated_at, created_by on every row. Full history of who created 
+                what and when. Essential for debugging AI-generated content.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Callout variant="tip" title="Canonization">
+          <p className="m-0">
+            When AI extracts data, <strong>canonize it</strong>. &quot;HP&quot;, &quot;hit points&quot;, and &quot;Hit Points&quot; should 
+            all map to the same field. Your intake agent should normalize before storing. This ensures 
+            consistent data regardless of how different source documents phrase things.
+          </p>
+        </Callout>
+
+        {/* Dynamic Tool Generation */}
+        <h3 id="dynamic-tool-generation" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Dynamic Tool Generation
+        </h3>
+
+        <p className="text-muted-foreground">
+          Here&apos;s the magic: <strong className="text-foreground">object type schemas can automatically 
+          generate tools</strong>. Define a &quot;Grapple&quot; action type with its dice roll formula, and the 
+          system generates a callable tool that agents can use.
+        </p>
+
+        <InteractiveWrapper
+          title="Interactive: Tool Generation Pipeline"
+          description="Watch how schemas become callable tools for AI agents"
+          icon="🔧"
+          colorTheme="amber"
+          minHeight="auto"
+        >
+          <DynamicToolGenerationDemo />
+        </InteractiveWrapper>
+
+        <div className="my-6 p-5 rounded-xl bg-violet-500/10 border border-violet-500/30">
+          <h4 className="text-lg font-semibold text-violet-400 mb-3">The Generation Pipeline</h4>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-3 p-2 rounded bg-background/30">
+              <span className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs font-bold">1</span>
+              <span className="text-muted-foreground">
+                <strong className="text-foreground">Schema defines structure</strong> — Fields, types, 
+                dice expressions stored in object_types
+              </span>
+            </div>
+            <div className="flex items-center gap-3 p-2 rounded bg-background/30">
+              <span className="w-6 h-6 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center text-xs font-bold">2</span>
+              <span className="text-muted-foreground">
+                <strong className="text-foreground">Zod validator generated</strong> — Type-safe input 
+                validation created from schema
+              </span>
+            </div>
+            <div className="flex items-center gap-3 p-2 rounded bg-background/30">
+              <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold">3</span>
+              <span className="text-muted-foreground">
+                <strong className="text-foreground">Tool function created</strong> — Wraps validation + 
+                execution logic + structured output
+              </span>
+            </div>
+            <div className="flex items-center gap-3 p-2 rounded bg-background/30">
+              <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">4</span>
+              <span className="text-muted-foreground">
+                <strong className="text-foreground">Registered in tool registry</strong> — Available to 
+                agents with appropriate permissions
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-muted-foreground">
+          This is <strong className="text-foreground">intake agent architecture</strong>: when you parse 
+          a rulebook and discover a new action like &quot;grappling&quot;, the intake agent proposes a schema. 
+          A human reviews and approves it. The system then automatically generates the tool, validator, 
+          and makes it available to player-facing agents. No deployment required.
+        </p>
+
+        <Callout variant="important" title="Human-in-the-Loop for Schema Creation">
+          <p className="m-0">
+            AI proposes schemas; humans approve them. When the intake agent extracts &quot;grappling&quot; rules 
+            and proposes a schema, it goes to a review queue. A human verifies the dice formula is correct, 
+            the fields make sense, and the validation rules are appropriate. Only then does it become 
+            a live tool. This prevents AI mistakes from contaminating your tool registry.
+          </p>
+        </Callout>
+
         <Callout variant="info" title="Key Takeaways">
           <ul className="list-disc list-inside space-y-2 mt-2 text-sm">
             <li>
@@ -766,6 +1541,12 @@ export function DataStructuringSection() {
             </li>
             <li>
               <strong>Define agents as data structures</strong>—skills, tools, and constraints all configurable
+            </li>
+            <li>
+              <strong>Use three tables</strong>—object_types, object_instances, relations for production ontology
+            </li>
+            <li>
+              <strong>Generate tools from schemas</strong>—no code changes needed for new capabilities
             </li>
             <li>
               <strong>Validate everything</strong>—schema validation is your safety net against AI mistakes

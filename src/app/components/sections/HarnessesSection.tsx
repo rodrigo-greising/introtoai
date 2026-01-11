@@ -11,6 +11,9 @@ import {
   Clock,
   RotateCcw,
   Terminal,
+  Brain,
+  MessageSquare,
+  Zap,
 } from "lucide-react";
 
 // =============================================================================
@@ -25,6 +28,13 @@ interface TestCase {
   error?: string;
 }
 
+interface ChatMessage {
+  id: string;
+  role: "agent" | "system";
+  content: string;
+  timestamp: number;
+}
+
 function TestHarnessBuilder() {
   const [tests, setTests] = useState<TestCase[]>([
     { id: "1", name: "should return correct sum for positive numbers", status: "pending" },
@@ -35,13 +45,41 @@ function TestHarnessBuilder() {
   ]);
   const [isRunning, setIsRunning] = useState(false);
   const [iteration, setIteration] = useState(0);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    { id: "0", role: "system", content: "Task: Implement the 'add' function that sums two numbers correctly.", timestamp: Date.now() }
+  ]);
+
+  const addChatMessage = (role: ChatMessage["role"], content: string) => {
+    setChatMessages(prev => [...prev, {
+      id: Date.now().toString(),
+      role,
+      content,
+      timestamp: Date.now()
+    }]);
+  };
 
   const runTests = async () => {
     setIsRunning(true);
-    setIteration(prev => prev + 1);
+    const currentIteration = iteration + 1;
+    setIteration(currentIteration);
+    
+    // Agent announces it's starting implementation
+    if (currentIteration === 1) {
+      addChatMessage("agent", "I'll implement the add function. Let me write the initial code...");
+      await new Promise(r => setTimeout(r, 400));
+      addChatMessage("agent", "```typescript\nfunction add(a: number, b: number): number {\n  return a + b;\n}\n```");
+    } else {
+      addChatMessage("agent", `Iteration ${currentIteration}: Analyzing test failures and fixing the implementation...`);
+      await new Promise(r => setTimeout(r, 400));
+    }
+    
+    await new Promise(r => setTimeout(r, 300));
+    addChatMessage("system", "Running test suite...");
     
     // Reset all tests
     setTests(prev => prev.map(t => ({ ...t, status: "pending", error: undefined })));
+    
+    const failedTests: string[] = [];
     
     for (let i = 0; i < tests.length; i++) {
       // Set running
@@ -50,21 +88,65 @@ function TestHarnessBuilder() {
       ));
       
       // Simulate test execution
-      await new Promise(r => setTimeout(r, 300 + Math.random() * 400));
+      await new Promise(r => setTimeout(r, 200 + Math.random() * 200));
       
       // Random pass/fail (weighted toward pass after more iterations)
-      const passRate = 0.6 + (iteration * 0.1);
+      const passRate = Math.min(0.5 + (currentIteration * 0.2), 1);
       const passed = Math.random() < passRate;
       const duration = Math.floor(10 + Math.random() * 90);
       
-      setTests(prev => prev.map((t, idx) => 
-        idx === i ? { 
-          ...t, 
-          status: passed ? "passed" as const : "failed" as const,
-          duration,
-          error: passed ? undefined : "AssertionError: Expected 42 but got 41"
-        } : t
-      ));
+      const errorMessages = [
+        `AssertionError: Expected 42 but got ${40 + Math.floor(Math.random() * 5)}`,
+        "TypeError: Cannot read property 'toFixed' of undefined",
+        "AssertionError: Expected function to throw but it did not",
+        "AssertionError: Expected NaN to equal 0",
+      ];
+      
+      const testName = tests[i].name;
+      
+      setTests(prev => prev.map((t, idx) => {
+        if (idx === i) {
+          if (!passed) {
+            failedTests.push(`${testName}: ${errorMessages[i % errorMessages.length]}`);
+          }
+          return { 
+            ...t, 
+            status: passed ? "passed" as const : "failed" as const,
+            duration,
+            error: passed ? undefined : errorMessages[i % errorMessages.length]
+          };
+        }
+        return t;
+      }));
+    }
+    
+    await new Promise(r => setTimeout(r, 300));
+    
+    const finalTests = tests.map((t) => {
+      const passRate = Math.min(0.5 + (currentIteration * 0.2), 1);
+      return { ...t, status: Math.random() < passRate ? "passed" : "failed" };
+    });
+    
+    const passedCount = finalTests.filter(t => t.status === "passed").length;
+    const failedCount = finalTests.filter(t => t.status === "failed").length;
+    
+    if (failedCount > 0) {
+      addChatMessage("system", `Tests complete: ${passedCount}/${tests.length} passed, ${failedCount} failed.`);
+      await new Promise(r => setTimeout(r, 200));
+      addChatMessage("agent", `I see ${failedCount} failing test(s). Let me analyze the errors and fix the implementation...`);
+      await new Promise(r => setTimeout(r, 300));
+      
+      const fixes = [
+        "Adding input validation for non-numeric types",
+        "Fixing edge case for negative numbers",
+        "Handling floating point precision",
+        "Adding type coercion for string inputs"
+      ];
+      addChatMessage("agent", `Fix: ${fixes[currentIteration % fixes.length]}. Updated implementation ready for next test run.`);
+    } else {
+      addChatMessage("system", `✓ All ${tests.length} tests passed!`);
+      await new Promise(r => setTimeout(r, 200));
+      addChatMessage("agent", "All tests are passing. The implementation is complete and verified.");
     }
     
     setIsRunning(false);
@@ -73,11 +155,14 @@ function TestHarnessBuilder() {
   const reset = () => {
     setTests(prev => prev.map(t => ({ ...t, status: "pending", error: undefined, duration: undefined })));
     setIteration(0);
+    setChatMessages([
+      { id: "0", role: "system", content: "Task: Implement the 'add' function that sums two numbers correctly.", timestamp: Date.now() }
+    ]);
   };
 
   const passedCount = tests.filter(t => t.status === "passed").length;
   const failedCount = tests.filter(t => t.status === "failed").length;
-  const allPassed = passedCount === tests.length;
+  const allPassed = passedCount === tests.length && passedCount > 0;
 
   const getStatusIcon = (status: TestCase["status"]) => {
     switch (status) {
@@ -103,7 +188,7 @@ function TestHarnessBuilder() {
           )}
         >
           <Play className="w-4 h-4" />
-          Run Tests
+          {iteration === 0 ? "Start Agent" : "Run Again"}
         </button>
         <button
           onClick={reset}
@@ -119,34 +204,88 @@ function TestHarnessBuilder() {
         )}
       </div>
 
-      {/* Test list */}
-      <div className="rounded-lg border border-border overflow-hidden">
-        <div className="bg-muted/30 px-4 py-2 border-b border-border flex items-center gap-2">
-          <Terminal className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Test Suite: add.test.ts</span>
+      {/* Two panel layout: Chat + Tests */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Agent Chat Panel */}
+        <div className="rounded-lg border border-violet-500/30 bg-violet-500/5 overflow-hidden">
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-violet-500/30 bg-violet-500/10">
+            <MessageSquare className="w-4 h-4 text-violet-400" />
+            <span className="text-xs font-medium text-violet-400">Agent Chat</span>
+          </div>
+          <div className="p-3 space-y-3 h-[280px] overflow-y-auto">
+            {chatMessages.map((msg) => (
+              <div 
+                key={msg.id}
+                className={cn(
+                  "flex gap-2 animate-in fade-in slide-in-from-bottom-2",
+                  msg.role === "system" ? "justify-start" : "justify-start"
+                )}
+              >
+                <div className={cn(
+                  "w-6 h-6 rounded-full flex items-center justify-center shrink-0",
+                  msg.role === "agent" ? "bg-violet-500/20" : "bg-cyan-500/20"
+                )}>
+                  {msg.role === "agent" 
+                    ? <Brain className="w-3 h-3 text-violet-400" />
+                    : <Zap className="w-3 h-3 text-cyan-400" />
+                  }
+                </div>
+                <div className={cn(
+                  "px-3 py-2 rounded-lg text-xs max-w-[85%]",
+                  msg.role === "agent" 
+                    ? "bg-violet-500/20 text-violet-300" 
+                    : "bg-cyan-500/20 text-cyan-300"
+                )}>
+                  {msg.content.includes("```") ? (
+                    <pre className="whitespace-pre-wrap font-mono text-[10px]">{msg.content}</pre>
+                  ) : (
+                    msg.content
+                  )}
+                </div>
+              </div>
+            ))}
+            {isRunning && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
+                <span>Agent processing...</span>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="divide-y divide-border">
-          {tests.map((test) => (
-            <div
-              key={test.id}
-              className={cn(
-                "px-4 py-3 flex items-start gap-3 transition-all",
-                test.status === "running" && "bg-amber-500/5",
-                test.status === "failed" && "bg-rose-500/5"
-              )}
-            >
-              {getStatusIcon(test.status)}
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-mono">{test.name}</div>
-                {test.error && (
-                  <div className="text-xs text-rose-400 mt-1 font-mono">{test.error}</div>
+
+        {/* Test list */}
+        <div className="rounded-lg border border-border overflow-hidden">
+          <div className="bg-muted/30 px-4 py-2 border-b border-border flex items-center gap-2">
+            <Terminal className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Test Suite: add.test.ts</span>
+          </div>
+          <div className="divide-y divide-border h-[280px] overflow-y-auto">
+            {tests.map((test) => (
+              <div
+                key={test.id}
+                className={cn(
+                  "px-4 py-3 flex items-start gap-3 transition-all",
+                  test.status === "running" && "bg-amber-500/5",
+                  test.status === "failed" && "bg-rose-500/5"
+                )}
+              >
+                {getStatusIcon(test.status)}
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-mono">{test.name}</div>
+                  {test.error && (
+                    <div className="text-xs text-rose-400 mt-1 font-mono">{test.error}</div>
+                  )}
+                </div>
+                {test.duration && (
+                  <span className="text-xs text-muted-foreground shrink-0">{test.duration}ms</span>
                 )}
               </div>
-              {test.duration && (
-                <span className="text-xs text-muted-foreground shrink-0">{test.duration}ms</span>
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
@@ -168,20 +307,10 @@ function TestHarnessBuilder() {
             "text-sm font-medium",
             allPassed ? "text-emerald-400" : "text-rose-400"
           )}>
-            {allPassed ? "✓ All tests pass!" : "✗ Some tests failed"}
+            {allPassed ? "✓ All tests pass!" : "→ Click 'Run Again' to iterate"}
           </span>
         </div>
       )}
-
-      {/* AI feedback hint */}
-      <div className="text-xs text-muted-foreground">
-        {failedCount > 0 
-          ? "→ AI would receive error messages and iterate on the implementation"
-          : passedCount > 0 
-            ? "→ AI iteration complete. Implementation verified."
-            : "→ Run tests to validate AI-generated code"
-        }
-      </div>
     </div>
   );
 }

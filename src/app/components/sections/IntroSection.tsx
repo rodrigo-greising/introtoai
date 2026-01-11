@@ -17,6 +17,8 @@ import {
   Settings,
   ChevronRight,
   Sparkles,
+  Dices,
+  ArrowRight,
 } from "lucide-react";
 
 // =============================================================================
@@ -370,6 +372,28 @@ export function IntroSection() {
               <p className="text-xs text-muted-foreground mt-0.5">
                 Used OpenAI, Anthropic, or similar APIs before
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Capstone Project Link */}
+        <div className="mt-10 p-4 rounded-xl bg-gradient-to-r from-violet-500/10 via-purple-500/10 to-pink-500/10 border border-violet-500/30">
+          <div className="flex items-start gap-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-violet-500/20 shrink-0">
+              <Dices className="w-6 h-6 text-violet-400" />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-semibold text-foreground mb-1">Capstone Project: D&D Game Assistant</h4>
+              <p className="text-sm text-muted-foreground mb-3">
+                See all guide concepts combined in a real-world example: a production-ready D&D assistant 
+                with RAG, orchestration, tools, guardrails, and cost optimization.
+              </p>
+              <a
+                href="#capstone"
+                className="inline-flex items-center gap-2 text-sm font-medium text-violet-400 hover:text-violet-300 transition-colors"
+              >
+                Jump to Capstone <ArrowRight className="w-4 h-4" />
+              </a>
             </div>
           </div>
         </div>

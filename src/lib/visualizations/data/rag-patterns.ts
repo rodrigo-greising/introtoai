@@ -63,39 +63,40 @@ const ragAsToolVectors: VectorPoint[] = [
   createVector("faq-5", "API Keys", 0.55, 0.25, "faq", "Generate API keys in Developer Settings. Keys are shown once—store them securely."),
 ];
 
+// Step durations increased for better readability
 const ragAsToolSteps: ScenarioStep[] = [
   createStep(
     "user-query",
     "User Question",
-    600,
+    1500,
     [createMessage("m1", "user", "How do I reset my password?", { tokens: 8 })],
     { activeQuery: "query", showConnections: false }
   ),
   createStep(
     "agent-thinking",
     "Agent Reasoning",
-    1000,
+    2500,
     [createMessage("m2", "orchestrator", "I need to find the specific steps for password reset. Let me search the knowledge base.", { tokens: 25 })],
     { activeQuery: "query", showConnections: false }
   ),
   createStep(
     "tool-call",
     "Tool Invocation",
-    800,
+    2000,
     [createMessage("m3", "tool_call", "search_knowledge_base({\n  query: \"password reset steps\",\n  top_k: 3\n})", { tokens: 15 })],
     { activeQuery: "query", showConnections: true, matches: ["faq-1", "faq-2"] }
   ),
   createStep(
     "retrieval",
     "Semantic Search",
-    1200,
+    3000,
     [createMessage("m4", "tool_result", "Found 2 relevant results:\n\n[1] Password Reset (similarity: 0.94)\n\"To reset your password, go to Settings > Security > Reset Password...\"\n\n[2] Account Recovery (similarity: 0.82)\n\"For account recovery, use the 'Forgot Password' link...\"", { tokens: 85, highlight: true })],
     { activeQuery: "query", showConnections: true, matches: ["faq-1", "faq-2"] }
   ),
   createStep(
     "response",
     "Generate Response",
-    1000,
+    2500,
     [createMessage("m5", "assistant", "To reset your password:\n\n1. Go to **Settings > Security > Reset Password**\n2. Click the reset button\n3. Check your email for a reset link (valid for 24 hours)\n4. Follow the link to create a new password\n\nAlternatively, you can use the \"Forgot Password\" link on the login page to recover your account.", { tokens: 75 })],
     { activeQuery: "query", showConnections: true, matches: ["faq-1", "faq-2"] }
   ),
@@ -134,39 +135,40 @@ const ragContextEngVectors: VectorPoint[] = [
   createVector("sop-3", "SOP: Shipping", 0.75, 0.8, "sop", "SHIPPING DELAY PROCEDURE:\n1. Check tracking status\n2. Contact carrier if needed\n3. Offer expedited reshipping\n4. Provide discount for inconvenience"),
 ];
 
+// Step durations increased for better readability
 const ragContextEngSteps: ScenarioStep[] = [
   createStep(
     "user-query",
     "User Request",
-    600,
+    1500,
     [createMessage("m1", "user", "Customer says their product arrived damaged, what should I do?", { tokens: 12 })],
     { activeQuery: "query", showConnections: false }
   ),
   createStep(
     "context-matching",
     "Match Hypothetical Qs",
-    1000,
+    2500,
     [createMessage("m2", "system", "Matching query against pre-indexed hypothetical questions...\n\nThese questions were generated from SOPs during ingestion, not from the user.", { tokens: 30 })],
     { activeQuery: "query", showConnections: true, matches: ["hypo-1", "hypo-2"] }
   ),
   createStep(
     "retrieve-sops",
     "Follow Links to SOPs",
-    800,
+    2000,
     [createMessage("m3", "context", "Hypothetical questions matched → following links to source SOPs:\n\n✓ \"What do I do if customer reports damaged goods?\" → SOP: Damaged Items\n✓ \"How to handle items broken during shipping?\" → SOP: Damaged Items\n\nInjecting SOP into context...", { tokens: 45, highlight: true })],
     { activeQuery: "query", showConnections: true, matches: ["hypo-1", "hypo-2", "sop-1"] }
   ),
   createStep(
     "context-injection",
     "Context Assembled",
-    1000,
+    2500,
     [createMessage("m4", "system", "Context now includes:\n\n📋 **DAMAGED ITEM PROCEDURE**\n1. Express empathy and apologize\n2. Request photos of damage\n3. Offer replacement OR full refund\n4. Arrange return pickup if needed\n5. Process within 24 hours\n6. Send follow-up satisfaction survey", { tokens: 65, highlight: true })],
     { activeQuery: "query", showConnections: true, matches: ["hypo-1", "hypo-2", "sop-1"] }
   ),
   createStep(
     "response",
     "Generate Response",
-    1200,
+    3000,
     [createMessage("m5", "assistant", "Here's how to handle this damaged item case:\n\n1. **Start with empathy**: \"I'm so sorry your order arrived damaged. Let me make this right for you.\"\n\n2. **Gather evidence**: Ask the customer to send photos of the damage.\n\n3. **Offer resolution**: Give them the choice of:\n   - Full replacement shipped immediately, OR\n   - Complete refund to original payment method\n\n4. **Handle logistics**: If they want a refund, arrange a free return pickup.\n\n5. **Follow up**: Process everything within 24 hours and send a satisfaction survey after.\n\nWould you like me to draft a response message to the customer?", { tokens: 140 })],
     { activeQuery: "query", showConnections: true, matches: ["hypo-1", "hypo-2", "sop-1"] }
   ),

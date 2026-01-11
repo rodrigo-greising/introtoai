@@ -389,6 +389,81 @@ export function ReliabilitySection() {
           </CardContent>
         </Card>
 
+        {/* Observability */}
+        <h3 id="observability" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Observability for AI Systems
+        </h3>
+
+        <p className="text-muted-foreground">
+          AI systems require <strong className="text-foreground">specialized observability</strong> beyond 
+          traditional monitoring. You need to track not just latency and errors, but prompt quality, 
+          output accuracy, token costs, and conversation flows.
+        </p>
+
+        <div className="space-y-4 mt-6">
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-cyan-400 mb-2">
+                <a 
+                  href="https://langfuse.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  Langfuse
+                </a>
+              </h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Open-source LLM engineering platform. Key features:
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Trace complex chains and agents across multiple LLM calls</li>
+                <li>Track token costs per user, feature, or prompt version</li>
+                <li>Collect user feedback for quality scoring</li>
+                <li>Dataset management for evaluations and fine-tuning</li>
+                <li>Self-hostable or cloud—your data stays private</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-violet-400 mb-2">What to Track</h4>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li><strong className="text-foreground">Token usage:</strong> Input, output, and cached tokens per request</li>
+                <li><strong className="text-foreground">Latency breakdown:</strong> Time to first token, total duration, queue time</li>
+                <li><strong className="text-foreground">Success rate:</strong> By model, prompt version, and user segment</li>
+                <li><strong className="text-foreground">User feedback:</strong> Thumbs up/down, edits, regenerations</li>
+                <li><strong className="text-foreground">Prompt versions:</strong> A/B test prompts and track performance</li>
+                <li><strong className="text-foreground">Trace spans:</strong> Full execution path through agent loops</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-amber-400 mb-2">Data Labeling with Observability</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Production data is the best source for improving your system:
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Flag low-confidence or user-corrected outputs for review</li>
+                <li>Build labeled datasets from real interactions</li>
+                <li>Use labeled data for evaluations, fine-tuning, or RAG</li>
+                <li>Identify patterns in failures for targeted improvements</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Callout variant="tip" title="Start Simple, Then Specialize">
+          <p className="m-0">
+            Begin with basic logging (prompts, outputs, latency, costs). Add tracing as you build 
+            complex flows. Introduce user feedback collection early—it&apos;s the most valuable signal 
+            for quality. Tools like Langfuse, LangSmith, or Helicone make this straightforward.
+          </p>
+        </Callout>
+
         <Callout variant="tip" title="Multi-Provider Strategy">
           <p className="m-0">
             Don&apos;t depend on a single LLM provider. Build abstractions that let you switch 

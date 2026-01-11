@@ -58,5 +58,8 @@ export { E2EPipelineSection } from "./E2EPipelineSection";
 export { CostOptimizationSection } from "./CostOptimizationSection";
 export { ReliabilitySection } from "./ReliabilitySection";
 
+// Capstone
+export { CapstoneSection } from "./CapstoneSection";
+
 // Utility
 export { PlaceholderSection } from "./PlaceholderSection";

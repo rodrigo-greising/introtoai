@@ -22,9 +22,11 @@ interface RoutingResult {
   model: string;
   category: string;
   complexity: string;
+  complexityScore: number; // 0-100
   reasoning: string;
   estimatedCost: string;
   estimatedLatency: string;
+  complexityFactors: string[];
 }
 
 function RouterSimulator() {
@@ -43,68 +45,93 @@ function RouterSimulator() {
   const simulateRouting = useCallback((input: string) => {
     setIsRouting(true);
     
-    // Simulate routing logic
+    // Simulate routing logic with abstract model tiers and complexity measurement
     setTimeout(() => {
       const lower = input.toLowerCase();
       const length = input.length;
       
+      // Calculate complexity score based on multiple factors
+      let complexityScore = 0;
+      const complexityFactors: string[] = [];
+      
+      // Length factor (longer = more complex)
+      if (length > 200) { complexityScore += 25; complexityFactors.push("Long prompt (+25)"); }
+      else if (length > 100) { complexityScore += 15; complexityFactors.push("Medium length (+15)"); }
+      else if (length > 50) { complexityScore += 5; complexityFactors.push("Short prompt (+5)"); }
+      
+      // Reasoning indicators
+      if (lower.includes("step by step")) { complexityScore += 30; complexityFactors.push("Step-by-step (+30)"); }
+      if (lower.includes("explain") || lower.includes("why")) { complexityScore += 20; complexityFactors.push("Explanation request (+20)"); }
+      if (lower.includes("compare") || lower.includes("difference")) { complexityScore += 15; complexityFactors.push("Comparison (+15)"); }
+      if (lower.includes("solve") || lower.includes("calculate")) { complexityScore += 25; complexityFactors.push("Problem solving (+25)"); }
+      
+      // Domain indicators
+      if (lower.includes("code") || lower.includes("function") || lower.includes("debug")) { complexityScore += 15; complexityFactors.push("Code task (+15)"); }
+      if (lower.includes("legal") || lower.includes("medical") || lower.includes("financial")) { complexityScore += 20; complexityFactors.push("Specialized domain (+20)"); }
+      
+      // Simplicity indicators (reduce score)
+      if (lower.includes("hi ") || lower.includes("hello") || lower.includes("thanks")) { complexityScore -= 30; complexityFactors.push("Simple greeting (-30)"); }
+      if (length < 30 && !lower.includes("explain") && !lower.includes("why")) { complexityScore -= 15; complexityFactors.push("Very short query (-15)"); }
+      
+      // Clamp to 0-100
+      complexityScore = Math.max(0, Math.min(100, complexityScore));
+      
       let category = "general";
       let complexity = "medium";
-      let model = "gpt-4o";
+      let model = "standard-tier";
       let reasoning = "";
       let estimatedCost = "$0.002";
       let estimatedLatency = "1-2s";
 
-      // Simple questions
-      if (length < 30 && !lower.includes("explain") && !lower.includes("why")) {
-        category = "simple_qa";
-        complexity = "low";
-        model = "gpt-4o-mini";
-        reasoning = "Short prompt, likely a simple question";
-        estimatedCost = "$0.0001";
-        estimatedLatency = "0.3-0.5s";
-      }
-      // Reasoning tasks
-      else if (lower.includes("step by step") || lower.includes("solve") || lower.includes("calculate")) {
-        category = "reasoning";
+      // Route based on complexity score
+      if (complexityScore >= 60) {
         complexity = "high";
-        model = "o1";
-        reasoning = "Multi-step reasoning detected";
-        estimatedCost = "$0.015";
-        estimatedLatency = "10-30s";
-      }
-      // Creative tasks
-      else if (lower.includes("write") || lower.includes("poem") || lower.includes("story") || lower.includes("creative")) {
-        category = "creative";
+        if (lower.includes("step by step") || lower.includes("solve") || lower.includes("calculate")) {
+          category = "reasoning";
+          model = "reasoning-tier";
+          reasoning = "Multi-step reasoning detected";
+          estimatedCost = "$0.015";
+          estimatedLatency = "10-30s";
+        } else {
+          category = "complex_analysis";
+          model = "premium-tier";
+          reasoning = "High complexity requires premium model";
+          estimatedCost = "$0.008";
+          estimatedLatency = "3-8s";
+        }
+      } else if (complexityScore >= 30) {
         complexity = "medium";
-        model = "claude-3-5-sonnet";
-        reasoning = "Creative generation task";
-        estimatedCost = "$0.003";
-        estimatedLatency = "2-4s";
-      }
-      // Code tasks
-      else if (lower.includes("code") || lower.includes("function") || lower.includes("debug") || lower.includes("error")) {
-        category = "code";
-        complexity = "medium";
-        model = "claude-3-5-sonnet";
-        reasoning = "Programming/debugging task";
-        estimatedCost = "$0.003";
-        estimatedLatency = "1-3s";
-      }
-      // Casual conversation
-      else if (lower.includes("hi") || lower.includes("hello") || lower.includes("how are") || lower.includes("thanks")) {
-        category = "conversation";
+        if (lower.includes("write") || lower.includes("poem") || lower.includes("story") || lower.includes("creative")) {
+          category = "creative";
+          model = "creative-tier";
+          reasoning = "Creative generation task";
+          estimatedCost = "$0.003";
+          estimatedLatency = "2-4s";
+        } else if (lower.includes("code") || lower.includes("function") || lower.includes("debug") || lower.includes("error")) {
+          category = "code";
+          model = "coding-tier";
+          reasoning = "Programming/debugging task";
+          estimatedCost = "$0.003";
+          estimatedLatency = "1-3s";
+        } else {
+          model = "standard-tier";
+          reasoning = "Standard task, balanced model";
+        }
+      } else {
+        category = complexityScore < 15 ? "conversation" : "simple_qa";
         complexity = "low";
-        model = "gpt-4o-mini";
-        reasoning = "Casual conversation, no complex task";
+        model = "fast-tier";
+        reasoning = complexityScore < 15 ? "Casual conversation, no complex task" : "Simple question, fast model sufficient";
         estimatedCost = "$0.0001";
-        estimatedLatency = "0.2-0.4s";
+        estimatedLatency = "0.2-0.5s";
       }
 
       setResult({
         model,
         category,
         complexity,
+        complexityScore,
+        complexityFactors,
         reasoning,
         estimatedCost,
         estimatedLatency,
@@ -121,9 +148,9 @@ function RouterSimulator() {
   }, [prompt, simulateRouting]);
 
   const getModelColor = (model: string) => {
-    if (model.includes("mini")) return "cyan";
-    if (model.includes("o1")) return "violet";
-    if (model.includes("claude")) return "amber";
+    if (model.includes("fast")) return "cyan";
+    if (model.includes("reasoning")) return "violet";
+    if (model.includes("creative") || model.includes("coding")) return "amber";
     return "emerald";
   };
 
@@ -173,8 +200,8 @@ function RouterSimulator() {
 
       {/* Result */}
       {result && (
-        <div className="p-4 rounded-lg bg-muted/20 border border-border animate-in fade-in">
-          <div className="flex items-center justify-between mb-4">
+        <div className="p-4 rounded-lg bg-muted/20 border border-border animate-in fade-in space-y-4">
+          <div className="flex items-center justify-between">
             <h4 className="text-sm font-medium text-foreground">Routing Decision</h4>
             <span className={cn(
               "px-3 py-1 rounded-full text-xs font-medium",
@@ -185,6 +212,48 @@ function RouterSimulator() {
             }}>
               {result.model}
             </span>
+          </div>
+
+          {/* Complexity Score Meter */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Complexity Score</span>
+              <span className={cn(
+                "text-sm font-bold",
+                result.complexityScore >= 60 ? "text-violet-400" :
+                result.complexityScore >= 30 ? "text-amber-400" :
+                "text-cyan-400"
+              )}>
+                {result.complexityScore}/100
+              </span>
+            </div>
+            <div className="h-2 rounded-full bg-muted/50 overflow-hidden">
+              <div 
+                className={cn(
+                  "h-full rounded-full transition-all duration-500",
+                  result.complexityScore >= 60 ? "bg-violet-500" :
+                  result.complexityScore >= 30 ? "bg-amber-500" :
+                  "bg-cyan-500"
+                )}
+                style={{ width: `${result.complexityScore}%` }}
+              />
+            </div>
+            {/* Complexity factors */}
+            {result.complexityFactors.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {result.complexityFactors.map((factor, i) => (
+                  <span 
+                    key={i}
+                    className={cn(
+                      "text-[10px] px-1.5 py-0.5 rounded",
+                      factor.includes("+") ? "bg-violet-500/20 text-violet-400" : "bg-cyan-500/20 text-cyan-400"
+                    )}
+                  >
+                    {factor}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -218,7 +287,7 @@ function RouterSimulator() {
             </div>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-border">
+          <div className="pt-3 border-t border-border">
             <div className="text-xs text-muted-foreground">{result.reasoning}</div>
           </div>
         </div>
@@ -228,16 +297,19 @@ function RouterSimulator() {
       <div className="flex flex-wrap gap-4 text-xs text-muted-foreground pt-2 border-t border-border">
         <div className="flex items-center gap-1">
           <Zap className="w-3 h-3 text-cyan-400" />
-          <span>gpt-4o-mini: Fast & cheap</span>
+          <span>fast-tier: Quick & economical</span>
         </div>
         <div className="flex items-center gap-1">
           <Brain className="w-3 h-3 text-violet-400" />
-          <span>o1: Deep reasoning</span>
+          <span>reasoning-tier: Deep thinking</span>
         </div>
         <div className="flex items-center gap-1">
           <Code2 className="w-3 h-3 text-amber-400" />
-          <span>claude: Code & creative</span>
+          <span>creative/coding: Specialized</span>
         </div>
+      </div>
+      <div className="text-[10px] text-muted-foreground mt-2">
+        Note: Map these tiers to actual models (e.g., GPT-4, Claude, Gemini) based on your provider and current pricing.
       </div>
     </div>
   );
@@ -327,9 +399,10 @@ export function ModelRoutingSection() {
 
         <Callout variant="tip" title="Small Models Are Underrated">
           <p>
-            Models like Arch-Router (1.5B params), Phi-3 Mini (3.8B), or custom fine-tuned models on 
-            Hugging Face can perform classification, routing, and labeling tasks with 90%+ accuracy 
-            while being 100x cheaper and 10x faster than large models.
+            Specialized routing models with 1-4B parameters (like Arch-Router, Phi-series, or custom 
+            fine-tuned models) can perform classification, routing, and labeling tasks with 90%+ 
+            accuracy while being 100x cheaper and 10x faster than large models. The specific models 
+            available evolve rapidly—focus on the pattern, not specific model names.
           </p>
         </Callout>
 
@@ -548,6 +621,100 @@ export function ModelRoutingSection() {
           </Card>
         </div>
 
+        <h3 id="model-aliases-fallbacks" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Model Aliases and Fallbacks
+        </h3>
+
+        <p className="text-muted-foreground">
+          Two essential patterns for production AI systems: <strong className="text-foreground">model aliases</strong> and 
+          <strong className="text-foreground"> fallback chains</strong>. Aliases decouple your code from specific models, 
+          while fallbacks ensure reliability when providers fail.
+        </p>
+
+        <h4 className="text-lg font-medium mt-6 mb-3">Model Aliases</h4>
+
+        <p className="text-muted-foreground mb-4">
+          Instead of hardcoding &quot;gpt-4o&quot; or &quot;claude-3-sonnet&quot; throughout your codebase, define 
+          semantic aliases that describe the <em>capability</em> you need:
+        </p>
+
+        <div className="bg-muted/30 rounded-lg p-4 font-mono text-sm mb-4">
+          <div className="text-muted-foreground">{/* config/models.ts */}</div>
+          <div className="mt-2">
+            <span className="text-violet-400">export const</span> <span className="text-cyan-400">MODEL_ALIASES</span> = {'{'}
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;fast&quot;</span>: <span className="text-emerald-400">&quot;gpt-4o-mini&quot;</span>,
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;balanced&quot;</span>: <span className="text-emerald-400">&quot;gpt-4o&quot;</span>,
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;reasoning&quot;</span>: <span className="text-emerald-400">&quot;o1&quot;</span>,
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;creative&quot;</span>: <span className="text-emerald-400">&quot;claude-3-5-sonnet&quot;</span>,
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;code&quot;</span>: <span className="text-emerald-400">&quot;claude-3-5-sonnet&quot;</span>,
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;cheap&quot;</span>: <span className="text-emerald-400">&quot;gemini-1.5-flash&quot;</span>,
+          </div>
+          {'}'};
+        </div>
+
+        <p className="text-muted-foreground">
+          Benefits: swap models without code changes, A/B test easily, respond to pricing changes instantly, 
+          and keep your codebase readable (&quot;use the fast model&quot; vs &quot;use gpt-4o-mini-2024-07-18&quot;).
+        </p>
+
+        <h4 className="text-lg font-medium mt-6 mb-3">Fallback Chains</h4>
+
+        <p className="text-muted-foreground mb-4">
+          Never let a single provider outage break your system. Define fallback chains that try alternative 
+          models when the primary fails:
+        </p>
+
+        <div className="bg-muted/30 rounded-lg p-4 font-mono text-sm mb-4">
+          <div className="text-muted-foreground">{/* Fallback chain for each alias */}</div>
+          <div className="mt-2">
+            <span className="text-violet-400">const</span> <span className="text-cyan-400">FALLBACK_CHAINS</span> = {'{'}
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;balanced&quot;</span>: [<span className="text-emerald-400">&quot;gpt-4o&quot;</span>, <span className="text-emerald-400">&quot;claude-3-5-sonnet&quot;</span>, <span className="text-emerald-400">&quot;gemini-1.5-pro&quot;</span>],
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;fast&quot;</span>: [<span className="text-emerald-400">&quot;gpt-4o-mini&quot;</span>, <span className="text-emerald-400">&quot;claude-3-haiku&quot;</span>, <span className="text-emerald-400">&quot;gemini-1.5-flash&quot;</span>],
+          </div>
+          {'}'};
+          <div className="mt-4">
+            <span className="text-violet-400">async function</span> <span className="text-cyan-400">callWithFallback</span>(alias, prompt) {'{'}
+          </div>
+          <div className="pl-4">
+            <span className="text-violet-400">for</span> (<span className="text-violet-400">const</span> model <span className="text-violet-400">of</span> FALLBACK_CHAINS[alias]) {'{'}
+          </div>
+          <div className="pl-8">
+            <span className="text-violet-400">try</span> {'{'} <span className="text-violet-400">return await</span> call(model, prompt); {'}'}
+          </div>
+          <div className="pl-8">
+            <span className="text-violet-400">catch</span> (e) {'{'} log(<span className="text-emerald-400">`${'{'}</span>model{'}'} failed, trying next...`); {'}'}
+          </div>
+          <div className="pl-4">{'}'}</div>
+          <div className="pl-4">
+            <span className="text-violet-400">throw new</span> Error(<span className="text-emerald-400">&quot;All models failed&quot;</span>);
+          </div>
+          {'}'}
+        </div>
+
+        <Callout variant="tip" title="Combine Aliases + Fallbacks + Routing">
+          <p>
+            The most robust pattern: routing decides the <em>capability tier</em> (alias), the alias 
+            maps to a <em>primary model</em>, and fallbacks provide <em>redundancy</em>. This gives 
+            you cost optimization, reliability, and flexibility all in one.
+          </p>
+        </Callout>
+
         <h3 id="building-routing-proxies" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
           Building Routing Proxies
         </h3>
@@ -617,7 +784,7 @@ export function ModelRoutingSection() {
         <Callout variant="important" title="Key Takeaways">
           <ul className="list-disc list-inside space-y-2 mt-2">
             <li>
-              <strong>Not every task needs GPT-4/Claude</strong>—many tasks can be handled by 
+              <strong>Not every task needs premium models</strong>—many tasks can be handled by 
               models 100x smaller and cheaper
             </li>
             <li>
@@ -635,6 +802,10 @@ export function ModelRoutingSection() {
             <li>
               <strong>Measure everything</strong>—track which routes are taken and their 
               outcomes to optimize over time
+            </li>
+            <li>
+              <strong>Models change constantly</strong>—design for abstract tiers, not specific 
+              model names, so you can swap providers easily
             </li>
           </ul>
         </Callout>

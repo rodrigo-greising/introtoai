@@ -10,7 +10,11 @@ import {
   Shield,
   Database,
   FileText,
-  CheckCircle,
+  Plus,
+  Minus,
+  DollarSign,
+  Cpu,
+  Zap,
 } from "lucide-react";
 
 // =============================================================================
@@ -26,6 +30,8 @@ interface Skill {
   triggers: string[];
   tools: string[];
   loaded: boolean;
+  tokenCost: number; // tokens added to context when loaded
+  estimatedLatency: number; // ms added to response time
 }
 
 function SkillRegistryBrowser() {
@@ -43,6 +49,8 @@ function SkillRegistryBrowser() {
       triggers: ["review", "PR", "pull request", "code quality"],
       tools: ["readFile", "analyzeDiff", "lintCode"],
       loaded: false,
+      tokenCost: 1200,
+      estimatedLatency: 150,
     },
     {
       id: "security-audit",
@@ -53,6 +61,8 @@ function SkillRegistryBrowser() {
       triggers: ["security", "vulnerability", "CVE", "audit"],
       tools: ["scanDependencies", "checkSecrets", "analyzePermissions"],
       loaded: false,
+      tokenCost: 1800,
+      estimatedLatency: 200,
     },
     {
       id: "database-migration",
@@ -63,6 +73,8 @@ function SkillRegistryBrowser() {
       triggers: ["migration", "schema", "database", "SQL"],
       tools: ["generateMigration", "validateSchema", "rollbackPlan"],
       loaded: false,
+      tokenCost: 1500,
+      estimatedLatency: 180,
     },
     {
       id: "documentation",
@@ -73,6 +85,32 @@ function SkillRegistryBrowser() {
       triggers: ["docs", "readme", "documentation", "API docs"],
       tools: ["extractTypes", "generateDocs", "updateReadme"],
       loaded: false,
+      tokenCost: 900,
+      estimatedLatency: 100,
+    },
+    {
+      id: "test-generation",
+      name: "Test Generation",
+      category: "testing",
+      icon: <Zap className="w-4 h-4" />,
+      description: "Generate comprehensive test suites for code changes",
+      triggers: ["test", "testing", "unit test", "coverage"],
+      tools: ["analyzeCode", "generateTests", "runTests"],
+      loaded: false,
+      tokenCost: 1400,
+      estimatedLatency: 250,
+    },
+    {
+      id: "performance-analysis",
+      name: "Performance Analysis",
+      category: "optimization",
+      icon: <Cpu className="w-4 h-4" />,
+      description: "Identify and fix performance bottlenecks",
+      triggers: ["performance", "slow", "optimize", "profiling"],
+      tools: ["profileCode", "analyzeBenchmarks", "suggestOptimizations"],
+      loaded: false,
+      tokenCost: 2000,
+      estimatedLatency: 300,
     },
   ];
 
@@ -101,8 +139,42 @@ function SkillRegistryBrowser() {
     });
   };
 
+  // Calculate totals for loaded skills
+  const loadedSkillObjects = skills.filter(s => loadedSkills.has(s.id));
+  const totalTokens = loadedSkillObjects.reduce((sum, s) => sum + s.tokenCost, 0);
+  const totalLatency = loadedSkillObjects.reduce((sum, s) => sum + s.estimatedLatency, 0);
+  const estimatedCost = (totalTokens / 1000000) * 3; // $3 per 1M tokens (illustrative)
+
   return (
     <div className="space-y-4">
+      {/* Cost Summary Panel */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
+          <div className="flex items-center gap-2 mb-1">
+            <Cpu className="w-4 h-4 text-cyan-400" />
+            <span className="text-xs text-muted-foreground">Total Tokens</span>
+          </div>
+          <div className="text-lg font-bold text-cyan-400">{totalTokens.toLocaleString()}</div>
+          <div className="text-[10px] text-muted-foreground">context size increase</div>
+        </div>
+        <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+          <div className="flex items-center gap-2 mb-1">
+            <DollarSign className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs text-muted-foreground">Est. Cost/Call</span>
+          </div>
+          <div className="text-lg font-bold text-emerald-400">${estimatedCost.toFixed(4)}</div>
+          <div className="text-[10px] text-muted-foreground">at $3/1M tokens</div>
+        </div>
+        <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+          <div className="flex items-center gap-2 mb-1">
+            <Zap className="w-4 h-4 text-amber-400" />
+            <span className="text-xs text-muted-foreground">Latency Impact</span>
+          </div>
+          <div className="text-lg font-bold text-amber-400">+{totalLatency}ms</div>
+          <div className="text-[10px] text-muted-foreground">processing overhead</div>
+        </div>
+      </div>
+
       {/* Search and filter */}
       <div className="flex gap-3">
         <div className="relative flex-1">
@@ -136,12 +208,11 @@ function SkillRegistryBrowser() {
             <div
               key={skill.id}
               className={cn(
-                "p-4 rounded-lg border transition-all cursor-pointer",
+                "p-4 rounded-lg border transition-all",
                 isLoaded
                   ? "bg-cyan-500/10 border-cyan-500/30"
                   : "bg-muted/30 border-border hover:border-border/80"
               )}
-              onClick={() => toggleSkillLoad(skill.id)}
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2">
@@ -156,15 +227,30 @@ function SkillRegistryBrowser() {
                     <div className="text-xs text-muted-foreground">{skill.category}</div>
                   </div>
                 </div>
-                {isLoaded && (
-                  <CheckCircle className="w-4 h-4 text-cyan-400" />
-                )}
+                <button
+                  onClick={() => toggleSkillLoad(skill.id)}
+                  className={cn(
+                    "p-1.5 rounded-lg transition-all",
+                    isLoaded
+                      ? "bg-rose-500/20 text-rose-400 hover:bg-rose-500/30"
+                      : "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
+                  )}
+                >
+                  {isLoaded ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                </button>
               </div>
               
               <p className="text-xs text-muted-foreground mb-2">{skill.description}</p>
               
+              {/* Cost info - always visible */}
+              <div className="flex items-center gap-4 text-[10px] text-muted-foreground mb-2">
+                <span className={isLoaded ? "text-cyan-400" : ""}>{skill.tokenCost.toLocaleString()} tokens</span>
+                <span>•</span>
+                <span className={isLoaded ? "text-amber-400" : ""}>+{skill.estimatedLatency}ms</span>
+              </div>
+              
               {isLoaded && (
-                <div className="space-y-2 pt-2 border-t border-border/50">
+                <div className="space-y-2 pt-2 border-t border-border/50 animate-in fade-in slide-in-from-top-2">
                   <div>
                     <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Triggers</div>
                     <div className="flex flex-wrap gap-1">
@@ -192,12 +278,35 @@ function SkillRegistryBrowser() {
         })}
       </div>
 
-      {/* Stats */}
-      <div className="flex gap-4 text-xs text-muted-foreground pt-2 border-t border-border">
-        <span>{skills.length} skills available</span>
-        <span>•</span>
-        <span className="text-cyan-400">{loadedSkills.size} loaded</span>
-        <span className="ml-auto">Click a skill to load/unload</span>
+      {/* Assembly summary */}
+      <div className="p-3 rounded-lg bg-muted/20 border border-border">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4 text-xs">
+            <span className="text-muted-foreground">{skills.length} skills available</span>
+            <span className="text-muted-foreground">•</span>
+            <span className="text-cyan-400 font-medium">{loadedSkills.size} assembled</span>
+          </div>
+          {loadedSkills.size > 0 && (
+            <button
+              onClick={() => setLoadedSkills(new Set())}
+              className="text-xs text-rose-400 hover:text-rose-300 transition-colors"
+            >
+              Clear all
+            </button>
+          )}
+        </div>
+        {loadedSkills.size > 0 && (
+          <div className="mt-2 pt-2 border-t border-border/50">
+            <div className="text-[10px] text-muted-foreground mb-1">Active skills:</div>
+            <div className="flex flex-wrap gap-1">
+              {loadedSkillObjects.map(s => (
+                <span key={s.id} className="px-2 py-0.5 text-[10px] rounded bg-cyan-500/10 text-cyan-400">
+                  {s.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -205,9 +314,9 @@ function SkillRegistryBrowser() {
 
 export function SkillsProgressiveDiscoverySection() {
   return (
-    <section id="skills-progressive-discovery" className="scroll-mt-20">
+    <section id="skills" className="scroll-mt-20">
       <SectionHeading
-        id="skills-progressive-discovery-heading"
+        id="skills-heading"
         title="Skills & Progressive Discovery"
         subtitle="Modular capabilities, subagents, and context-aware delegation"
       />

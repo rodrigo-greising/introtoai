@@ -206,11 +206,11 @@ async function sectionedParallel(document: string) {
           <div className="px-3 py-2 rounded-lg bg-muted/50 text-xs font-medium">Input</div>
           <ArrowRight className="w-4 h-4 text-muted-foreground rotate-90" />
           <div className="px-3 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-medium border border-emerald-500/30">
-            Primary (GPT-4)
+            Primary Model
           </div>
           <div className="text-xs text-muted-foreground">↓ on failure</div>
           <div className="px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-400/80 text-xs font-medium border border-emerald-500/20">
-            Fallback (Claude)
+            Fallback (Alt Provider)
           </div>
           <div className="text-xs text-muted-foreground">↓ on failure</div>
           <div className="px-3 py-2 rounded-lg bg-emerald-500/5 text-emerald-400/60 text-xs font-medium border border-emerald-500/10">
@@ -221,8 +221,8 @@ async function sectionedParallel(document: string) {
       code: `// Fallback: Graceful degradation
 async function withFallback(input: string) {
   const providers = [
-    { name: "gpt-4", fn: () => openai.complete(input) },
-    { name: "claude", fn: () => anthropic.complete(input) },
+    { name: "primary", fn: () => primaryProvider.complete(input) },
+    { name: "fallback", fn: () => fallbackProvider.complete(input) },
     { name: "local", fn: () => localModel.complete(input) },
   ];
   
@@ -518,6 +518,63 @@ export function OrchestrationPatternsSection() {
           </table>
         </div>
 
+        {/* Interface Pattern */}
+        <h3 id="interface-pattern" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          The Interface Pattern
+        </h3>
+
+        <p className="text-muted-foreground">
+          The key to composable patterns is <strong className="text-foreground">consistent interfaces</strong>. 
+          When all your patterns implement the same interface, they become interchangeable building blocks.
+        </p>
+
+        <Card variant="default" className="mt-4">
+          <CardContent>
+            <h4 className="font-medium text-foreground mb-3">Defining a Common Interface</h4>
+            <pre className="text-xs font-mono text-muted-foreground bg-muted/30 p-3 rounded-lg overflow-x-auto">
+{`// All orchestration patterns implement this interface
+interface OrchestrationStep<TInput, TOutput> {
+  name: string;
+  execute(input: TInput, context: Context): Promise<TOutput>;
+  canHandle?(input: TInput): boolean;  // For routing
+  fallback?: OrchestrationStep<TInput, TOutput>;
+}
+
+// Context flows through all steps
+interface Context {
+  traceId: string;
+  history: StepResult[];
+  metadata: Record<string, unknown>;
+}
+
+// Example: A chain is just steps composed sequentially
+class Chain<T> implements OrchestrationStep<T, T> {
+  constructor(
+    public name: string,
+    private steps: OrchestrationStep<T, T>[]
+  ) {}
+
+  async execute(input: T, ctx: Context): Promise<T> {
+    let result = input;
+    for (const step of this.steps) {
+      result = await step.execute(result, ctx);
+      ctx.history.push({ step: step.name, result });
+    }
+    return result;
+  }
+}`}
+            </pre>
+          </CardContent>
+        </Card>
+
+        <Callout variant="tip" title="Benefit: Hot-swappable Components">
+          <p className="m-0">
+            With a common interface, you can swap a simple LLM call for a complex orchestration 
+            pattern without changing the calling code. A single-step handler can be upgraded to 
+            a chain, router, or evaluator loop as requirements evolve.
+          </p>
+        </Callout>
+
         {/* Combining Patterns */}
         <h3 id="combining-patterns" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
           Combining Patterns
@@ -530,6 +587,37 @@ export function OrchestrationPatternsSection() {
           for quality assurance. Each handler can itself use multiple patterns, creating powerful, 
           composable systems.
         </p>
+
+        <Card variant="default" className="mt-4">
+          <CardContent>
+            <h4 className="font-medium text-foreground mb-3">Composing Patterns</h4>
+            <pre className="text-xs font-mono text-muted-foreground bg-muted/30 p-3 rounded-lg overflow-x-auto">
+{`// Build complex pipelines from simple patterns
+const supportPipeline = new Router("support-router", [
+  {
+    // Simple queries go to cheap model with fallback
+    canHandle: (input) => input.complexity === "low",
+    handler: new WithFallback(cheapModel, [primaryModel])
+  },
+  {
+    // Complex queries use evaluator loop
+    canHandle: (input) => input.complexity === "high",
+    handler: new EvaluatorLoop(
+      new Chain("research-chain", [
+        searchStep,
+        analyzeStep,
+        synthesizeStep
+      ]),
+      { maxIterations: 3, threshold: 0.9 }
+    )
+  }
+]);
+
+// All patterns implement the same interface
+const result = await supportPipeline.execute(input, context);`}
+            </pre>
+          </CardContent>
+        </Card>
 
         {/* Best Practices */}
         <h3 className="text-xl font-semibold mt-10 mb-4">Best Practices</h3>

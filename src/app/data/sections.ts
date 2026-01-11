@@ -34,7 +34,8 @@ export interface Section {
     | "evaluation"
     | "coding-agents"
     | "workflow"
-    | "production";
+    | "production"
+    | "capstone";
   description?: string;
   subSections?: SubSection[];
 }
@@ -51,6 +52,7 @@ export const partMeta = {
   "coding-agents": { label: "Part 8: Coding Agents", order: 8 },
   workflow: { label: "Part 9: Development Workflow", order: 9 },
   production: { label: "Part 10: Production", order: 10 },
+  capstone: { label: "Capstone Project", order: 11 },
 } as const;
 
 export const sections: Section[] = [
@@ -563,6 +565,22 @@ export const sections: Section[] = [
       { id: "retry-patterns", title: "Retry Patterns" },
       { id: "fallback-strategies", title: "Fallback Strategies" },
       { id: "retry-simulator", title: "Interactive: Retry Simulator" },
+    ],
+  },
+
+  // ==========================================================================
+  // Capstone Project (1 section)
+  // ==========================================================================
+  {
+    id: "capstone",
+    title: "D&D Game Assistant",
+    part: "capstone",
+    description: "A production-ready example combining all guide concepts",
+    subSections: [
+      { id: "architecture", title: "System Architecture" },
+      { id: "implementation-details", title: "Implementation Details" },
+      { id: "cost-estimation", title: "Cost Estimation" },
+      { id: "concepts-applied", title: "Concepts Applied" },
     ],
   },
 ];

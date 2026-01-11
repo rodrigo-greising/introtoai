@@ -454,8 +454,56 @@ export function VectorDatabasesSection() {
 
         {/* Popular Options */}
         <h3 id="database-options" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
-          Popular Vector Database Options
+          Recommended: pgvector
         </h3>
+
+        <Callout variant="tip" title="Start with pgvector">
+          <p className="m-0">
+            For most projects, <strong>pgvector</strong> (a PostgreSQL extension) is the recommended starting point. 
+            It lets you combine vector similarity search with full SQL—joining embeddings with relational data, 
+            using complex filters, and leveraging PostgreSQL&apos;s ecosystem of tools and hosting options.
+          </p>
+        </Callout>
+
+        <p className="text-muted-foreground mt-4">
+          The power of pgvector comes from <strong className="text-foreground">mixed queries</strong>—combining 
+          semantic search with traditional SQL in a single query:
+        </p>
+
+        <div className="my-6 p-4 rounded-xl bg-card border border-border font-mono text-sm overflow-x-auto">
+          <pre className="text-muted-foreground whitespace-pre-wrap">{`-- Find similar documents with relational constraints
+SELECT 
+  docs.id,
+  docs.title,
+  docs.content,
+  docs.embedding <=> query_embedding AS distance
+FROM documents docs
+JOIN users u ON docs.user_id = u.id
+WHERE u.organization_id = $1           -- Relational filter
+  AND docs.created_at > NOW() - INTERVAL '30 days'
+  AND docs.status = 'published'
+ORDER BY docs.embedding <=> query_embedding  -- Vector similarity
+LIMIT 10;
+
+-- Hybrid search: keyword + semantic
+SELECT docs.*
+FROM documents docs
+WHERE to_tsvector('english', docs.content) @@ plainto_tsquery('machine learning')
+ORDER BY docs.embedding <=> $1
+LIMIT 10;`}</pre>
+        </div>
+
+        <p className="text-muted-foreground">
+          This is powerful because you&apos;re not managing two systems—your relational data and vectors live 
+          together, can be queried together, and maintain referential integrity.
+        </p>
+
+        <h4 className="text-lg font-medium mt-8 mb-4">Other Vector Database Options</h4>
+
+        <p className="text-muted-foreground">
+          If you have specific requirements that pgvector doesn&apos;t meet (billion-scale vectors, managed hosting, 
+          specialized features), consider dedicated vector databases:
+        </p>
 
         <div className="overflow-x-auto mt-6">
           <table className="w-full text-sm border-collapse">
@@ -464,45 +512,38 @@ export function VectorDatabasesSection() {
                 <th className="text-left p-3 font-medium text-foreground">Database</th>
                 <th className="text-left p-3 font-medium text-foreground">Type</th>
                 <th className="text-left p-3 font-medium text-foreground">Best For</th>
-                <th className="text-left p-3 font-medium text-foreground">Notable Features</th>
               </tr>
             </thead>
             <tbody className="text-muted-foreground">
-              <tr className="border-b border-border/50">
-                <td className="p-3 font-medium text-[var(--highlight)]">Pinecone</td>
-                <td className="p-3">Managed SaaS</td>
-                <td className="p-3">Fast setup, production-ready</td>
-                <td className="p-3">Auto-scaling, metadata filtering, namespaces</td>
+              <tr className="border-b border-border/50 bg-emerald-500/5">
+                <td className="p-3 font-medium text-emerald-400">pgvector ⭐</td>
+                <td className="p-3">PostgreSQL extension</td>
+                <td className="p-3">Most projects—combined SQL + vector queries</td>
               </tr>
               <tr className="border-b border-border/50">
-                <td className="p-3 font-medium text-violet-400">Weaviate</td>
+                <td className="p-3 font-medium text-violet-400">Qdrant</td>
+                <td className="p-3">Open source / Cloud</td>
+                <td className="p-3">High-volume, complex filtering</td>
+              </tr>
+              <tr className="border-b border-border/50">
+                <td className="p-3 font-medium text-cyan-400">Weaviate</td>
                 <td className="p-3">Open source / Cloud</td>
                 <td className="p-3">GraphQL API, hybrid search</td>
-                <td className="p-3">Built-in vectorizers, multimodal support</td>
               </tr>
               <tr className="border-b border-border/50">
-                <td className="p-3 font-medium text-cyan-400">pgvector</td>
-                <td className="p-3">PostgreSQL extension</td>
-                <td className="p-3">Existing Postgres users</td>
-                <td className="p-3">Familiar SQL, joins with relational data</td>
-              </tr>
-              <tr className="border-b border-border/50">
-                <td className="p-3 font-medium text-emerald-400">Chroma</td>
+                <td className="p-3 font-medium text-amber-400">Chroma</td>
                 <td className="p-3">Open source</td>
-                <td className="p-3">Local development, prototyping</td>
-                <td className="p-3">Simple API, embedded mode, LangChain integration</td>
-              </tr>
-              <tr className="border-b border-border/50">
-                <td className="p-3 font-medium text-amber-400">Qdrant</td>
-                <td className="p-3">Open source / Cloud</td>
-                <td className="p-3">High performance, filtering</td>
-                <td className="p-3">Rich filtering, payload storage, Rust performance</td>
+                <td className="p-3">Local dev, prototyping</td>
               </tr>
               <tr className="border-b border-border/50">
                 <td className="p-3 font-medium text-rose-400">Milvus</td>
                 <td className="p-3">Open source</td>
-                <td className="p-3">Large scale, GPU acceleration</td>
-                <td className="p-3">Billion-scale vectors, multiple index types</td>
+                <td className="p-3">Billion+ vectors, GPU acceleration</td>
+              </tr>
+              <tr className="border-b border-border/50">
+                <td className="p-3 font-medium text-muted-foreground">Pinecone, etc.</td>
+                <td className="p-3">Managed SaaS</td>
+                <td className="p-3">Zero-ops, quick start</td>
               </tr>
             </tbody>
           </table>
@@ -510,13 +551,44 @@ export function VectorDatabasesSection() {
 
         {/* Usage Example */}
         <h3 id="usage-example" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
-          Example: Pinecone Setup
+          Example: pgvector Setup
         </h3>
 
+        <div className="my-6 p-4 rounded-xl bg-card border border-border font-mono text-sm overflow-x-auto">
+          <pre className="text-muted-foreground whitespace-pre-wrap">{`-- Enable the extension
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- Create a table with vector column
+CREATE TABLE documents (
+  id SERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  user_id INTEGER REFERENCES users(id),
+  embedding VECTOR(1536),  -- Dimension matches your model
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create an index for fast similarity search
+CREATE INDEX ON documents 
+USING ivfflat (embedding vector_cosine_ops) 
+WITH (lists = 100);  -- Tune based on dataset size
+
+-- Insert with embedding
+INSERT INTO documents (title, content, user_id, embedding)
+VALUES ('My Doc', 'Content here...', 1, $1);
+
+-- Query similar documents
+SELECT id, title, 1 - (embedding <=> $1) AS similarity
+FROM documents
+WHERE user_id = $2
+ORDER BY embedding <=> $1
+LIMIT 5;`}</pre>
+        </div>
+
         <p className="text-muted-foreground">
-          Vector databases like Pinecone provide APIs for ingesting documents as embeddings and querying 
-          them efficiently. The typical workflow involves embedding documents during ingestion, storing 
-          them with metadata, and then querying with embedded questions to find the most similar content.
+          The typical workflow involves embedding documents during ingestion, storing them with 
+          metadata, and then querying with embedded questions to find the most similar content.
+          With pgvector, you get the full power of SQL for filtering, joining, and aggregating.
         </p>
 
         {/* Metadata Filtering */}

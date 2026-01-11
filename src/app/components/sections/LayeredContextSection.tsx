@@ -14,6 +14,7 @@ import {
   User,
   ChevronDown,
   ChevronUp,
+  Clock,
 } from "lucide-react";
 
 // =============================================================================
@@ -74,6 +75,16 @@ const defaultLayers: ContextLayer[] = [
     color: "emerald",
   },
   {
+    id: "realtime",
+    name: "Real-time Data",
+    description: "Current time, live state, session variables",
+    content: `Current time: ${new Date().toISOString()}, user_timezone: "America/New_York", session_id: "abc123"`,
+    tokens: 50,
+    volatility: "variable",
+    icon: Clock,
+    color: "pink",
+  },
+  {
     id: "history",
     name: "Conversation History",
     description: "Recent messages (summarized if needed)",
@@ -100,13 +111,13 @@ function LayerBuilder() {
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [expandedLayer, setExpandedLayer] = useState<string | null>(null);
 
-  const volatilityColors = {
+  const volatilityColors: Record<ContextLayer["volatility"], { bg: string; border: string; text: string; label: string }> = {
     static: { bg: "bg-cyan-500/20", border: "border-cyan-500/40", text: "text-cyan-400", label: "Static" },
     "semi-static": { bg: "bg-amber-500/20", border: "border-amber-500/40", text: "text-amber-400", label: "Semi-static" },
     dynamic: { bg: "bg-emerald-500/20", border: "border-emerald-500/40", text: "text-emerald-400", label: "Dynamic" },
     variable: { bg: "bg-rose-500/20", border: "border-rose-500/40", text: "text-rose-400", label: "Variable" },
   };
-
+  
   const totalTokens = layers.reduce((sum, l) => sum + l.tokens, 0);
   
   // Calculate cache efficiency

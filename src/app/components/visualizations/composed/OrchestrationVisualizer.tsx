@@ -107,7 +107,9 @@ export function OrchestrationVisualizer({
   }, [selectedTaskId, tabs]);
 
   // Handle tab click
-  const handleTabClick = useCallback((tabId: string) => {
+  const handleTabClick = useCallback((e: React.MouseEvent, tabId: string) => {
+    e.stopPropagation();
+    e.preventDefault();
     setActiveTab(tabId);
     const tab = tabs.find((t) => t.id === tabId);
     if (tab?.taskId) {
@@ -345,7 +347,7 @@ export function OrchestrationVisualizer({
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => handleTabClick(tab.id)}
+                    onClick={(e) => handleTabClick(e, tab.id)}
                     className={cn(
                       "px-3 py-1.5 text-[11px] font-medium rounded-t-lg transition-all duration-200 whitespace-nowrap",
                       "border border-b-0 -mb-px relative",

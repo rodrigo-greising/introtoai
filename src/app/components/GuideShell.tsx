@@ -51,6 +51,8 @@ import {
   // Production
   CostOptimizationSection,
   ReliabilitySection,
+  // Capstone
+  CapstoneSection,
 } from "./sections";
 import { sections } from "@/app/data/sections";
 import { useActiveSection, scrollToSection } from "@/hooks/useActiveSection";
@@ -132,6 +134,9 @@ const sectionComponents: Record<string, React.ComponentType> = {
   // Part 10: Production
   "cost-optimization": CostOptimizationSection,
   "reliability": ReliabilitySection,
+
+  // Capstone
+  "capstone": CapstoneSection,
 };
 
 export function GuideShell() {

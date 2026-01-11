@@ -33,9 +33,11 @@ function SchemaBuilder() {
     { id: "3", name: "completed", type: "boolean", description: "Whether the task is done", required: false },
   ]);
   const [newFieldName, setNewFieldName] = useState("");
+  const [newFieldDescription, setNewFieldDescription] = useState("");
   const [newFieldType, setNewFieldType] = useState<SchemaField["type"]>("string");
   const [testOutput, setTestOutput] = useState<string | null>(null);
   const [isValid, setIsValid] = useState<boolean | null>(null);
+  const [editingField, setEditingField] = useState<string | null>(null);
 
   const jsonSchema = useMemo(() => {
     const properties: Record<string, { type: string; description: string }> = {};
@@ -82,11 +84,20 @@ function SchemaBuilder() {
       id: Date.now().toString(),
       name: newFieldName.trim(),
       type: newFieldType,
-      description: `Description for ${newFieldName}`,
+      description: newFieldDescription.trim() || `Description for ${newFieldName}`,
       required: true,
     };
     setFields([...fields, newField]);
     setNewFieldName("");
+    setNewFieldDescription("");
+  };
+
+  const updateFieldDescription = (id: string, description: string) => {
+    setFields(fields.map(f => f.id === id ? { ...f, description } : f));
+  };
+
+  const updateFieldName = (id: string, name: string) => {
+    setFields(fields.map(f => f.id === id ? { ...f, name } : f));
   };
 
   const removeField = (id: string) => {
@@ -167,9 +178,27 @@ function SchemaBuilder() {
                     : "bg-muted/30 border-border"
                 )}
               >
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-foreground">{field.name}</span>
+                    {editingField === field.id ? (
+                      <input
+                        type="text"
+                        value={field.name}
+                        onChange={(e) => updateFieldName(field.id, e.target.value)}
+                        onBlur={() => setEditingField(null)}
+                        onKeyDown={(e) => e.key === "Enter" && setEditingField(null)}
+                        className="font-medium text-foreground bg-transparent border-b border-cyan-500/50 focus:outline-none px-0 py-0 w-24"
+                        autoFocus
+                      />
+                    ) : (
+                      <span 
+                        className="font-medium text-foreground cursor-pointer hover:text-cyan-400 transition-colors"
+                        onClick={() => setEditingField(field.id)}
+                        title="Click to edit name"
+                      >
+                        {field.name}
+                      </span>
+                    )}
                     <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                       {field.type}
                     </span>
@@ -179,7 +208,25 @@ function SchemaBuilder() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">{field.description}</p>
+                  {editingField === `${field.id}-desc` ? (
+                    <input
+                      type="text"
+                      value={field.description}
+                      onChange={(e) => updateFieldDescription(field.id, e.target.value)}
+                      onBlur={() => setEditingField(null)}
+                      onKeyDown={(e) => e.key === "Enter" && setEditingField(null)}
+                      className="text-xs text-muted-foreground bg-transparent border-b border-cyan-500/50 focus:outline-none w-full mt-0.5"
+                      autoFocus
+                    />
+                  ) : (
+                    <p 
+                      className="text-xs text-muted-foreground mt-0.5 cursor-pointer hover:text-foreground transition-colors"
+                      onClick={() => setEditingField(`${field.id}-desc`)}
+                      title="Click to edit description"
+                    >
+                      {field.description}
+                    </p>
+                  )}
                 </div>
                 <button
                   onClick={() => toggleRequired(field.id)}
@@ -199,33 +246,45 @@ function SchemaBuilder() {
           </div>
 
           {/* Add field */}
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={newFieldName}
-              onChange={(e) => setNewFieldName(e.target.value)}
-              placeholder="Field name"
-              className="flex-1 px-3 py-2 rounded-lg bg-muted/50 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-              onKeyDown={(e) => e.key === "Enter" && addField()}
-            />
-            <select
-              value={newFieldType}
-              onChange={(e) => setNewFieldType(e.target.value as SchemaField["type"])}
-              className="px-3 py-2 rounded-lg bg-muted/50 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-            >
-              <option value="string">string</option>
-              <option value="number">number</option>
-              <option value="boolean">boolean</option>
-              <option value="array">array</option>
-              <option value="object">object</option>
-            </select>
-            <button
-              onClick={addField}
-              disabled={!newFieldName.trim()}
-              className="px-3 py-2 rounded-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 hover:bg-cyan-500/30 disabled:opacity-50 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newFieldName}
+                onChange={(e) => setNewFieldName(e.target.value)}
+                placeholder="Field name"
+                className="flex-1 px-3 py-2 rounded-lg bg-muted/50 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                onKeyDown={(e) => e.key === "Enter" && addField()}
+              />
+              <select
+                value={newFieldType}
+                onChange={(e) => setNewFieldType(e.target.value as SchemaField["type"])}
+                className="px-3 py-2 rounded-lg bg-muted/50 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+              >
+                <option value="string">string</option>
+                <option value="number">number</option>
+                <option value="boolean">boolean</option>
+                <option value="array">array</option>
+                <option value="object">object</option>
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newFieldDescription}
+                onChange={(e) => setNewFieldDescription(e.target.value)}
+                placeholder="Description (guides the LLM)"
+                className="flex-1 px-3 py-2 rounded-lg bg-muted/50 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                onKeyDown={(e) => e.key === "Enter" && addField()}
+              />
+              <button
+                onClick={addField}
+                disabled={!newFieldName.trim()}
+                className="px-3 py-2 rounded-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 hover:bg-cyan-500/30 disabled:opacity-50 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -491,6 +550,72 @@ Not completed yet.`}
             </CardContent>
           </Card>
         </div>
+
+        {/* Designing for AI Integration */}
+        <h3 id="designing-for-ai" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Designing for AI Integration
+        </h3>
+
+        <p className="text-muted-foreground">
+          Structured outputs aren&apos;t just for LLM responses—they inform how you <strong className="text-foreground">design 
+          your entire system</strong> to work with AI. Think of it as building an &quot;AI-friendly&quot; architecture.
+        </p>
+
+        <div className="space-y-4 mt-6">
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-cyan-400 mb-2">Ontology Layer</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Define your domain&apos;s entities and relationships as explicit schemas. This becomes the 
+                &quot;shared language&quot; between your AI and your system.
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Enumerate entity types: User, Task, Project, Document</li>
+                <li>Define relationships: Task belongsTo Project, User owns Tasks</li>
+                <li>Standardize IDs, timestamps, and status fields</li>
+                <li>The AI can reason about these entities because they&apos;re well-defined</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-violet-400 mb-2">Action Plane</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Build a deterministic API layer that the AI calls—never let the AI access your database directly.
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>AI produces structured &quot;intents&quot;: <code className="text-xs bg-muted px-1 rounded">{`{action: "create_task", params: {...}}`}</code></li>
+                <li>Your code validates and executes the intent</li>
+                <li>All mutations go through your business logic layer</li>
+                <li>You control permissions, validation, and side effects</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-amber-400 mb-2">Agents as Data Structures</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Model agents themselves as structured data—their capabilities, constraints, and state.
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Agent configs: model, temperature, tools, system prompt</li>
+                <li>Skill registries: available capabilities with metadata</li>
+                <li>Session state: conversation history, current task, learned preferences</li>
+                <li>Makes agents composable, testable, and version-controlled</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Callout variant="tip" title="The Pattern">
+          <p className="m-0">
+            <strong>Ontology</strong> defines what exists. <strong>Action Plane</strong> defines what can 
+            be done. <strong>Agent Config</strong> defines who does it and how. When all three are structured 
+            data, your entire AI integration becomes predictable, testable, and maintainable.
+          </p>
+        </Callout>
 
         <Callout variant="tip" title="Coming Up: Tools">
           <p>

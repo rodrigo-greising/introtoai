@@ -325,6 +325,70 @@ export function DelegationSection() {
           </Card>
         </div>
 
+        {/* Advanced Multi-Agent Patterns */}
+        <h3 id="advanced-patterns" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Advanced Multi-Agent Patterns
+        </h3>
+
+        <p className="text-muted-foreground">
+          Beyond simple delegation, there are more sophisticated patterns for agent coordination:
+        </p>
+
+        <div className="space-y-4 mt-6">
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-cyan-400 mb-2">Swarm Patterns</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Agents that can dynamically spawn sub-agents based on task requirements:
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Self-organizing: agents decide when to delegate and to whom</li>
+                <li>Dynamic scaling: spawn more workers for parallel subtasks</li>
+                <li>Automatic handoffs: agents transfer context to the right specialist</li>
+                <li>Example: research agent spawns 5 parallel search agents for different sources</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-violet-400 mb-2">Group Chat / Multi-Agent Conversation</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Multiple agents participate in a shared conversation:
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Round-robin: agents take turns responding to the conversation</li>
+                <li>Selective: a manager decides which agent should respond next</li>
+                <li>Free-form: agents respond when they have relevant input</li>
+                <li>Good for: brainstorming, debates, comprehensive analysis</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-amber-400 mb-2">Agent-to-Agent Communication</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Direct communication between peer agents without orchestrator:
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Message passing: agents send structured messages to each other</li>
+                <li>Shared state: agents read/write to a common context store</li>
+                <li>Negotiation: agents discuss and reach consensus on approach</li>
+                <li>Warning: harder to debug; use when orchestration becomes a bottleneck</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Callout variant="warning" title="Complexity Trade-offs">
+          <p className="m-0">
+            Advanced patterns like swarms and group chat add significant complexity. Start with 
+            simple orchestrator-worker patterns. Only introduce these when you have clear evidence 
+            that simpler approaches are insufficient for your use case.
+          </p>
+        </Callout>
+
         {/* Implementation */}
         <h3 id="implementation" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
           Implementation

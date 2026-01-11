@@ -289,12 +289,12 @@ export function BackgroundAgentsSection() {
           complete—freeing you to work on other things while AI handles implementation.
         </p>
 
-        <Callout variant="info" title="Example Tool Notice">
+        <Callout variant="info" title="Rapidly Evolving Space">
           <p className="m-0">
-            Cursor&apos;s background agent is the primary example. Alternatives include: 
-            <strong>OpenAI Codex</strong>, <strong>Claude with computer use</strong>, 
-            <strong>Devin</strong>, <strong>GitHub Copilot Workspace</strong>, 
-            <strong>Replit Agent</strong>, <strong>Codeium Windsurf</strong>.
+            Background coding agents are evolving rapidly. The examples and patterns here use 
+            Cursor&apos;s implementation, but the concepts apply across tools. Many alternatives 
+            exist and new ones emerge frequently—focus on understanding the patterns rather than 
+            specific tools.
           </p>
         </Callout>
 

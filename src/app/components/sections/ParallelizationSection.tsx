@@ -222,7 +222,7 @@ function TimelineComparisonVisualizer() {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats - Percentages emphasized (they matter!), numbers secondary */}
         <div className="flex gap-4">
           <div className={cn(
             "flex-1 p-3 rounded-lg border text-center",
@@ -230,7 +230,7 @@ function TimelineComparisonVisualizer() {
               ? "bg-rose-500/10 border-rose-500/30"
               : "bg-muted/30 border-border"
           )}>
-            <div className="text-2xl font-bold text-foreground">11s</div>
+            <div className="text-sm text-muted-foreground">11s</div>
             <div className="text-xs text-muted-foreground">Sequential</div>
           </div>
           <div className={cn(
@@ -239,12 +239,13 @@ function TimelineComparisonVisualizer() {
               ? "bg-emerald-500/10 border-emerald-500/30"
               : "bg-muted/30 border-border"
           )}>
-            <div className="text-2xl font-bold text-foreground">7s</div>
+            <div className="text-sm text-muted-foreground">7s</div>
             <div className="text-xs text-muted-foreground">Parallel</div>
           </div>
-          <div className="flex-1 p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-center">
-            <div className="text-2xl font-bold text-cyan-400">36%</div>
-            <div className="text-xs text-muted-foreground">Time Saved</div>
+          <div className="flex-[2] p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-center">
+            <div className="text-3xl font-bold text-cyan-400">36%</div>
+            <div className="text-sm text-cyan-300">Faster</div>
+            <div className="text-xs text-muted-foreground mt-1">11s → 7s</div>
           </div>
         </div>
       </div>

@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { 
-  MessageSquare, 
-  Layers,
+  MessageCircleQuestion, 
+  ListTodo,
   Bot,
-  Check,
+  Bug,
+  Sparkles,
   ChevronRight,
 } from "lucide-react";
 
@@ -19,15 +20,15 @@ function UseCaseMatcher() {
       id: "debug",
       label: "Debug a function that's not working",
       icon: "🐛",
-      bestMode: "chat",
-      reasoning: "Start in Chat to understand the issue through discussion. Once you identify the fix, you can apply it or switch to Composer for multi-file changes.",
+      bestMode: "debug",
+      reasoning: "Debug mode is purpose-built for this. It analyzes the error, inspects relevant code, and suggests targeted fixes.",
     },
     {
       id: "new-component",
       label: "Create a new React component",
       icon: "🧩",
-      bestMode: "composer",
-      reasoning: "Composer excels at single or multi-file creation. Describe the component, and it will generate the file(s) with proper structure.",
+      bestMode: "agent",
+      reasoning: "Agent mode can create files, add proper structure, imports, and even set up related test files in one go.",
     },
     {
       id: "refactor-multiple",
@@ -40,8 +41,8 @@ function UseCaseMatcher() {
       id: "explain-code",
       label: "Understand how existing code works",
       icon: "📖",
-      bestMode: "chat",
-      reasoning: "Chat is perfect for exploration and explanation. Ask questions, get context, understand behavior without making changes.",
+      bestMode: "ask",
+      reasoning: "Ask mode is perfect for exploration and explanation. Get context and understand behavior without making changes.",
     },
     {
       id: "quick-edit",
@@ -58,11 +59,11 @@ function UseCaseMatcher() {
       reasoning: "Agent mode can read the spec, create files, write tests, run them, and iterate until everything passes. Best for substantial work.",
     },
     {
-      id: "add-tests",
-      label: "Add tests to existing code",
-      icon: "🧪",
-      bestMode: "composer",
-      reasoning: "Composer can see the source file and generate corresponding test files. You review the complete set of tests before applying.",
+      id: "plan-approach",
+      label: "Plan how to approach a complex task",
+      icon: "🗺️",
+      bestMode: "plan",
+      reasoning: "Plan mode helps you break down complex tasks into steps before executing. Great for understanding the full scope first.",
     },
     {
       id: "migrate-lib",
@@ -74,27 +75,33 @@ function UseCaseMatcher() {
   ];
 
   const modeInfo = {
-    chat: {
-      name: "Chat",
-      icon: MessageSquare,
-      color: "cyan",
-      description: "Discussion and exploration without direct file changes",
-    },
-    composer: {
-      name: "Composer",
-      icon: Layers,
-      color: "violet",
-      description: "Multi-file edits with diff preview before applying",
-    },
     agent: {
       name: "Agent",
       icon: Bot,
       color: "amber",
       description: "Autonomous execution with terminal and file access",
     },
+    plan: {
+      name: "Plan",
+      icon: ListTodo,
+      color: "violet",
+      description: "Break down complex tasks into reviewable steps first",
+    },
+    debug: {
+      name: "Debug",
+      icon: Bug,
+      color: "rose",
+      description: "Purpose-built for fixing errors and bugs",
+    },
+    ask: {
+      name: "Ask",
+      icon: MessageCircleQuestion,
+      color: "cyan",
+      description: "Questions and explanations without changes",
+    },
     inline: {
       name: "Inline (Cmd+K)",
-      icon: Check,
+      icon: Sparkles,
       color: "emerald",
       description: "Quick in-place edits on selected code",
     },
@@ -198,35 +205,12 @@ export function CursorModesSection() {
           Mode Overview
         </h3>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mt-6">
-          <Card variant="default">
-            <CardContent>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-                  <MessageSquare className="w-4 h-4 text-cyan-400" />
-                </div>
-                <h4 className="font-medium text-foreground m-0">Chat</h4>
-              </div>
-              <p className="text-sm text-muted-foreground m-0">
-                Questions, explanations, debugging discussion. Doesn&apos;t directly modify files.
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card variant="default">
-            <CardContent>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                  <Layers className="w-4 h-4 text-violet-400" />
-                </div>
-                <h4 className="font-medium text-foreground m-0">Composer</h4>
-              </div>
-              <p className="text-sm text-muted-foreground m-0">
-                Multi-file edits in one go. Best for coordinated changes across files.
-              </p>
-            </CardContent>
-          </Card>
-          
+        <p className="text-muted-foreground">
+          Cursor provides five main interaction modes. Each is optimized for different tasks—using 
+          the right mode makes the AI significantly more effective.
+        </p>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-6">
           <Card variant="default">
             <CardContent>
               <div className="flex items-center gap-2 mb-3">
@@ -236,7 +220,49 @@ export function CursorModesSection() {
                 <h4 className="font-medium text-foreground m-0">Agent</h4>
               </div>
               <p className="text-sm text-muted-foreground m-0">
-                Autonomous execution. Can run commands, iterate on feedback, chain actions.
+                Full autonomous execution. Creates files, runs commands, iterates on errors automatically.
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card variant="default">
+            <CardContent>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                  <ListTodo className="w-4 h-4 text-violet-400" />
+                </div>
+                <h4 className="font-medium text-foreground m-0">Plan</h4>
+              </div>
+              <p className="text-sm text-muted-foreground m-0">
+                Breaks down complex tasks into steps. Review the plan before execution begins.
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card variant="default">
+            <CardContent>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
+                  <Bug className="w-4 h-4 text-rose-400" />
+                </div>
+                <h4 className="font-medium text-foreground m-0">Debug</h4>
+              </div>
+              <p className="text-sm text-muted-foreground m-0">
+                Purpose-built for fixing errors. Analyzes errors, inspects code, suggests targeted fixes.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                  <MessageCircleQuestion className="w-4 h-4 text-cyan-400" />
+                </div>
+                <h4 className="font-medium text-foreground m-0">Ask</h4>
+              </div>
+              <p className="text-sm text-muted-foreground m-0">
+                Questions and explanations only. Understand code without making changes.
               </p>
             </CardContent>
           </Card>
@@ -245,69 +271,16 @@ export function CursorModesSection() {
             <CardContent>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <Check className="w-4 h-4 text-emerald-400" />
+                  <Sparkles className="w-4 h-4 text-emerald-400" />
                 </div>
-                <h4 className="font-medium text-foreground m-0">Inline</h4>
+                <h4 className="font-medium text-foreground m-0">Inline (Cmd+K)</h4>
               </div>
               <p className="text-sm text-muted-foreground m-0">
-                Cmd+K for quick edits. Select code, describe change, apply. Fastest path.
+                Quick edits on selected code. Fastest path for small, focused changes.
               </p>
             </CardContent>
           </Card>
         </div>
-
-        {/* Composer Mode */}
-        <h3 id="composer-mode" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
-          Composer Mode
-        </h3>
-
-        <p className="text-muted-foreground">
-          Composer is your workhorse for <strong className="text-foreground">planned changes</strong>. 
-          It shows you diffs before applying, lets you @-mention context, and handles multi-file 
-          changes gracefully.
-        </p>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Card variant="default">
-            <CardContent>
-              <h4 className="font-medium text-emerald-400 mb-2">✓ Composer Excels At</h4>
-              <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
-                <li>Creating new files with structure</li>
-                <li>Coordinated changes across files</li>
-                <li>Refactoring with review before apply</li>
-                <li>Adding features with test files</li>
-              </ul>
-            </CardContent>
-          </Card>
-          <Card variant="default">
-            <CardContent>
-              <h4 className="font-medium text-rose-400 mb-2">✗ Less Suited For</h4>
-              <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
-                <li>Exploratory debugging</li>
-                <li>Tasks requiring command execution</li>
-                <li>Iterative trial-and-error work</li>
-                <li>Changes that need verification</li>
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Chat Mode */}
-        <h3 id="chat-mode" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
-          Chat Mode
-        </h3>
-
-        <p className="text-muted-foreground">
-          Chat is for <strong className="text-foreground">exploration and understanding</strong>. 
-          Ask questions, get explanations, discuss approaches—without committing to changes yet.
-        </p>
-
-        <Callout variant="tip" title="Chat → Composer Workflow">
-          <p className="m-0">
-            A powerful pattern: Start in Chat to understand a problem, discuss potential solutions, 
-            then switch to Composer when you&apos;re ready to implement. Chat for thinking, Composer for doing.
-          </p>
-        </Callout>
 
         {/* Agent Mode */}
         <h3 id="agent-mode" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
@@ -315,8 +288,9 @@ export function CursorModesSection() {
         </h3>
 
         <p className="text-muted-foreground">
-          Agent mode is <strong className="text-foreground">autonomous execution</strong>. The agent 
-          can run terminal commands, observe outputs, make changes, and iterate until the task is complete.
+          Agent is the <strong className="text-foreground">most capable mode</strong>—it can read files, 
+          create files, run terminal commands, observe outputs, and iterate until the task is complete. 
+          Use it for substantial work that requires multiple steps or verification.
         </p>
 
         <Card variant="highlight" className="mt-6">
@@ -324,9 +298,9 @@ export function CursorModesSection() {
             <h4 className="font-medium text-foreground mb-2">Agent Mode Capabilities</h4>
             <div className="grid gap-3 sm:grid-cols-2">
               <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
+                <li>Create and modify files</li>
                 <li>Run terminal commands</li>
                 <li>Read command output</li>
-                <li>Create and modify files</li>
                 <li>Search the codebase</li>
               </ul>
               <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
@@ -339,7 +313,57 @@ export function CursorModesSection() {
           </CardContent>
         </Card>
 
-        <Callout variant="warning" title="Agent Mode Trust">
+        {/* Plan Mode */}
+        <h3 id="plan-mode" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Plan Mode
+        </h3>
+
+        <p className="text-muted-foreground">
+          Plan mode is for <strong className="text-foreground">complex tasks that benefit from 
+          thinking first</strong>. The AI breaks down the task into steps, you review and approve 
+          the plan, then it executes.
+        </p>
+
+        <Callout variant="tip" title="Plan → Agent Workflow">
+          <p className="m-0">
+            A powerful pattern: Start with Plan mode to understand the full scope, review the 
+            proposed steps, then let it execute as an agent. Planning first reduces surprises.
+          </p>
+        </Callout>
+
+        {/* Debug Mode */}
+        <h3 id="debug-mode" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Debug Mode
+        </h3>
+
+        <p className="text-muted-foreground">
+          Debug mode is <strong className="text-foreground">purpose-built for fixing errors</strong>. 
+          When you have an error, Debug mode analyzes the stack trace, inspects relevant code, and 
+          suggests targeted fixes.
+        </p>
+
+        {/* Ask Mode */}
+        <h3 id="ask-mode" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Ask Mode
+        </h3>
+
+        <p className="text-muted-foreground">
+          Ask is for <strong className="text-foreground">exploration and understanding</strong>. 
+          Ask questions, get explanations, understand code—without making any changes.
+        </p>
+
+        {/* Inline Completion */}
+        <h3 id="inline-mode" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Inline Completion (Cmd+K)
+        </h3>
+
+        <p className="text-muted-foreground">
+          The fastest path for small edits. Select code, press Cmd+K, describe the change, and 
+          apply. Also provides <strong className="text-foreground">tab-completion suggestions</strong> as 
+          you type—accept with Tab, reject by continuing to type.
+        </p>
+
+        <Callout variant="warning" title="Trust Levels">
           <p className="m-0">
             Agent mode can execute commands. Always review what it&apos;s about to run, especially 
             for commands that could affect your system beyond the project. Use sandboxing when available.

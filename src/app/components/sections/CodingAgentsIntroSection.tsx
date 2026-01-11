@@ -217,10 +217,10 @@ export function CodingAgentsIntroSection() {
               <div className="flex items-start gap-3">
                 <Bot className="w-5 h-5 text-cyan-400 mt-0.5" />
                 <div>
-                  <h4 className="font-medium text-foreground">Devin, SWE-Agent, OpenHands</h4>
+                  <h4 className="font-medium text-foreground">And Many More...</h4>
                   <p className="text-sm text-muted-foreground m-0">
-                    Autonomous or semi-autonomous agents that work on issues end-to-end. 
-                    Often run in sandboxed environments.
+                    The space is evolving rapidly. New tools emerge frequently with various 
+                    approaches to autonomous coding. Focus on understanding the patterns.
                   </p>
                 </div>
               </div>

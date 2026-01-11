@@ -34,7 +34,6 @@ const samplePrompts: { request1: PromptPart[]; request2: PromptPart[] } = {
 };
 
 function PrefixMatchDemo() {
-  const [showRequest2, setShowRequest2] = useState(false);
   const [selectedChange, setSelectedChange] = useState<string | null>(null);
 
   // Simulate what happens when a part changes
@@ -50,7 +49,6 @@ function PrefixMatchDemo() {
   }, [selectedChange]);
 
   const calculateCacheMatch = () => {
-    if (!showRequest2) return { cached: 0, fresh: 0, matched: [] };
     
     let cached = 0;
     const matched: string[] = [];
@@ -104,23 +102,15 @@ function PrefixMatchDemo() {
           </p>
         </div>
 
-        {/* Toggle */}
-        <button
-          onClick={() => setShowRequest2(!showRequest2)}
-          className={cn(
-            "w-full flex items-center justify-center gap-2 py-2 rounded-lg border transition-all",
-            showRequest2
-              ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-400"
-              : "bg-muted/50 border-border text-muted-foreground hover:bg-muted"
-          )}
-        >
-          <ArrowRight className={cn("w-4 h-4 transition-transform", showRequest2 && "rotate-90")} />
-          {showRequest2 ? "Hide Request 2" : "Show Request 2 (with caching)"}
-        </button>
+        {/* Divider with arrow */}
+        <div className="flex items-center justify-center gap-2 py-2">
+          <div className="h-px flex-1 bg-border" />
+          <ArrowRight className="w-5 h-5 text-emerald-400 animate-pulse" />
+          <div className="h-px flex-1 bg-border" />
+        </div>
 
-        {/* Request 2 */}
-        {showRequest2 && (
-          <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+        {/* Request 2 - Always shown */}
+        <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-foreground">Request 2 (Subsequent)</span>
               <span className="text-xs text-muted-foreground">
@@ -200,7 +190,6 @@ function PrefixMatchDemo() {
               }
             </p>
           </div>
-        )}
       </div>
   );
 }

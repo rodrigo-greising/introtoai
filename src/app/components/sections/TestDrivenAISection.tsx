@@ -147,11 +147,11 @@ function RedGreenAnimation() {
       <div className="flex gap-4 text-xs text-muted-foreground">
         <div className="flex items-center gap-1">
           <User className="w-3 h-3" />
-          <span>Human writes tests</span>
+          <span>Human reviews/approves tests</span>
         </div>
         <div className="flex items-center gap-1">
           <Bot className="w-3 h-3" />
-          <span>AI implements until pass</span>
+          <span>AI generates tests & implements</span>
         </div>
       </div>
     </div>
@@ -169,18 +169,31 @@ export function TestDrivenAISection() {
       
       <div className="prose space-y-6">
         <p className="text-lg text-muted-foreground leading-relaxed">
-          Test-Driven Development with AI inverts the typical workflow: you write the tests that 
-          define correct behavior, then <strong className="text-foreground">task the AI with making 
-          them pass</strong>. Tests become both specification and validation in one artifact.
+          Test-Driven Development with AI creates a powerful feedback loop: AI generates tests from 
+          requirements, <strong className="text-foreground">humans review and freeze the tests</strong>, 
+          then AI implements code to make those tests pass. Tests become both specification and validation 
+          in one artifact.
         </p>
 
-        <Callout variant="important" title="The Core Insight">
-          <p className="m-0">
-            Tests are <strong>executable specifications</strong>. When you give AI a failing test 
-            and ask it to make it pass, you&apos;re providing an unambiguous success criterion. No 
-            interpretation needed—either the test passes or it doesn&apos;t.
+        <Callout variant="important" title="The AITDD Flow">
+          <p className="mb-2">
+            The key insight is that <strong>humans verify the tests, not the implementation</strong>:
           </p>
+          <ol className="m-0 pl-4 list-decimal space-y-1 text-sm">
+            <li><strong>AI generates tests</strong> from requirements/specs</li>
+            <li><strong>Human reviews tests</strong> — Are these the right behaviors?</li>
+            <li><strong>Tests are frozen</strong> — Approved tests become the contract</li>
+            <li><strong>AI implements code</strong> — Iterates until tests pass</li>
+            <li><strong>Human reviews implementation</strong> — Optional, tests already verify correctness</li>
+          </ol>
         </Callout>
+
+        <p className="text-muted-foreground">
+          This is more effective than reviewing AI-generated code directly because <strong className="text-foreground">
+          tests are easier to verify than implementations</strong>. You can read a test and confirm 
+          &quot;yes, the function should return 0 for orders under $100&quot; faster than you can verify the 
+          implementation handles all edge cases correctly.
+        </p>
 
         {/* Red-Green-Refactor Animation */}
         <h3 id="tdd-cycle" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
@@ -209,16 +222,17 @@ export function TestDrivenAISection() {
 
         <p className="text-muted-foreground">
           Traditional TDD follows the <strong className="text-foreground">Red-Green-Refactor</strong> cycle. 
-          With AI, the cycle shifts: humans own the &quot;Red&quot; phase (writing failing tests), AI handles 
-          &quot;Green&quot; (implementation), and both collaborate on &quot;Refactor.&quot;
+          With AITDD, the cycle shifts: AI proposes tests (or human writes them), <strong className="text-foreground">
+          human reviews and freezes the tests</strong>, AI handles &quot;Green&quot; (implementation), 
+          and both collaborate on &quot;Refactor.&quot;
         </p>
 
         <div className="grid gap-4 sm:grid-cols-3 mt-6">
           <Card variant="default">
             <CardContent>
-              <h4 className="font-medium text-rose-400 mb-2">Red (Human)</h4>
+              <h4 className="font-medium text-rose-400 mb-2">Red (Human Reviews)</h4>
               <p className="text-sm text-muted-foreground m-0">
-                Write a test that captures the desired behavior. It should fail because the code doesn&apos;t exist yet.
+                AI generates tests from spec, human reviews and approves. Tests are frozen as the contract.
               </p>
             </CardContent>
           </Card>
@@ -227,7 +241,7 @@ export function TestDrivenAISection() {
             <CardContent>
               <h4 className="font-medium text-emerald-500 mb-2">Green (AI)</h4>
               <p className="text-sm text-muted-foreground m-0">
-                AI writes the minimal code to make the test pass. The test is the acceptance criterion.
+                AI writes the minimal code to make approved tests pass. The frozen tests are the acceptance criterion.
               </p>
             </CardContent>
           </Card>
@@ -281,15 +295,23 @@ export function TestDrivenAISection() {
           <CardContent>
             <h4 className="font-medium text-foreground mb-2">The AI-TDD Loop</h4>
             <ol className="text-sm text-muted-foreground m-0 pl-4 list-decimal space-y-1">
-              <li>Human writes a failing test for the next behavior</li>
-              <li>Human provides test + any relevant context to AI</li>
-              <li>AI generates implementation attempt</li>
-              <li>Human runs tests—pass or fail?</li>
-              <li>If fail: provide error output to AI, iterate</li>
-              <li>If pass: write next test or refactor</li>
+              <li><strong>AI generates tests</strong> from requirements or spec document</li>
+              <li><strong>Human reviews tests</strong> — Do they capture the right behavior?</li>
+              <li><strong>Approve & freeze</strong> — Tests become the immutable contract</li>
+              <li><strong>AI implements</strong> — Generates code to make tests pass</li>
+              <li><strong>Run tests</strong> — If fail, AI gets error and iterates automatically</li>
+              <li><strong>Tests pass</strong> — Implementation is complete (human review optional)</li>
             </ol>
           </CardContent>
         </Card>
+
+        <Callout variant="info" title="Why Review Tests, Not Code?">
+          <p className="m-0">
+            Tests are <strong>specifications in executable form</strong>. It&apos;s easier to verify 
+            &quot;should return discount of 10% for orders over $100&quot; is correct than to trace through 
+            branching logic in implementation code. Once tests are correct, passing them proves correctness.
+          </p>
+        </Callout>
 
         {/* End-to-End Test Strategies */}
         <h3 id="e2e-test-strategies" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">

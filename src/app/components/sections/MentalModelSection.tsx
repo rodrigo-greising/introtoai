@@ -111,33 +111,6 @@ function StatelessFunctionDemo() {
     setShowLogs(false);
   };
 
-  const coreLogic = `// The Reality: LLM as a Stateless Function
-
-async function chat(userMessage: string, history: Message[]) {
-  // Step 1: Build the FULL context from history
-  const messages = [
-    { role: "system", content: SYSTEM_PROMPT },
-    ...history,  // ALL previous messages
-    { role: "user", content: userMessage }  // New message
-  ];
-
-  // Step 2: Send EVERYTHING to the API
-  // The API has no memory—it sees this as a fresh request
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages,  // Entire conversation sent every time
-  });
-
-  // Step 3: Return response (and store history yourself)
-  return response.choices[0].message.content;
-}
-
-// What feels like a "conversation" is actually:
-// Call 1: "Hello" → sends [Hello]
-// Call 2: "How are you?" → sends [Hello, Hi!, How are you?]
-// Call 3: "Tell me more" → sends [Hello, Hi!, How are you?, I'm good!, Tell me more]
-// Each call resends EVERYTHING. Context grows linearly, cost grows quadratically.`;
-
   return (
     <div className="space-y-4">
         {/* Chat interface */}

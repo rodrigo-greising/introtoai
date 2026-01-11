@@ -173,36 +173,6 @@ function LayerBuilder() {
     setExpandedLayer(null);
   };
 
-  const coreLogic = `// Layered Context Architecture
-
-interface ContextLayer {
-  name: string;
-  content: string;
-  volatility: 'static' | 'semi-static' | 'dynamic' | 'variable';
-}
-
-function buildContext(layers: ContextLayer[]): string {
-  // Key insight: Order by volatility for cache efficiency
-  // Static → Semi-static → Dynamic → Variable
-  
-  const sorted = layers.sort((a, b) => {
-    const order = { static: 0, 'semi-static': 1, dynamic: 2, variable: 3 };
-    return order[a.volatility] - order[b.volatility];
-  });
-  
-  // The prefix (static + semi-static) gets cached
-  // Only variable content at the end needs fresh processing
-  return sorted.map(layer => layer.content).join('\\n\\n');
-}
-
-// Example optimal ordering:
-// 1. System prompt (static) - CACHED
-// 2. Tool schemas (static) - CACHED  
-// 3. Examples (semi-static) - CACHED
-// 4. Retrieved docs (dynamic) - per-query
-// 5. Conversation (dynamic) - grows
-// 6. User message (variable) - always fresh`;
-
   return (
     <div className="space-y-4">
         {/* Stats bar */}

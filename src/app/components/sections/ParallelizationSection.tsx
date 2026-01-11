@@ -89,49 +89,10 @@ function TimelineComparisonVisualizer() {
 
   const getTaskStatus = (task: Task & { startTime?: number; endTime?: number }) => {
     if (!task.startTime || !task.endTime) return "pending";
-    if (currentTime < task.startTime) return "pending";
+    if (currentTime < task.startTime)     return "pending";
     if (currentTime >= task.endTime) return "complete";
     return "running";
   };
-
-  const coreLogic = `// Sequential execution: Wait for each task
-async function sequential() {
-  const userData = await fetchUserData();    // 2s
-  const docs = await searchDocuments();       // 3s
-  const context = await analyzeContext();     // 2s
-  const response = await generateResponse(); // 4s
-  // Total: 11s
-}
-
-// Parallel execution: Run independent tasks concurrently  
-async function parallel() {
-  // These 3 have no dependencies - run in parallel
-  const [userData, docs, context] = await Promise.all([
-    fetchUserData(),     // 2s ┐
-    searchDocuments(),   // 3s ├─ All start at t=0
-    analyzeContext(),    // 2s ┘
-  ]);
-  // Wait for longest: 3s
-  
-  // This depends on the above - must wait
-  const response = await generateResponse({ userData, docs, context }); // 4s
-  // Total: 3s + 4s = 7s (vs 11s sequential)
-}
-
-// With concurrency limits (for rate limiting)
-async function parallelWithLimit(items: Item[], limit = 5) {
-  const results: Result[] = [];
-  
-  for (let i = 0; i < items.length; i += limit) {
-    const batch = items.slice(i, i + limit);
-    const batchResults = await Promise.all(
-      batch.map(item => processItem(item))
-    );
-    results.push(...batchResults);
-  }
-  
-  return results;
-}`;
 
   const timelineWidth = 300;
   const timeScale = timelineWidth / totalTime;

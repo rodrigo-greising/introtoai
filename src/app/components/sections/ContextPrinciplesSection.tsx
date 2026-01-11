@@ -59,41 +59,6 @@ function SignalNoiseVisualizer() {
     setShowOptimized(false);
   };
 
-  const coreLogic = `// Context Engineering: Maximize Signal, Minimize Noise
-
-interface ContextItem {
-  content: string;
-  relevance: 'high' | 'medium' | 'low' | 'noise';
-  tokens: number;
-}
-
-function optimizeContext(items: ContextItem[], budget: number): ContextItem[] {
-  // Step 1: Remove obvious noise
-  const filtered = items.filter(i => i.relevance !== 'noise');
-  
-  // Step 2: Sort by relevance (high first)
-  const sorted = filtered.sort((a, b) => {
-    const order = { high: 0, medium: 1, low: 2 };
-    return order[a.relevance] - order[b.relevance];
-  });
-  
-  // Step 3: Fit within budget, prioritizing high-relevance items
-  const result: ContextItem[] = [];
-  let used = 0;
-  
-  for (const item of sorted) {
-    if (used + item.tokens <= budget) {
-      result.push(item);
-      used += item.tokens;
-    }
-  }
-  
-  return result;
-}
-
-// Key principle: Every token must earn its place
-// Ask: "Does this information help the model complete the task?"`;
-
   return (
     <div className="space-y-4">
         {/* Stats bar */}

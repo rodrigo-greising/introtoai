@@ -144,36 +144,6 @@ function SchemaBuilder() {
     setIsValid(null);
   };
 
-  const coreLogic = `// Structured Outputs with Zod and OpenAI
-
-import { z } from "zod";
-import { zodResponseFormat } from "openai/helpers/zod";
-
-// 1. Define your schema with Zod
-const TaskSchema = z.object({
-  title: z.string().describe("The task title"),
-  priority: z.number().min(1).max(5),
-  completed: z.boolean().optional(),
-});
-
-// 2. Use it with the API
-const response = await openai.beta.chat.completions.parse({
-  model: "gpt-4o-2024-08-06",
-  messages: [
-    { role: "system", content: "Extract task details from the message." },
-    { role: "user", content: "Create a high priority task to review the PR" }
-  ],
-  // This tells the API to return JSON matching your schema
-  response_format: zodResponseFormat(TaskSchema, "task"),
-});
-
-// 3. Get type-safe, validated output
-const task = response.choices[0].message.parsed;
-// task is typed as { title: string; priority: number; completed?: boolean }
-
-// The API guarantees the output matches your schema
-// No more parsing or validation needed!`;
-
   return (
     <div className="space-y-6">
         {/* Schema editor */}

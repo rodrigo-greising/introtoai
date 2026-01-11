@@ -108,52 +108,6 @@ function DAGBuilderVisualizer() {
     }
   };
 
-  const coreLogic = `// Task Decomposition: Break complex tasks into a DAG
-interface Task {
-  id: string;
-  execute: () => Promise<Result>;
-  dependencies: string[];
-}
-
-async function executeDAG(tasks: Task[]): Promise<Map<string, Result>> {
-  const results = new Map<string, Result>();
-  const completed = new Set<string>();
-  
-  // Topological execution - respect dependencies
-  while (completed.size < tasks.length) {
-    // Find tasks ready to run (all dependencies complete)
-    const ready = tasks.filter(task => 
-      !completed.has(task.id) &&
-      task.dependencies.every(dep => completed.has(dep))
-    );
-    
-    // Execute ready tasks IN PARALLEL
-    const batch = await Promise.all(
-      ready.map(async (task) => {
-        const result = await task.execute();
-        return { id: task.id, result };
-      })
-    );
-    
-    // Record results
-    for (const { id, result } of batch) {
-      results.set(id, result);
-      completed.add(id);
-    }
-  }
-  
-  return results;
-}
-
-// Example: Complex document processing
-const documentPipeline: Task[] = [
-  { id: "analyze", execute: () => analyzeRequest(input), dependencies: [] },
-  { id: "search", execute: () => searchDocs(analyzed), dependencies: ["analyze"] },
-  { id: "fetch", execute: () => fetchContext(analyzed), dependencies: ["analyze"] },
-  { id: "generate", execute: () => generate(search, fetch), dependencies: ["search", "fetch"] },
-  { id: "review", execute: () => reviewOutput(generated), dependencies: ["generate"] },
-];`;
-
   return (
     <div className="space-y-4">
         {/* Controls */}

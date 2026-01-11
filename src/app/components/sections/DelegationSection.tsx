@@ -88,54 +88,6 @@ function DelegationVisualizer() {
     }
   };
 
-  const coreLogic = `// Delegation: Orchestrator + Specialized Subagents
-interface Subagent {
-  name: string;
-  systemPrompt: string;
-  tools: Tool[];
-  execute: (task: string, context?: Context) => Promise<Result>;
-}
-
-class Orchestrator {
-  private subagents: Map<string, Subagent>;
-  
-  async delegate(task: string, agentName: string, context?: Context) {
-    const agent = this.subagents.get(agentName);
-    
-    // Each subagent has its OWN context window
-    // This is key: main agent context doesn't bloat
-    return await agent.execute(task, context);
-  }
-  
-  async orchestrate(userRequest: string) {
-    // Step 1: Plan the work
-    const plan = await this.planDelegation(userRequest);
-    
-    // Step 2: Execute each delegation
-    const results: Record<string, Result> = {};
-    
-    for (const step of plan.steps) {
-      // Pass only RELEVANT context to subagent
-      const relevantContext = this.extractRelevantContext(step, results);
-      
-      results[step.id] = await this.delegate(
-        step.task,
-        step.agent,
-        relevantContext
-      );
-    }
-    
-    // Step 3: Synthesize results
-    return await this.synthesize(results, userRequest);
-  }
-}
-
-// Key benefits:
-// 1. Each subagent has focused context (not bloated)
-// 2. Subagents can have specialized tools
-// 3. Main agent stays high-level, subagents do details
-// 4. Easier to test and improve individual agents`;
-
   return (
     <div className="space-y-4">
         {/* Step indicator */}

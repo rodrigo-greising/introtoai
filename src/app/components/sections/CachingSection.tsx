@@ -73,39 +73,6 @@ function PrefixMatchDemo() {
 
   const { cached, fresh, matched } = calculateCacheMatch();
 
-  const coreLogic = `// How prefix caching works internally (simplified)
-
-function checkCacheMatch(newPrompt: Token[], cache: CacheEntry[]): CacheResult {
-  let matchedTokens = 0;
-  
-  // Find the longest matching prefix in cache
-  for (const entry of cache) {
-    let i = 0;
-    while (
-      i < entry.tokens.length && 
-      i < newPrompt.length &&
-      entry.tokens[i] === newPrompt[i]  // Exact match required!
-    ) {
-      i++;
-    }
-    
-    if (i > matchedTokens) {
-      matchedTokens = i;
-      cachedKVState = entry.kvState.slice(0, i);
-    }
-  }
-  
-  return {
-    cachedTokens: matchedTokens,        // Reuse KV cache
-    freshTokens: newPrompt.length - matchedTokens,  // Must compute
-    // Fresh tokens are charged at 100% price
-    // Cached tokens are charged at ~10% price (90% discount)
-  };
-}
-
-// Key insight: ANY change in the prefix breaks the match!
-// "Hello world" and "Hello World" are DIFFERENT prefixes`;
-
   return (
     <div className="space-y-6">
         {/* Request 1 */}

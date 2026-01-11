@@ -103,36 +103,6 @@ function TrainingPipelineVisualizer() {
     emerald: { bg: "bg-emerald-500/20", border: "border-emerald-500/40", text: "text-emerald-400", ring: "ring-emerald-500/50" },
   };
 
-  const coreLogic = `// Simplified: How LLM training works conceptually
-
-// Stage 1: Pre-training (Next Token Prediction)
-function pretrain(model, corpus) {
-  for (const text of corpus) {
-    for (let i = 0; i < text.length - 1; i++) {
-      const context = text.slice(0, i + 1);
-      const nextToken = text[i + 1];
-      // Learn: P(nextToken | context)
-      model.learnToPredict(context, nextToken);
-    }
-  }
-}
-
-// Stage 2: Fine-tuning (Instruction Following)
-function finetune(model, instructionPairs) {
-  for (const { instruction, response } of instructionPairs) {
-    // Learn: P(response | instruction)
-    model.learnToFollow(instruction, response);
-  }
-}
-
-// Stage 3: RLHF (Preference Optimization)
-function rlhf(model, humanPreferences) {
-  for (const { prompt, preferred, rejected } of humanPreferences) {
-    // Learn: prefer outputs humans like
-    model.optimizeForPreference(prompt, preferred, rejected);
-  }
-}`;
-
   return (
     <div className="space-y-6">
         {/* Pipeline stages */}
@@ -301,31 +271,6 @@ function NextTokenDemo() {
       setIsAnimating(false);
     }, 500);
   };
-
-  const coreLogic = `// Next Token Prediction - The Core of LLMs
-
-function predictNextToken(context: string): TokenProbabilities {
-  // 1. Tokenize the input
-  const tokens = tokenize(context);
-  
-  // 2. Get embeddings for each token
-  const embeddings = tokens.map(t => embed(t));
-  
-  // 3. Pass through transformer layers
-  // Each layer applies attention + feed-forward
-  let hidden = embeddings;
-  for (const layer of transformerLayers) {
-    hidden = layer.attention(hidden);  // "What should I pay attention to?"
-    hidden = layer.feedForward(hidden); // "What does this mean?"
-  }
-  
-  // 4. Project to vocabulary and apply softmax
-  // Result: probability distribution over all possible next tokens
-  const logits = project(hidden.last(), vocabularySize);
-  const probabilities = softmax(logits);
-  
-  return probabilities; // e.g., { "the": 0.15, "jumps": 0.72, ... }
-}`;
 
   return (
     <div className="space-y-4">

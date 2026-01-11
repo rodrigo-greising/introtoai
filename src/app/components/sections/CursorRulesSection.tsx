@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { 
   FileText, 
   FolderTree, 
@@ -355,61 +355,12 @@ export function CursorRulesSection() {
           Example Rule Structure
         </h3>
 
-        <CodeBlock
-          language="markdown"
-          filename=".cursor/rules/react-patterns.mdc"
-          code={`---
-description: React component conventions
-globs: ["src/components/**/*.tsx", "src/app/**/*.tsx"]
-alwaysApply: false
----
-
-# React Component Patterns
-
-## Component Structure
-Every component should follow this structure:
-
-\`\`\`tsx
-// 1. Imports (grouped: react, external, internal, types)
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui";
-import type { User } from "@/types";
-
-// 2. Types
-interface Props {
-  user: User;
-  onUpdate: (user: User) => void;
-}
-
-// 3. Component (named export)
-export function UserCard({ user, onUpdate }: Props) {
-  // hooks first
-  const [editing, setEditing] = useState(false);
-  
-  // handlers
-  const handleSave = () => {
-    onUpdate(user);
-    setEditing(false);
-  };
-
-  // render
-  return (
-    <div>...</div>
-  );
-}
-\`\`\`
-
-## Naming
-- Components: PascalCase
-- Hooks: useXxx
-- Handlers: handleXxx
-
-## Prohibited
-- No default exports
-- No inline styles (use Tailwind)
-- No useEffect for data fetching (use React Query)`}
-        />
+        <p className="text-muted-foreground">
+          Example rule structure: Rules are markdown files with frontmatter specifying description, 
+          globs for file matching, and whether to always apply. The content defines patterns, naming 
+          conventions, and prohibited practices. Components should follow a clear structure: imports 
+          grouped by type, types/interfaces, then the component with hooks first, handlers, and render.
+        </p>
 
         <Callout variant="tip" title="Version Control Your Rules">
           <p className="m-0">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   Search,
@@ -10,7 +10,11 @@ import {
   Shield,
   Database,
   FileText,
-  CheckCircle,
+  Plus,
+  Minus,
+  DollarSign,
+  Cpu,
+  Zap,
 } from "lucide-react";
 
 // =============================================================================
@@ -26,6 +30,8 @@ interface Skill {
   triggers: string[];
   tools: string[];
   loaded: boolean;
+  tokenCost: number; // tokens added to context when loaded
+  estimatedLatency: number; // ms added to response time
 }
 
 function SkillRegistryBrowser() {
@@ -43,6 +49,8 @@ function SkillRegistryBrowser() {
       triggers: ["review", "PR", "pull request", "code quality"],
       tools: ["readFile", "analyzeDiff", "lintCode"],
       loaded: false,
+      tokenCost: 1200,
+      estimatedLatency: 150,
     },
     {
       id: "security-audit",
@@ -53,6 +61,8 @@ function SkillRegistryBrowser() {
       triggers: ["security", "vulnerability", "CVE", "audit"],
       tools: ["scanDependencies", "checkSecrets", "analyzePermissions"],
       loaded: false,
+      tokenCost: 1800,
+      estimatedLatency: 200,
     },
     {
       id: "database-migration",
@@ -63,6 +73,8 @@ function SkillRegistryBrowser() {
       triggers: ["migration", "schema", "database", "SQL"],
       tools: ["generateMigration", "validateSchema", "rollbackPlan"],
       loaded: false,
+      tokenCost: 1500,
+      estimatedLatency: 180,
     },
     {
       id: "documentation",
@@ -73,6 +85,32 @@ function SkillRegistryBrowser() {
       triggers: ["docs", "readme", "documentation", "API docs"],
       tools: ["extractTypes", "generateDocs", "updateReadme"],
       loaded: false,
+      tokenCost: 900,
+      estimatedLatency: 100,
+    },
+    {
+      id: "test-generation",
+      name: "Test Generation",
+      category: "testing",
+      icon: <Zap className="w-4 h-4" />,
+      description: "Generate comprehensive test suites for code changes",
+      triggers: ["test", "testing", "unit test", "coverage"],
+      tools: ["analyzeCode", "generateTests", "runTests"],
+      loaded: false,
+      tokenCost: 1400,
+      estimatedLatency: 250,
+    },
+    {
+      id: "performance-analysis",
+      name: "Performance Analysis",
+      category: "optimization",
+      icon: <Cpu className="w-4 h-4" />,
+      description: "Identify and fix performance bottlenecks",
+      triggers: ["performance", "slow", "optimize", "profiling"],
+      tools: ["profileCode", "analyzeBenchmarks", "suggestOptimizations"],
+      loaded: false,
+      tokenCost: 2000,
+      estimatedLatency: 300,
     },
   ];
 
@@ -101,8 +139,42 @@ function SkillRegistryBrowser() {
     });
   };
 
+  // Calculate totals for loaded skills
+  const loadedSkillObjects = skills.filter(s => loadedSkills.has(s.id));
+  const totalTokens = loadedSkillObjects.reduce((sum, s) => sum + s.tokenCost, 0);
+  const totalLatency = loadedSkillObjects.reduce((sum, s) => sum + s.estimatedLatency, 0);
+  const estimatedCost = (totalTokens / 1000000) * 3; // $3 per 1M tokens (illustrative)
+
   return (
     <div className="space-y-4">
+      {/* Cost Summary Panel */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
+          <div className="flex items-center gap-2 mb-1">
+            <Cpu className="w-4 h-4 text-cyan-400" />
+            <span className="text-xs text-muted-foreground">Total Tokens</span>
+          </div>
+          <div className="text-lg font-bold text-cyan-400">{totalTokens.toLocaleString()}</div>
+          <div className="text-[10px] text-muted-foreground">context size increase</div>
+        </div>
+        <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+          <div className="flex items-center gap-2 mb-1">
+            <DollarSign className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs text-muted-foreground">Est. Cost/Call</span>
+          </div>
+          <div className="text-lg font-bold text-emerald-400">${estimatedCost.toFixed(4)}</div>
+          <div className="text-[10px] text-muted-foreground">at $3/1M tokens</div>
+        </div>
+        <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+          <div className="flex items-center gap-2 mb-1">
+            <Zap className="w-4 h-4 text-amber-400" />
+            <span className="text-xs text-muted-foreground">Latency Impact</span>
+          </div>
+          <div className="text-lg font-bold text-amber-400">+{totalLatency}ms</div>
+          <div className="text-[10px] text-muted-foreground">processing overhead</div>
+        </div>
+      </div>
+
       {/* Search and filter */}
       <div className="flex gap-3">
         <div className="relative flex-1">
@@ -136,12 +208,11 @@ function SkillRegistryBrowser() {
             <div
               key={skill.id}
               className={cn(
-                "p-4 rounded-lg border transition-all cursor-pointer",
+                "p-4 rounded-lg border transition-all",
                 isLoaded
                   ? "bg-cyan-500/10 border-cyan-500/30"
                   : "bg-muted/30 border-border hover:border-border/80"
               )}
-              onClick={() => toggleSkillLoad(skill.id)}
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2">
@@ -156,15 +227,30 @@ function SkillRegistryBrowser() {
                     <div className="text-xs text-muted-foreground">{skill.category}</div>
                   </div>
                 </div>
-                {isLoaded && (
-                  <CheckCircle className="w-4 h-4 text-cyan-400" />
-                )}
+                <button
+                  onClick={() => toggleSkillLoad(skill.id)}
+                  className={cn(
+                    "p-1.5 rounded-lg transition-all",
+                    isLoaded
+                      ? "bg-rose-500/20 text-rose-400 hover:bg-rose-500/30"
+                      : "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
+                  )}
+                >
+                  {isLoaded ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                </button>
               </div>
               
               <p className="text-xs text-muted-foreground mb-2">{skill.description}</p>
               
+              {/* Cost info - always visible */}
+              <div className="flex items-center gap-4 text-[10px] text-muted-foreground mb-2">
+                <span className={isLoaded ? "text-cyan-400" : ""}>{skill.tokenCost.toLocaleString()} tokens</span>
+                <span>•</span>
+                <span className={isLoaded ? "text-amber-400" : ""}>+{skill.estimatedLatency}ms</span>
+              </div>
+              
               {isLoaded && (
-                <div className="space-y-2 pt-2 border-t border-border/50">
+                <div className="space-y-2 pt-2 border-t border-border/50 animate-in fade-in slide-in-from-top-2">
                   <div>
                     <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Triggers</div>
                     <div className="flex flex-wrap gap-1">
@@ -192,12 +278,35 @@ function SkillRegistryBrowser() {
         })}
       </div>
 
-      {/* Stats */}
-      <div className="flex gap-4 text-xs text-muted-foreground pt-2 border-t border-border">
-        <span>{skills.length} skills available</span>
-        <span>•</span>
-        <span className="text-cyan-400">{loadedSkills.size} loaded</span>
-        <span className="ml-auto">Click a skill to load/unload</span>
+      {/* Assembly summary */}
+      <div className="p-3 rounded-lg bg-muted/20 border border-border">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4 text-xs">
+            <span className="text-muted-foreground">{skills.length} skills available</span>
+            <span className="text-muted-foreground">•</span>
+            <span className="text-cyan-400 font-medium">{loadedSkills.size} assembled</span>
+          </div>
+          {loadedSkills.size > 0 && (
+            <button
+              onClick={() => setLoadedSkills(new Set())}
+              className="text-xs text-rose-400 hover:text-rose-300 transition-colors"
+            >
+              Clear all
+            </button>
+          )}
+        </div>
+        {loadedSkills.size > 0 && (
+          <div className="mt-2 pt-2 border-t border-border/50">
+            <div className="text-[10px] text-muted-foreground mb-1">Active skills:</div>
+            <div className="flex flex-wrap gap-1">
+              {loadedSkillObjects.map(s => (
+                <span key={s.id} className="px-2 py-0.5 text-[10px] rounded bg-cyan-500/10 text-cyan-400">
+                  {s.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -205,9 +314,9 @@ function SkillRegistryBrowser() {
 
 export function SkillsProgressiveDiscoverySection() {
   return (
-    <section id="skills-progressive-discovery" className="scroll-mt-20">
+    <section id="skills" className="scroll-mt-20">
       <SectionHeading
-        id="skills-progressive-discovery-heading"
+        id="skills-heading"
         title="Skills & Progressive Discovery"
         subtitle="Modular capabilities, subagents, and context-aware delegation"
       />
@@ -284,71 +393,12 @@ export function SkillsProgressiveDiscoverySection() {
           skill&apos;s &quot;contract&quot;—defining what it does and how to use it.
         </p>
 
-        <CodeBlock
-          language="plaintext"
-          filename="Skill Directory Structure"
-          code={`skills/
-├── code-review/
-│   ├── SKILL.md           # Purpose, capabilities, usage patterns
-│   ├── instructions.md    # Detailed review guidelines
-│   ├── checklists/
-│   │   ├── security.md    # Security review checklist
-│   │   └── performance.md # Performance review checklist
-│   └── tools/
-│       └── review-diff.sh # Script to analyze diffs
-│
-├── database-migration/
-│   ├── SKILL.md
-│   ├── patterns/          # Migration patterns & examples
-│   ├── validators/        # Schema validation scripts
-│   └── rollback.md        # Rollback procedures
-│
-└── api-design/
-    ├── SKILL.md
-    ├── openapi-guide.md   # OpenAPI specification guide
-    └── examples/          # Well-designed API examples`}
-        />
-
         <p className="text-muted-foreground mt-4">
-          The <code className="text-cyan-400">SKILL.md</code> file typically contains:
+          Skills are organized as directories with a <code className="text-cyan-400">SKILL.md</code> file 
+          that serves as the skill&apos;s contract. The SKILL.md file typically contains: purpose, when to use, 
+          capabilities, required context, tools available, and output format. Skills can include additional 
+          files like instructions, checklists, patterns, validators, and tools.
         </p>
-
-        <CodeBlock
-          language="markdown"
-          filename="Example SKILL.md"
-          code={`# Code Review Skill
-
-## Purpose
-Perform thorough code reviews focusing on correctness, security, 
-performance, and maintainability.
-
-## When to Use
-- Pull request review requests
-- Security audit tasks
-- Pre-merge code quality checks
-
-## Capabilities
-- Analyze diffs for common issues
-- Apply language-specific best practices
-- Check against security checklists
-- Suggest performance improvements
-
-## Required Context
-- The code diff or files to review
-- Repository coding standards (if available)
-- Specific focus areas (optional)
-
-## Tools Available
-- \`review-diff.sh\`: Parses and annotates diff output
-- Access to security and performance checklists
-
-## Output Format
-Structured review with:
-- Summary assessment
-- Critical issues (blocking)
-- Suggestions (non-blocking)
-- Positive observations`}
-        />
 
         <Callout variant="tip" title="Skills are Composable">
           <p className="m-0">
@@ -434,57 +484,11 @@ Structured review with:
           </p>
         </Callout>
 
-        <CodeBlock
-          language="typescript"
-          filename="Progressive Disclosure Implementation"
-          code={`interface SkillMetadata {
-  id: string;
-  name: string;
-  description: string;  // Brief, for relevance matching
-  triggers: string[];   // Keywords that suggest this skill
-}
-
-interface Skill extends SkillMetadata {
-  instructions: string;   // Full SKILL.md content
-  tools: ToolDefinition[];
-  resources: ResourceRef[];
-}
-
-class SkillRegistry {
-  private metadata: Map<string, SkillMetadata> = new Map();
-  private loadedSkills: Map<string, Skill> = new Map();
-
-  // Stage 1: Load just metadata at boot
-  async initialize() {
-    const skillDirs = await listSkillDirectories();
-    for (const dir of skillDirs) {
-      const meta = await loadSkillMetadata(dir);
-      this.metadata.set(meta.id, meta);
-    }
-  }
-
-  // Stage 2: Find relevant skills without full loading
-  findRelevantSkills(task: string): SkillMetadata[] {
-    return Array.from(this.metadata.values())
-      .filter(skill => this.isRelevant(skill, task));
-  }
-
-  // Stage 2 continued: Load full skill when needed
-  async loadSkill(skillId: string): Promise<Skill> {
-    if (this.loadedSkills.has(skillId)) {
-      return this.loadedSkills.get(skillId)!;
-    }
-    const skill = await loadFullSkill(skillId);
-    this.loadedSkills.set(skillId, skill);
-    return skill;
-  }
-
-  // Stage 3: Load specific resource on demand
-  async loadResource(skillId: string, resourcePath: string) {
-    return await loadSkillResource(skillId, resourcePath);
-  }
-}`}
-        />
+        <p className="text-muted-foreground">
+          Progressive disclosure is implemented through a skill registry that loads metadata at boot (stage 1), 
+          finds relevant skills based on task keywords (stage 2), loads full skill definitions when needed (stage 2), 
+          and loads specific resources on demand (stage 3). This keeps context lean while maintaining broad capabilities.
+        </p>
 
         {/* Subagents and Delegation */}
         <h3 id="subagents-delegation" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
@@ -533,63 +537,12 @@ class SkillRegistry {
           </div>
         </div>
 
-        <CodeBlock
-          language="typescript"
-          filename="Subagent Delegation Pattern"
-          code={`interface SubagentConfig {
-  skill: Skill;
-  task: string;
-  context: Record<string, unknown>;
-  maxTokens?: number;
-}
-
-interface SubagentResult {
-  success: boolean;
-  output: unknown;
-  tokensUsed: number;
-  reasoning?: string;
-}
-
-async function delegateToSubagent(config: SubagentConfig): Promise<SubagentResult> {
-  const { skill, task, context } = config;
-  
-  // Build focused context from skill definition
-  const systemPrompt = buildSubagentPrompt(skill);
-  
-  // Subagent gets only skill-specific tools
-  const tools = skill.tools;
-  
-  // Execute in isolated context
-  const response = await llmCall({
-    system: systemPrompt,
-    messages: [
-      { role: "user", content: formatTask(task, context) }
-    ],
-    tools,
-    // Subagent doesn't see main conversation history
-  });
-
-  return parseSubagentResponse(response);
-}
-
-function buildSubagentPrompt(skill: Skill): string {
-  return \`You are a specialized agent for: \${skill.name}
-
-\${skill.instructions}
-
-## Your Focus
-You handle ONLY tasks related to \${skill.name}. 
-Stay focused on this domain.
-
-## Output Requirements
-Provide structured output that can be consumed by the orchestrating agent.
-Include confidence levels and any caveats.
-
-## Available Tools
-\${skill.tools.map(t => \`- \${t.name}: \${t.description}\`).join('\\n')}
-\`;
-}`}
-        />
+        <p className="text-muted-foreground">
+          Subagent delegation pattern: configure a subagent with a skill, task, and context. Build a focused 
+          system prompt from the skill definition, provide only skill-specific tools, execute in isolated context 
+          (no main conversation history), and return structured results. The subagent operates with its own context 
+          window, custom system prompt, scoped tool access, and defined output format.
+        </p>
 
         <Callout variant="tip" title="Subagents Can Have Subagents">
           <p className="m-0">
@@ -779,34 +732,11 @@ Include confidence levels and any caveats.
           </Card>
         </div>
 
-        <CodeBlock
-          language="plaintext"
-          filename="Example Skill Library Organization"
-          code={`skills/
-├── core/                    # Fundamental capabilities
-│   ├── code-review/
-│   ├── documentation/
-│   └── testing/
-│
-├── security/                # Security-focused skills
-│   ├── vulnerability-scan/
-│   ├── dependency-audit/
-│   └── secrets-detection/
-│
-├── data/                    # Data engineering skills
-│   ├── schema-migration/
-│   ├── query-optimization/
-│   └── etl-design/
-│
-├── frontend/                # UI/UX skills
-│   ├── accessibility-audit/
-│   ├── component-review/
-│   └── performance-audit/
-│
-└── team-specific/           # Custom team skills
-    ├── our-api-standards/
-    └── deployment-checklist/`}
-        />
+        <p className="text-muted-foreground">
+          Organize skills into a library structure: core skills for fundamental capabilities, domain-specific 
+          skills (security, data, frontend), and team-specific custom skills. This organization makes skills 
+          discoverable, maintainable, and shareable across the organization.
+        </p>
 
         <Callout variant="tip" title="Putting It All Together" className="mt-8">
           <p className="m-0">

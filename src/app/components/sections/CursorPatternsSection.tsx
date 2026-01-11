@@ -9,7 +9,204 @@ import {
   FileText,
   CheckCircle2,
   ArrowRight,
+  MessageSquare,
+  AlertCircle,
+  Sparkles,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
+
+// Interactive Prompt Quality Demo
+function PromptQualityDemo() {
+  const [selectedPrompt, setSelectedPrompt] = useState<"poor" | "good">("poor");
+
+  const prompts = {
+    poor: {
+      title: "Polluted Chat",
+      likelihood: 35,
+      messages: [
+        { role: "user", content: "Fix the bug" },
+        { role: "assistant", content: "I'd be happy to help fix the bug. Could you tell me more about what's happening?" },
+        { role: "user", content: "In the login" },
+        { role: "assistant", content: "I see you're having an issue with the login. Can you share the error message or describe the unexpected behavior?" },
+        { role: "user", content: "It's not working" },
+        { role: "assistant", content: "I understand. To help fix the login issue, I'd need to see:\n1. The relevant code files\n2. The error message\n3. What you expect vs what happens\n\nCould you share these?" },
+        { role: "user", content: "Just fix it please" },
+      ],
+      issues: [
+        "No specific context provided",
+        "No @-mentions of relevant files",
+        "Ambiguous problem description",
+        "Multiple back-and-forth messages wasting tokens",
+        "AI forced to guess about the issue",
+      ],
+    },
+    good: {
+      title: "Perfect Prompt",
+      likelihood: 92,
+      messages: [
+        { 
+          role: "user", 
+          content: `@auth/login.ts @auth/useAuth.ts @types/user.ts
+
+The login form submits successfully but the user state isn't being updated.
+
+Expected: After login, user object should be populated
+Actual: user remains null, isAuthenticated stays false
+
+Error in console:
+"TypeError: Cannot read property 'id' of undefined at useAuth.ts:24"
+
+Please fix the state update logic in useAuth.ts.`
+        },
+        { 
+          role: "assistant", 
+          content: `I can see the issue. In \`useAuth.ts\` line 24, you're accessing \`response.user.id\` but the API returns the user directly in \`response.data\`, not \`response.user\`.
+
+Here's the fix:
+
+\`\`\`typescript
+// useAuth.ts line 22-28
+const handleLogin = async (credentials) => {
+  const response = await authApi.login(credentials);
+  // Fix: Access response.data instead of response.user
+  setUser(response.data);
+  setIsAuthenticated(true);
+};
+\`\`\`
+
+This change correctly extracts the user from the API response structure.`
+        },
+      ],
+      strengths: [
+        "Relevant files @-mentioned explicitly",
+        "Clear expected vs actual behavior",
+        "Specific error message included",
+        "Single, focused request",
+        "AI can solve immediately",
+      ],
+    },
+  };
+
+  const current = prompts[selectedPrompt];
+
+  return (
+    <div className="space-y-4">
+      {/* Selector */}
+      <div className="flex gap-2 p-1 rounded-lg bg-muted/30">
+        <button
+          onClick={() => setSelectedPrompt("poor")}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded text-sm font-medium transition-all",
+            selectedPrompt === "poor"
+              ? "bg-rose-500/20 text-rose-400"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <AlertCircle className="w-4 h-4" />
+          Polluted Chat
+        </button>
+        <button
+          onClick={() => setSelectedPrompt("good")}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded text-sm font-medium transition-all",
+            selectedPrompt === "good"
+              ? "bg-emerald-500/20 text-emerald-400"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Sparkles className="w-4 h-4" />
+          Perfect Prompt
+        </button>
+      </div>
+
+      {/* Success likelihood meter */}
+      <div className="p-4 rounded-lg bg-muted/20 border border-border">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm text-muted-foreground">Success Likelihood</span>
+          <span className={cn(
+            "text-lg font-bold",
+            current.likelihood >= 80 ? "text-emerald-400" : 
+            current.likelihood >= 50 ? "text-amber-400" : "text-rose-400"
+          )}>
+            {current.likelihood}%
+          </span>
+        </div>
+        <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
+          <div 
+            className={cn(
+              "h-full rounded-full transition-all duration-500",
+              current.likelihood >= 80 ? "bg-emerald-500" : 
+              current.likelihood >= 50 ? "bg-amber-500" : "bg-rose-500"
+            )}
+            style={{ width: `${current.likelihood}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Chat display */}
+      <div className="rounded-lg border border-border overflow-hidden">
+        <div className={cn(
+          "flex items-center gap-2 px-3 py-2 border-b",
+          selectedPrompt === "poor" 
+            ? "bg-rose-500/10 border-rose-500/30"
+            : "bg-emerald-500/10 border-emerald-500/30"
+        )}>
+          <MessageSquare className={cn(
+            "w-4 h-4",
+            selectedPrompt === "poor" ? "text-rose-400" : "text-emerald-400"
+          )} />
+          <span className={cn(
+            "text-xs font-medium",
+            selectedPrompt === "poor" ? "text-rose-400" : "text-emerald-400"
+          )}>
+            {current.title}
+          </span>
+        </div>
+        <div className="p-3 space-y-3 max-h-[300px] overflow-y-auto bg-background/50">
+          {current.messages.map((msg, i) => (
+            <div 
+              key={i}
+              className={cn(
+                "flex gap-2",
+                msg.role === "user" ? "justify-end" : "justify-start"
+              )}
+            >
+              <div className={cn(
+                "px-3 py-2 rounded-lg text-xs max-w-[85%] whitespace-pre-wrap",
+                msg.role === "user" 
+                  ? "bg-cyan-500/20 text-cyan-300" 
+                  : "bg-violet-500/20 text-violet-300"
+              )}>
+                {msg.content}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Analysis */}
+      <div className={cn(
+        "p-4 rounded-lg border",
+        selectedPrompt === "poor" 
+          ? "bg-rose-500/5 border-rose-500/30"
+          : "bg-emerald-500/5 border-emerald-500/30"
+      )}>
+        <div className={cn(
+          "text-xs font-medium uppercase tracking-wide mb-2",
+          selectedPrompt === "poor" ? "text-rose-400" : "text-emerald-400"
+        )}>
+          {selectedPrompt === "poor" ? "Issues" : "Strengths"}
+        </div>
+        <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
+          {(selectedPrompt === "poor" ? prompts.poor.issues : prompts.good.strengths).map((item, i) => (
+            <li key={i}>{item}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
 
 // Interactive Pattern Library
 function PatternLibrary() {
@@ -302,6 +499,34 @@ export function CursorPatternsSection() {
           results come from <strong className="text-foreground">working with the tool&apos;s strengths</strong>, 
           not fighting against its limitations.
         </p>
+
+        {/* Prompt Quality Demo */}
+        <h3 id="prompt-quality" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Perfect Prompt vs Polluted Chat
+        </h3>
+
+        <p className="text-muted-foreground">
+          The difference between effective and ineffective AI assistance often comes down to 
+          <strong className="text-foreground"> how you start the conversation</strong>. Compare these two approaches:
+        </p>
+
+        <InteractiveWrapper
+          title="Interactive: Prompt Quality"
+          description="Compare polluted chat vs perfect prompt"
+          icon="💬"
+          colorTheme="cyan"
+          minHeight="auto"
+        >
+          <PromptQualityDemo />
+        </InteractiveWrapper>
+
+        <Callout variant="important" title="The First Message Matters Most">
+          <p className="m-0">
+            A single, well-crafted first message with all necessary context will outperform a lengthy 
+            back-and-forth conversation. Each message in a polluted chat wastes tokens and compounds 
+            ambiguity. <strong>Front-load your context.</strong>
+          </p>
+        </Callout>
 
         {/* Pattern Library */}
         <h3 id="pattern-library" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">

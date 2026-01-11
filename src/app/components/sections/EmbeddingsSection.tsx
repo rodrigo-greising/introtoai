@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SectionHeading, Card, CardContent, Callout, EmbeddingVisualizer } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { ArrowRight, Layers, Search, Database, Sparkles } from "lucide-react";
 
 // =============================================================================
@@ -48,47 +48,8 @@ function SimilarityDemo() {
     }
   };
 
-  const coreLogic = `// Cosine Similarity - measures angle between vectors
-function cosineSimilarity(a: number[], b: number[]): number {
-  let dotProduct = 0;
-  let normA = 0;
-  let normB = 0;
-  
-  for (let i = 0; i < a.length; i++) {
-    dotProduct += a[i] * b[i];  // Sum of products
-    normA += a[i] * a[i];       // Sum of squares (a)
-    normB += b[i] * b[i];       // Sum of squares (b)
-  }
-  
-  // Dot product divided by product of magnitudes
-  // Result: -1 (opposite) to 1 (identical direction)
-  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
-}
-
-// Euclidean Distance - straight-line distance
-function euclideanDistance(a: number[], b: number[]): number {
-  let sumSquaredDiffs = 0;
-  
-  for (let i = 0; i < a.length; i++) {
-    sumSquaredDiffs += Math.pow(a[i] - b[i], 2);
-  }
-  
-  // Pythagorean theorem in n dimensions
-  return Math.sqrt(sumSquaredDiffs);
-}
-
-// Why cosine is usually preferred for embeddings:
-// - Magnitude-invariant (only direction matters)
-// - Works well in high dimensions
-// - Bounded range makes comparison easy`;
-
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Similarity Functions"
-      description="How we measure semantic similarity between embeddings"
-    >
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Vector editors */}
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Vector A */}
@@ -227,7 +188,6 @@ function euclideanDistance(a: number[], b: number[]): number {
           </p>
         </div>
       </div>
-    </ViewCodeToggle>
   );
 }
 

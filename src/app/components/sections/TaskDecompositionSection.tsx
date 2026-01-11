@@ -2,8 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   GitBranch, 
   ArrowRight,
@@ -108,59 +108,8 @@ function DAGBuilderVisualizer() {
     }
   };
 
-  const coreLogic = `// Task Decomposition: Break complex tasks into a DAG
-interface Task {
-  id: string;
-  execute: () => Promise<Result>;
-  dependencies: string[];
-}
-
-async function executeDAG(tasks: Task[]): Promise<Map<string, Result>> {
-  const results = new Map<string, Result>();
-  const completed = new Set<string>();
-  
-  // Topological execution - respect dependencies
-  while (completed.size < tasks.length) {
-    // Find tasks ready to run (all dependencies complete)
-    const ready = tasks.filter(task => 
-      !completed.has(task.id) &&
-      task.dependencies.every(dep => completed.has(dep))
-    );
-    
-    // Execute ready tasks IN PARALLEL
-    const batch = await Promise.all(
-      ready.map(async (task) => {
-        const result = await task.execute();
-        return { id: task.id, result };
-      })
-    );
-    
-    // Record results
-    for (const { id, result } of batch) {
-      results.set(id, result);
-      completed.add(id);
-    }
-  }
-  
-  return results;
-}
-
-// Example: Complex document processing
-const documentPipeline: Task[] = [
-  { id: "analyze", execute: () => analyzeRequest(input), dependencies: [] },
-  { id: "search", execute: () => searchDocs(analyzed), dependencies: ["analyze"] },
-  { id: "fetch", execute: () => fetchContext(analyzed), dependencies: ["analyze"] },
-  { id: "generate", execute: () => generate(search, fetch), dependencies: ["search", "fetch"] },
-  { id: "review", execute: () => reviewOutput(generated), dependencies: ["generate"] },
-];`;
-
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="DAG-Based Task Execution"
-      description="Decompose complex tasks and execute with parallelism"
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         {/* Controls */}
         <div className="flex items-center gap-3">
           <button
@@ -274,7 +223,6 @@ const documentPipeline: Task[] = [
           </div>
         </div>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -392,59 +340,12 @@ export function TaskDecompositionSection() {
           Implementation Pattern
         </h3>
 
-        <CodeBlock
-          language="typescript"
-          filename="task-decomposition.ts"
-          code={`// Define tasks with explicit dependencies
-interface Task<T = unknown> {
-  id: string;
-  execute: (deps: Record<string, unknown>) => Promise<T>;
-  dependencies: string[];
-}
-
-// Example: Research assistant decomposition
-const researchPipeline: Task[] = [
-  {
-    id: "parse_query",
-    dependencies: [],
-    execute: async () => {
-      return await llm.analyze(query, { extractEntities: true });
-    }
-  },
-  {
-    id: "search_web",
-    dependencies: ["parse_query"],
-    execute: async ({ parse_query }) => {
-      const entities = parse_query.entities;
-      return await Promise.all(
-        entities.map(e => webSearch(e)) // Parallel searches
-      );
-    }
-  },
-  {
-    id: "search_docs",
-    dependencies: ["parse_query"],
-    execute: async ({ parse_query }) => {
-      return await vectorDB.search(parse_query.embedding);
-    }
-  },
-  {
-    id: "synthesize",
-    dependencies: ["search_web", "search_docs"],
-    execute: async ({ search_web, search_docs }) => {
-      const context = [...search_web.flat(), ...search_docs];
-      return await llm.generate({
-        system: "Synthesize research findings",
-        context,
-        query
-      });
-    }
-  }
-];
-
-// Execute respecting dependencies
-const results = await executeDAG(researchPipeline, { query });`}
-        />
+        <p className="text-muted-foreground">
+          Define tasks with explicit dependencies. Each task has an ID, an execute function that receives 
+          results from dependencies, and a list of dependency IDs. Tasks with no dependencies can run in 
+          parallel, while dependent tasks wait for their prerequisites. This pattern enables efficient 
+          parallel execution while respecting dependencies.
+        </p>
 
         {/* Benefits */}
         <h3 className="text-xl font-semibold mt-10 mb-4">Benefits of Decomposition</h3>

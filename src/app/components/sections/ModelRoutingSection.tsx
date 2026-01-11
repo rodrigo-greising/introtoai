@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   Send,
@@ -22,9 +22,11 @@ interface RoutingResult {
   model: string;
   category: string;
   complexity: string;
+  complexityScore: number; // 0-100
   reasoning: string;
   estimatedCost: string;
   estimatedLatency: string;
+  complexityFactors: string[];
 }
 
 function RouterSimulator() {
@@ -43,68 +45,93 @@ function RouterSimulator() {
   const simulateRouting = useCallback((input: string) => {
     setIsRouting(true);
     
-    // Simulate routing logic
+    // Simulate routing logic with abstract model tiers and complexity measurement
     setTimeout(() => {
       const lower = input.toLowerCase();
       const length = input.length;
       
+      // Calculate complexity score based on multiple factors
+      let complexityScore = 0;
+      const complexityFactors: string[] = [];
+      
+      // Length factor (longer = more complex)
+      if (length > 200) { complexityScore += 25; complexityFactors.push("Long prompt (+25)"); }
+      else if (length > 100) { complexityScore += 15; complexityFactors.push("Medium length (+15)"); }
+      else if (length > 50) { complexityScore += 5; complexityFactors.push("Short prompt (+5)"); }
+      
+      // Reasoning indicators
+      if (lower.includes("step by step")) { complexityScore += 30; complexityFactors.push("Step-by-step (+30)"); }
+      if (lower.includes("explain") || lower.includes("why")) { complexityScore += 20; complexityFactors.push("Explanation request (+20)"); }
+      if (lower.includes("compare") || lower.includes("difference")) { complexityScore += 15; complexityFactors.push("Comparison (+15)"); }
+      if (lower.includes("solve") || lower.includes("calculate")) { complexityScore += 25; complexityFactors.push("Problem solving (+25)"); }
+      
+      // Domain indicators
+      if (lower.includes("code") || lower.includes("function") || lower.includes("debug")) { complexityScore += 15; complexityFactors.push("Code task (+15)"); }
+      if (lower.includes("legal") || lower.includes("medical") || lower.includes("financial")) { complexityScore += 20; complexityFactors.push("Specialized domain (+20)"); }
+      
+      // Simplicity indicators (reduce score)
+      if (lower.includes("hi ") || lower.includes("hello") || lower.includes("thanks")) { complexityScore -= 30; complexityFactors.push("Simple greeting (-30)"); }
+      if (length < 30 && !lower.includes("explain") && !lower.includes("why")) { complexityScore -= 15; complexityFactors.push("Very short query (-15)"); }
+      
+      // Clamp to 0-100
+      complexityScore = Math.max(0, Math.min(100, complexityScore));
+      
       let category = "general";
       let complexity = "medium";
-      let model = "gpt-4o";
+      let model = "standard-tier";
       let reasoning = "";
       let estimatedCost = "$0.002";
       let estimatedLatency = "1-2s";
 
-      // Simple questions
-      if (length < 30 && !lower.includes("explain") && !lower.includes("why")) {
-        category = "simple_qa";
-        complexity = "low";
-        model = "gpt-4o-mini";
-        reasoning = "Short prompt, likely a simple question";
-        estimatedCost = "$0.0001";
-        estimatedLatency = "0.3-0.5s";
-      }
-      // Reasoning tasks
-      else if (lower.includes("step by step") || lower.includes("solve") || lower.includes("calculate")) {
-        category = "reasoning";
+      // Route based on complexity score
+      if (complexityScore >= 60) {
         complexity = "high";
-        model = "o1";
-        reasoning = "Multi-step reasoning detected";
-        estimatedCost = "$0.015";
-        estimatedLatency = "10-30s";
-      }
-      // Creative tasks
-      else if (lower.includes("write") || lower.includes("poem") || lower.includes("story") || lower.includes("creative")) {
-        category = "creative";
+        if (lower.includes("step by step") || lower.includes("solve") || lower.includes("calculate")) {
+          category = "reasoning";
+          model = "reasoning-tier";
+          reasoning = "Multi-step reasoning detected";
+          estimatedCost = "$0.015";
+          estimatedLatency = "10-30s";
+        } else {
+          category = "complex_analysis";
+          model = "premium-tier";
+          reasoning = "High complexity requires premium model";
+          estimatedCost = "$0.008";
+          estimatedLatency = "3-8s";
+        }
+      } else if (complexityScore >= 30) {
         complexity = "medium";
-        model = "claude-3-5-sonnet";
-        reasoning = "Creative generation task";
-        estimatedCost = "$0.003";
-        estimatedLatency = "2-4s";
-      }
-      // Code tasks
-      else if (lower.includes("code") || lower.includes("function") || lower.includes("debug") || lower.includes("error")) {
-        category = "code";
-        complexity = "medium";
-        model = "claude-3-5-sonnet";
-        reasoning = "Programming/debugging task";
-        estimatedCost = "$0.003";
-        estimatedLatency = "1-3s";
-      }
-      // Casual conversation
-      else if (lower.includes("hi") || lower.includes("hello") || lower.includes("how are") || lower.includes("thanks")) {
-        category = "conversation";
+        if (lower.includes("write") || lower.includes("poem") || lower.includes("story") || lower.includes("creative")) {
+          category = "creative";
+          model = "creative-tier";
+          reasoning = "Creative generation task";
+          estimatedCost = "$0.003";
+          estimatedLatency = "2-4s";
+        } else if (lower.includes("code") || lower.includes("function") || lower.includes("debug") || lower.includes("error")) {
+          category = "code";
+          model = "coding-tier";
+          reasoning = "Programming/debugging task";
+          estimatedCost = "$0.003";
+          estimatedLatency = "1-3s";
+        } else {
+          model = "standard-tier";
+          reasoning = "Standard task, balanced model";
+        }
+      } else {
+        category = complexityScore < 15 ? "conversation" : "simple_qa";
         complexity = "low";
-        model = "gpt-4o-mini";
-        reasoning = "Casual conversation, no complex task";
+        model = "fast-tier";
+        reasoning = complexityScore < 15 ? "Casual conversation, no complex task" : "Simple question, fast model sufficient";
         estimatedCost = "$0.0001";
-        estimatedLatency = "0.2-0.4s";
+        estimatedLatency = "0.2-0.5s";
       }
 
       setResult({
         model,
         category,
         complexity,
+        complexityScore,
+        complexityFactors,
         reasoning,
         estimatedCost,
         estimatedLatency,
@@ -121,9 +148,9 @@ function RouterSimulator() {
   }, [prompt, simulateRouting]);
 
   const getModelColor = (model: string) => {
-    if (model.includes("mini")) return "cyan";
-    if (model.includes("o1")) return "violet";
-    if (model.includes("claude")) return "amber";
+    if (model.includes("fast")) return "cyan";
+    if (model.includes("reasoning")) return "violet";
+    if (model.includes("creative") || model.includes("coding")) return "amber";
     return "emerald";
   };
 
@@ -173,8 +200,8 @@ function RouterSimulator() {
 
       {/* Result */}
       {result && (
-        <div className="p-4 rounded-lg bg-muted/20 border border-border animate-in fade-in">
-          <div className="flex items-center justify-between mb-4">
+        <div className="p-4 rounded-lg bg-muted/20 border border-border animate-in fade-in space-y-4">
+          <div className="flex items-center justify-between">
             <h4 className="text-sm font-medium text-foreground">Routing Decision</h4>
             <span className={cn(
               "px-3 py-1 rounded-full text-xs font-medium",
@@ -185,6 +212,48 @@ function RouterSimulator() {
             }}>
               {result.model}
             </span>
+          </div>
+
+          {/* Complexity Score Meter */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Complexity Score</span>
+              <span className={cn(
+                "text-sm font-bold",
+                result.complexityScore >= 60 ? "text-violet-400" :
+                result.complexityScore >= 30 ? "text-amber-400" :
+                "text-cyan-400"
+              )}>
+                {result.complexityScore}/100
+              </span>
+            </div>
+            <div className="h-2 rounded-full bg-muted/50 overflow-hidden">
+              <div 
+                className={cn(
+                  "h-full rounded-full transition-all duration-500",
+                  result.complexityScore >= 60 ? "bg-violet-500" :
+                  result.complexityScore >= 30 ? "bg-amber-500" :
+                  "bg-cyan-500"
+                )}
+                style={{ width: `${result.complexityScore}%` }}
+              />
+            </div>
+            {/* Complexity factors */}
+            {result.complexityFactors.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {result.complexityFactors.map((factor, i) => (
+                  <span 
+                    key={i}
+                    className={cn(
+                      "text-[10px] px-1.5 py-0.5 rounded",
+                      factor.includes("+") ? "bg-violet-500/20 text-violet-400" : "bg-cyan-500/20 text-cyan-400"
+                    )}
+                  >
+                    {factor}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -218,7 +287,7 @@ function RouterSimulator() {
             </div>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-border">
+          <div className="pt-3 border-t border-border">
             <div className="text-xs text-muted-foreground">{result.reasoning}</div>
           </div>
         </div>
@@ -228,16 +297,19 @@ function RouterSimulator() {
       <div className="flex flex-wrap gap-4 text-xs text-muted-foreground pt-2 border-t border-border">
         <div className="flex items-center gap-1">
           <Zap className="w-3 h-3 text-cyan-400" />
-          <span>gpt-4o-mini: Fast & cheap</span>
+          <span>fast-tier: Quick & economical</span>
         </div>
         <div className="flex items-center gap-1">
           <Brain className="w-3 h-3 text-violet-400" />
-          <span>o1: Deep reasoning</span>
+          <span>reasoning-tier: Deep thinking</span>
         </div>
         <div className="flex items-center gap-1">
           <Code2 className="w-3 h-3 text-amber-400" />
-          <span>claude: Code & creative</span>
+          <span>creative/coding: Specialized</span>
         </div>
+      </div>
+      <div className="text-[10px] text-muted-foreground mt-2">
+        Note: Map these tiers to actual models (e.g., GPT-4, Claude, Gemini) based on your provider and current pricing.
       </div>
     </div>
   );
@@ -308,34 +380,12 @@ export function ModelRoutingSection() {
           </Card>
         </div>
 
-        <CodeBlock
-          language="typescript"
-          filename="router-concept.ts"
-          code={`// The routing pattern
-type RouterDecision = {
-  model: string;          // Which model to use
-  confidence: number;     // How certain the router is
-  reasoning?: string;     // Why this model was chosen
-};
-
-async function routeRequest(prompt: string): Promise<RouterDecision> {
-  // A tiny model analyzes the prompt and decides
-  const analysis = await tinyRouter.analyze(prompt);
-  
-  if (analysis.complexity === "simple") {
-    return { model: "gpt-4o-mini", confidence: 0.95 };
-  }
-  if (analysis.taskType === "reasoning") {
-    return { model: "o1", confidence: 0.88 };
-  }
-  if (analysis.taskType === "creative") {
-    return { model: "claude-3-5-sonnet", confidence: 0.91 };
-  }
-  
-  // Default to a balanced option
-  return { model: "gpt-4o", confidence: 0.75 };
-}`}
-        />
+        <p className="text-muted-foreground">
+          The routing pattern uses a tiny model to analyze prompts and decide which model to use. The router 
+          returns a decision with the model name, confidence level, and optional reasoning. Based on task 
+          complexity or type, it routes to appropriate models: simple tasks to fast/cheap models, reasoning 
+          tasks to specialized models, creative tasks to creative models, with a balanced default option.
+        </p>
 
         <h3 id="power-of-small-models" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
           The Power of Small Models
@@ -349,9 +399,10 @@ async function routeRequest(prompt: string): Promise<RouterDecision> {
 
         <Callout variant="tip" title="Small Models Are Underrated">
           <p>
-            Models like Arch-Router (1.5B params), Phi-3 Mini (3.8B), or custom fine-tuned models on 
-            Hugging Face can perform classification, routing, and labeling tasks with 90%+ accuracy 
-            while being 100x cheaper and 10x faster than large models.
+            Specialized routing models with 1-4B parameters (like Arch-Router, Phi-series, or custom 
+            fine-tuned models) can perform classification, routing, and labeling tasks with 90%+ 
+            accuracy while being 100x cheaper and 10x faster than large models. The specific models 
+            available evolve rapidly—focus on the pattern, not specific model names.
           </p>
         </Callout>
 
@@ -438,29 +489,11 @@ async function routeRequest(prompt: string): Promise<RouterDecision> {
           Fast and predictable, but brittle and limited.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="rule-based-router.ts"
-          code={`// Simple but limited
-function routeByKeywords(prompt: string): string {
-  const lower = prompt.toLowerCase();
-  
-  if (lower.includes("code") || lower.includes("function") || lower.includes("debug")) {
-    return "code-model";
-  }
-  if (lower.includes("write") || lower.includes("story") || lower.includes("creative")) {
-    return "creative-model";
-  }
-  if (lower.includes("calculate") || lower.includes("math") || lower.includes("solve")) {
-    return "reasoning-model";
-  }
-  
-  return "general-model";
-}
-
-// Works for simple cases, but misses nuance:
-// &quot;Tell me a story about debugging&quot; → code-model? creative-model?`}
-        />
+        <p className="text-muted-foreground">
+          Keyword-based routing uses simple string matching to categorize prompts. It works for simple cases 
+          but misses nuance—for example, &quot;Tell me a story about debugging&quot; could match either code-model 
+          or creative-model keywords.
+        </p>
 
         <h4 className="text-lg font-medium mt-6 mb-3">2. Embedding-Based Routing</h4>
 
@@ -469,49 +502,12 @@ function routeByKeywords(prompt: string): string {
           More flexible than keywords, but requires curating good examples.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="embedding-router.ts"
-          code={`// Pre-compute embeddings for example prompts in each category
-const categoryExamples = {
-  reasoning: [
-    "Solve this math problem step by step",
-    "What's the logical flaw in this argument?",
-    "Help me think through this decision",
-  ],
-  creative: [
-    "Write a poem about autumn",
-    "Generate a story idea for a sci-fi novel",
-    "Come up with a catchy tagline",
-  ],
-  factual: [
-    "What year did World War II end?",
-    "Who invented the telephone?",
-    "What's the capital of France?",
-  ],
-};
-
-async function routeByEmbedding(prompt: string): Promise<string> {
-  const promptEmbedding = await embed(prompt);
-  
-  let bestCategory = "general";
-  let bestSimilarity = 0;
-  
-  for (const [category, examples] of Object.entries(categoryExamples)) {
-    const similarities = await Promise.all(
-      examples.map(ex => cosineSimilarity(promptEmbedding, await embed(ex)))
-    );
-    const avgSimilarity = average(similarities);
-    
-    if (avgSimilarity > bestSimilarity) {
-      bestSimilarity = avgSimilarity;
-      bestCategory = category;
-    }
-  }
-  
-  return categoryToModel[bestCategory];
-}`}
-        />
+        <p className="text-muted-foreground">
+          Embedding-based routing pre-computes embeddings for example prompts in each category, then compares 
+          incoming prompt embeddings using cosine similarity. It finds the category with the highest average 
+          similarity and routes to the corresponding model. More flexible than keywords but requires curating 
+          good examples.
+        </p>
 
         <h4 className="text-lg font-medium mt-6 mb-3">3. LLM-Based Routing (Small Model)</h4>
 
@@ -520,73 +516,13 @@ async function routeByEmbedding(prompt: string): Promise<string> {
           router can understand nuance, handle edge cases, and even explain its decisions.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="llm-router.ts"
-          showLineNumbers
-          code={`import { z } from "zod";
-
-// Define the routing schema
-const RoutingDecision = z.object({
-  category: z.enum([
-    "simple_qa",      // Factual questions, quick lookups
-    "reasoning",      // Math, logic, multi-step problems
-    "creative",       // Writing, brainstorming, generation
-    "code",           // Programming tasks
-    "conversation",   // Casual chat, follow-ups
-  ]),
-  complexity: z.enum(["low", "medium", "high"]),
-  confidence: z.number().min(0).max(1),
-});
-
-async function routeWithSmallModel(prompt: string) {
-  // Use a tiny, fast model for classification
-  const response = await smallModel.generate({
-    model: "arch-router-1.5b", // or any small classifier model
-    messages: [{
-      role: "system",
-      content: \`Analyze the user's prompt and classify it.
-        - category: the type of task
-        - complexity: how difficult the task is
-        - confidence: how certain you are (0-1)
-        
-        Respond only with valid JSON.\`
-    }, {
-      role: "user", 
-      content: prompt
-    }],
-    response_format: { type: "json_object" }
-  });
-  
-  const decision = RoutingDecision.parse(JSON.parse(response));
-  
-  // Map decision to model
-  return selectModel(decision);
-}
-
-function selectModel(decision: z.infer<typeof RoutingDecision>): string {
-  // High complexity always gets powerful models
-  if (decision.complexity === "high") {
-    return decision.category === "reasoning" ? "o1" : "claude-3-5-sonnet";
-  }
-  
-  // Low complexity can use mini models
-  if (decision.complexity === "low") {
-    return "gpt-4o-mini";
-  }
-  
-  // Medium complexity - route by category
-  const categoryModels = {
-    simple_qa: "gpt-4o-mini",
-    reasoning: "gpt-4o",
-    creative: "claude-3-5-sonnet",
-    code: "claude-3-5-sonnet",
-    conversation: "gpt-4o-mini",
-  };
-  
-  return categoryModels[decision.category];
-}`}
-        />
+        <p className="text-muted-foreground">
+          LLM-based routing uses a small, fast language model to classify prompts. Define a routing schema 
+          with categories (simple_qa, reasoning, creative, code, conversation), complexity levels, and confidence. 
+          The small model analyzes the prompt and returns structured output. Then map the decision to models: 
+          high complexity gets powerful models, low complexity uses mini models, and medium complexity routes 
+          by category. This is the most flexible approach and can handle nuance and edge cases.
+        </p>
 
         <h4 className="text-lg font-medium mt-6 mb-3">4. Preference-Aligned Routing</h4>
 
@@ -595,41 +531,12 @@ function selectModel(decision: z.infer<typeof RoutingDecision>): string {
           to the best-fitting description. This is the approach used by ArchGW.
         </p>
 
-        <CodeBlock
-          language="yaml"
-          filename="archgw-config.yaml"
-          code={`# Define model preferences in natural language
-llm_providers:
-  - name: reasoning-specialist
-    provider: openai
-    model: o1
-    description: |
-      Best for complex reasoning, math problems, logic puzzles,
-      multi-step problem solving, and tasks requiring careful thought.
-      
-  - name: creative-writer
-    provider: anthropic
-    model: claude-3-5-sonnet
-    description: |
-      Excels at creative writing, storytelling, brainstorming,
-      nuanced communication, and tasks requiring empathy or style.
-      
-  - name: fast-assistant
-    provider: openai
-    model: gpt-4o-mini
-    description: |
-      Quick responses for simple questions, factual lookups,
-      summarization, and straightforward tasks. Very cost-effective.
-      
-  - name: code-expert
-    provider: anthropic
-    model: claude-3-5-sonnet
-    description: |
-      Specialized in code generation, debugging, code review,
-      and technical explanations. Strong at following conventions.
-
-# The router automatically matches prompts to the best description`}
-        />
+        <p className="text-muted-foreground">
+          Preference-aligned routing defines models by their strengths in natural language descriptions. The router 
+          automatically matches prompts to the best-fitting description. For example, define a reasoning-specialist 
+          for complex reasoning tasks, a creative-writer for creative tasks, a fast-assistant for simple questions, 
+          and a code-expert for programming tasks. This approach is used by tools like ArchGW.
+        </p>
 
         <h3 id="routing-tools" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
           Tools: ArchGW and Alternatives
@@ -714,6 +621,100 @@ llm_providers:
           </Card>
         </div>
 
+        <h3 id="model-aliases-fallbacks" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Model Aliases and Fallbacks
+        </h3>
+
+        <p className="text-muted-foreground">
+          Two essential patterns for production AI systems: <strong className="text-foreground">model aliases</strong> and 
+          <strong className="text-foreground"> fallback chains</strong>. Aliases decouple your code from specific models, 
+          while fallbacks ensure reliability when providers fail.
+        </p>
+
+        <h4 className="text-lg font-medium mt-6 mb-3">Model Aliases</h4>
+
+        <p className="text-muted-foreground mb-4">
+          Instead of hardcoding &quot;gpt-4o&quot; or &quot;claude-3-sonnet&quot; throughout your codebase, define 
+          semantic aliases that describe the <em>capability</em> you need:
+        </p>
+
+        <div className="bg-muted/30 rounded-lg p-4 font-mono text-sm mb-4">
+          <div className="text-muted-foreground">{/* config/models.ts */}</div>
+          <div className="mt-2">
+            <span className="text-violet-400">export const</span> <span className="text-cyan-400">MODEL_ALIASES</span> = {'{'}
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;fast&quot;</span>: <span className="text-emerald-400">&quot;gpt-4o-mini&quot;</span>,
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;balanced&quot;</span>: <span className="text-emerald-400">&quot;gpt-4o&quot;</span>,
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;reasoning&quot;</span>: <span className="text-emerald-400">&quot;o1&quot;</span>,
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;creative&quot;</span>: <span className="text-emerald-400">&quot;claude-3-5-sonnet&quot;</span>,
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;code&quot;</span>: <span className="text-emerald-400">&quot;claude-3-5-sonnet&quot;</span>,
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;cheap&quot;</span>: <span className="text-emerald-400">&quot;gemini-1.5-flash&quot;</span>,
+          </div>
+          {'}'};
+        </div>
+
+        <p className="text-muted-foreground">
+          Benefits: swap models without code changes, A/B test easily, respond to pricing changes instantly, 
+          and keep your codebase readable (&quot;use the fast model&quot; vs &quot;use gpt-4o-mini-2024-07-18&quot;).
+        </p>
+
+        <h4 className="text-lg font-medium mt-6 mb-3">Fallback Chains</h4>
+
+        <p className="text-muted-foreground mb-4">
+          Never let a single provider outage break your system. Define fallback chains that try alternative 
+          models when the primary fails:
+        </p>
+
+        <div className="bg-muted/30 rounded-lg p-4 font-mono text-sm mb-4">
+          <div className="text-muted-foreground">{/* Fallback chain for each alias */}</div>
+          <div className="mt-2">
+            <span className="text-violet-400">const</span> <span className="text-cyan-400">FALLBACK_CHAINS</span> = {'{'}
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;balanced&quot;</span>: [<span className="text-emerald-400">&quot;gpt-4o&quot;</span>, <span className="text-emerald-400">&quot;claude-3-5-sonnet&quot;</span>, <span className="text-emerald-400">&quot;gemini-1.5-pro&quot;</span>],
+          </div>
+          <div className="pl-4">
+            <span className="text-amber-400">&quot;fast&quot;</span>: [<span className="text-emerald-400">&quot;gpt-4o-mini&quot;</span>, <span className="text-emerald-400">&quot;claude-3-haiku&quot;</span>, <span className="text-emerald-400">&quot;gemini-1.5-flash&quot;</span>],
+          </div>
+          {'}'};
+          <div className="mt-4">
+            <span className="text-violet-400">async function</span> <span className="text-cyan-400">callWithFallback</span>(alias, prompt) {'{'}
+          </div>
+          <div className="pl-4">
+            <span className="text-violet-400">for</span> (<span className="text-violet-400">const</span> model <span className="text-violet-400">of</span> FALLBACK_CHAINS[alias]) {'{'}
+          </div>
+          <div className="pl-8">
+            <span className="text-violet-400">try</span> {'{'} <span className="text-violet-400">return await</span> call(model, prompt); {'}'}
+          </div>
+          <div className="pl-8">
+            <span className="text-violet-400">catch</span> (e) {'{'} log(<span className="text-emerald-400">`${'{'}</span>model{'}'} failed, trying next...`); {'}'}
+          </div>
+          <div className="pl-4">{'}'}</div>
+          <div className="pl-4">
+            <span className="text-violet-400">throw new</span> Error(<span className="text-emerald-400">&quot;All models failed&quot;</span>);
+          </div>
+          {'}'}
+        </div>
+
+        <Callout variant="tip" title="Combine Aliases + Fallbacks + Routing">
+          <p>
+            The most robust pattern: routing decides the <em>capability tier</em> (alias), the alias 
+            maps to a <em>primary model</em>, and fallbacks provide <em>redundancy</em>. This gives 
+            you cost optimization, reliability, and flexibility all in one.
+          </p>
+        </Callout>
+
         <h3 id="building-routing-proxies" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
           Building Routing Proxies
         </h3>
@@ -722,131 +723,12 @@ llm_providers:
           Here&apos;s a practical example of building your own routing proxy that combines multiple strategies:
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="routing-proxy.ts"
-          showLineNumbers
-          code={`import { Hono } from "hono";
-import { z } from "zod";
-
-const app = new Hono();
-
-// Model configurations with cost/capability tradeoffs
-const models = {
-  "fast": { 
-    provider: "openai", 
-    model: "gpt-4o-mini",
-    costPer1kTokens: 0.00015,
-    maxComplexity: "low"
-  },
-  "balanced": { 
-    provider: "openai", 
-    model: "gpt-4o",
-    costPer1kTokens: 0.0025,
-    maxComplexity: "medium"
-  },
-  "powerful": { 
-    provider: "anthropic", 
-    model: "claude-3-5-sonnet",
-    costPer1kTokens: 0.003,
-    maxComplexity: "high"
-  },
-  "reasoning": { 
-    provider: "openai", 
-    model: "o1",
-    costPer1kTokens: 0.015,
-    maxComplexity: "high"
-  },
-};
-
-// The routing logic
-async function route(prompt: string, options?: { 
-  maxCost?: number;
-  preferLatency?: boolean;
-}) {
-  // Step 1: Quick heuristics (free, instant)
-  const quickCategory = quickClassify(prompt);
-  
-  // Step 2: If heuristics are confident, use them
-  if (quickCategory.confidence > 0.9) {
-    return selectModelForCategory(quickCategory.category, options);
-  }
-  
-  // Step 3: Use small model for uncertain cases
-  const routerDecision = await classifyWithSmallModel(prompt);
-  return selectModelForCategory(routerDecision.category, options);
-}
-
-function quickClassify(prompt: string) {
-  const lower = prompt.toLowerCase();
-  const length = prompt.length;
-  
-  // Very short prompts are usually simple
-  if (length < 50 && !lower.includes("explain") && !lower.includes("why")) {
-    return { category: "simple", confidence: 0.85 };
-  }
-  
-  // Explicit reasoning requests
-  if (lower.includes("step by step") || lower.includes("think through")) {
-    return { category: "reasoning", confidence: 0.92 };
-  }
-  
-  // Code patterns
-  if (lower.includes("function") || lower.includes("class ") || lower.includes("error:")) {
-    return { category: "code", confidence: 0.88 };
-  }
-  
-  // Default: uncertain
-  return { category: "unknown", confidence: 0.3 };
-}
-
-async function classifyWithSmallModel(prompt: string) {
-  // Call a tiny model running locally or on a cheap endpoint
-  const response = await fetch("http://localhost:11434/api/generate", {
-    method: "POST",
-    body: JSON.stringify({
-      model: "phi3:mini",  // 3.8B params, runs fast locally
-      prompt: \`Classify this prompt into exactly one category:
-        - simple: basic questions, greetings, quick tasks
-        - reasoning: math, logic, multi-step problems
-        - creative: writing, brainstorming, generation
-        - code: programming, debugging, technical
-        
-        Prompt: "\${prompt}"
-        
-        Category:\`,
-      stream: false,
-    }),
-  });
-  
-  const result = await response.json();
-  const category = result.response.trim().toLowerCase();
-  
-  return { 
-    category: ["simple", "reasoning", "creative", "code"].includes(category) 
-      ? category 
-      : "simple",
-    confidence: 0.8 
-  };
-}
-
-// API endpoint
-app.post("/v1/chat/completions", async (c) => {
-  const body = await c.req.json();
-  const prompt = body.messages.map((m: any) => m.content).join("\\n");
-  
-  // Route to appropriate model
-  const selectedModel = await route(prompt, {
-    maxCost: body.max_cost,
-    preferLatency: body.prefer_latency,
-  });
-  
-  // Forward to actual provider
-  return forwardToProvider(selectedModel, body);
-});
-
-export default app;`}
-        />
+        <p className="text-muted-foreground">
+          A practical routing proxy combines multiple strategies: define model configurations with cost/capability 
+          tradeoffs, use quick heuristics for confident classifications (free, instant), fall back to a small model 
+          for uncertain cases, and expose an API endpoint that routes requests to the appropriate model based on 
+          the prompt and constraints. This hybrid approach balances speed, cost, and accuracy.
+        </p>
 
         <Callout variant="info" title="The Routing Overhead">
           <p>
@@ -866,147 +748,43 @@ export default app;`}
 
         <h4 className="text-lg font-medium mt-6 mb-3">Data Labeling at Scale</h4>
 
-        <CodeBlock
-          language="typescript"
-          filename="data-labeling.ts"
-          code={`// Process thousands of customer feedback items
-const feedbackSchema = z.object({
-  sentiment: z.enum(["positive", "negative", "neutral"]),
-  category: z.enum(["bug", "feature_request", "praise", "question", "complaint"]),
-  urgency: z.enum(["low", "medium", "high"]),
-  product_area: z.string().optional(),
-});
-
-async function labelFeedback(items: string[]) {
-  // Use a small model for high-volume labeling
-  // Cost: ~$0.01 per 1000 items vs $1+ with large models
-  
-  const results = await Promise.all(
-    items.map(async (item) => {
-      const response = await smallModel.generate({
-        model: "phi3:mini",
-        messages: [{
-          role: "system",
-          content: \`Label the feedback. Return JSON with: 
-            sentiment, category, urgency, product_area\`
-        }, {
-          role: "user",
-          content: item
-        }],
-      });
-      
-      return feedbackSchema.parse(JSON.parse(response));
-    })
-  );
-  
-  return results;
-}
-
-// Now you can aggregate, filter, and route to humans
-const urgent = results.filter(r => r.urgency === "high");
-const bugs = results.filter(r => r.category === "bug");`}
-        />
+        <p className="text-muted-foreground">
+          Use small models for high-volume data labeling tasks like processing customer feedback. Define a schema 
+          for the labels (sentiment, category, urgency, product area), then use a small model to classify each 
+          item. This costs ~$0.01 per 1000 items vs $1+ with large models. After labeling, you can aggregate, 
+          filter, and route to humans based on urgency or category.
+        </p>
 
         <h4 className="text-lg font-medium mt-6 mb-3">Agent Selection</h4>
 
-        <CodeBlock
-          language="typescript"
-          filename="agent-router.ts"
-          code={`// Route to specialized agents based on task type
-const agents = {
-  researcher: new ResearchAgent(),   // Web search, fact-finding
-  coder: new CodingAgent(),          // Code generation, debugging
-  writer: new WritingAgent(),        // Content creation
-  analyst: new AnalysisAgent(),      // Data analysis, insights
-};
-
-async function routeToAgent(userRequest: string) {
-  // Small model picks the right agent
-  const agentChoice = await smallModel.classify(userRequest, {
-    options: Object.keys(agents),
-    prompt: "Which specialist should handle this request?"
-  });
-  
-  const selectedAgent = agents[agentChoice];
-  return selectedAgent.handle(userRequest);
-}
-
-// Example: "Can you analyze our Q4 sales data and write a report?"
-// Router sees: analysis + writing → might use analyst first, then writer`}
-        />
+        <p className="text-muted-foreground">
+          Route to specialized agents based on task type. Define agents for different domains (research, coding, 
+          writing, analysis), then use a small model to classify the user request and select the appropriate agent. 
+          For complex requests that span multiple domains, you might chain agents—for example, use an analyst first, 
+          then a writer.
+        </p>
 
         <h4 className="text-lg font-medium mt-6 mb-3">Smart Fallbacks</h4>
 
-        <CodeBlock
-          language="typescript"
-          filename="smart-fallback.ts"
-          code={`// Start cheap, escalate only when needed
-async function smartComplete(prompt: string) {
-  // Try the fast model first
-  const quickResponse = await models.fast.complete(prompt);
-  
-  // Use small model to evaluate quality
-  const qualityCheck = await smallModel.evaluate({
-    prompt,
-    response: quickResponse,
-    criteria: ["completeness", "accuracy", "helpfulness"]
-  });
-  
-  // If quality is sufficient, return early (saved $$$)
-  if (qualityCheck.score > 0.8) {
-    return quickResponse;
-  }
-  
-  // Otherwise, escalate to more powerful model
-  console.log("Escalating due to low quality score:", qualityCheck.score);
-  return models.powerful.complete(prompt);
-}
-
-// This pattern can reduce costs by 60-80% while maintaining quality`}
-        />
+        <p className="text-muted-foreground">
+          Smart fallback pattern: start with a fast, cheap model, then use a small model to evaluate the quality 
+          of the response. If quality is sufficient (score {'>'} 0.8), return early and save costs. Otherwise, escalate 
+          to a more powerful model. This pattern can reduce costs by 60-80% while maintaining quality.
+        </p>
 
         <h4 className="text-lg font-medium mt-6 mb-3">Unstructured → Structured Conversion</h4>
 
-        <CodeBlock
-          language="typescript"
-          filename="fuzzy-extraction.ts"
-          code={`// Turn messy text into clean, typed data
-const ContactSchema = z.object({
-  name: z.string(),
-  email: z.string().email().optional(),
-  phone: z.string().optional(),
-  company: z.string().optional(),
-  role: z.enum(["decision_maker", "influencer", "user", "unknown"]),
-});
-
-async function extractContact(messyText: string) {
-  // Small model provides the "fuzzy logic" your regex can't
-  const extracted = await smallModel.generate({
-    model: "qwen2.5:1.5b",
-    messages: [{
-      role: "system",
-      content: \`Extract contact info from text. Return JSON with:
-        name, email (if present), phone (if present), 
-        company (if mentioned), role (infer from context)\`
-    }, {
-      role: "user",
-      content: messyText
-    }],
-  });
-  
-  return ContactSchema.parse(JSON.parse(extracted));
-}
-
-// Input: "Hey, this is Mike from Acme Corp. Ring me at 555-1234 
-//         when you get a chance. I make the final call on vendors."
-// Output: { name: "Mike", phone: "555-1234", company: "Acme Corp", 
-//           role: "decision_maker" }`}
-        />
+        <p className="text-muted-foreground">
+          Use small models for unstructured-to-structured conversion. Define a schema for the data you want to extract, 
+          then use a small model to parse messy text into clean, typed data. Small models provide the &quot;fuzzy logic&quot; 
+          that regex can&apos;t handle—they can infer context, handle variations, and extract information even when the 
+          format is inconsistent.
+        </p>
 
         <Callout variant="important" title="Key Takeaways">
           <ul className="list-disc list-inside space-y-2 mt-2">
             <li>
-              <strong>Not every task needs GPT-4/Claude</strong>—many tasks can be handled by 
+              <strong>Not every task needs premium models</strong>—many tasks can be handled by 
               models 100x smaller and cheaper
             </li>
             <li>
@@ -1024,6 +802,10 @@ async function extractContact(messyText: string) {
             <li>
               <strong>Measure everything</strong>—track which routes are taken and their 
               outcomes to optimize over time
+            </li>
+            <li>
+              <strong>Models change constantly</strong>—design for abstract tiers, not specific 
+              model names, so you can swap providers easily
             </li>
           </ul>
         </Callout>

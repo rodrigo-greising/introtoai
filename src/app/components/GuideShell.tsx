@@ -11,11 +11,14 @@ import {
   ContextPrinciplesSection,
   LayeredContextSection,
   ContextTechniquesSection,
+  EpisodicSummarizationSection,
   // Capabilities
   StructuredOutputsSection,
   ToolsSection,
   AgenticLoopSection,
   WorkflowsVsAgentsSection,
+  DataStructuringSection,
+  StreamingVoiceSection,
   // Retrieval
   RAGFundamentalsSection,
   VectorDatabasesSection,
@@ -31,6 +34,7 @@ import {
   // Evaluation
   HarnessesSection,
   TestDrivenAISection,
+  ObservabilitySection,
   // Safety
   GuardrailsSection,
   HumanInLoopSection,
@@ -51,6 +55,8 @@ import {
   // Production
   CostOptimizationSection,
   ReliabilitySection,
+  // Capstone
+  CapstoneSection,
 } from "./sections";
 import { sections } from "@/app/data/sections";
 import { useActiveSection, scrollToSection } from "@/hooks/useActiveSection";
@@ -85,12 +91,15 @@ const sectionComponents: Record<string, React.ComponentType> = {
   "context-principles": ContextPrinciplesSection,
   "layered-context": LayeredContextSection,
   "context-lifecycle": ContextTechniquesSection, // Has lifecycle content
+  "episodic-summarization": EpisodicSummarizationSection,
 
   // Part 3: Capabilities
   "structured-outputs": StructuredOutputsSection,
   "tools": ToolsSection,
   "agentic-loop": AgenticLoopSection,
   "workflows-vs-agents": WorkflowsVsAgentsSection,
+  "data-structuring": DataStructuringSection,
+  "streaming-voice": StreamingVoiceSection,
 
   // Part 4: Knowledge & Retrieval
   "rag-fundamentals": RAGFundamentalsSection,
@@ -113,6 +122,7 @@ const sectionComponents: Record<string, React.ComponentType> = {
   // Part 7: Evaluation
   "harnesses": HarnessesSection,
   "tdd-ai": TestDrivenAISection,
+  "observability": ObservabilitySection,
 
   // Part 8: Coding Agents
   "coding-agents-intro": CodingAgentsIntroSection,
@@ -132,6 +142,9 @@ const sectionComponents: Record<string, React.ComponentType> = {
   // Part 10: Production
   "cost-optimization": CostOptimizationSection,
   "reliability": ReliabilitySection,
+
+  // Capstone
+  "capstone": CapstoneSection,
 };
 
 export function GuideShell() {

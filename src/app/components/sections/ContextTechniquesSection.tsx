@@ -1,4 +1,4 @@
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { OrchestrationVisualizer, OrchestrationCostAnalysis } from "@/app/components/visualizations";
 
 export function ContextTechniquesSection() {
@@ -151,30 +151,91 @@ export function ContextTechniquesSection() {
           </Card>
         </div>
 
-        <CodeBlock
-          language="typescript"
-          filename="putting-it-together.ts"
-          code={`// The context engineering equation
-function buildOptimalContext(request: Request): Context {
-  return {
-    // Layered by volatility (cache-friendly)
-    // Separated concerns (secure)
-    system: STATIC_SYSTEM_PROMPT,      // Layer 1
-    tools: STATIC_TOOL_SCHEMAS,        // Layer 2
-    
-    // Signal over noise (high density)
-    // Dynamic relevance (curated)
-    knowledge: retrieveRelevant(request),  // Layer 3
-    history: compressIfNeeded(session),    // Layer 4
-    
-    // Explicit (self-contained)
-    // Compressed without loss
-    query: request.message,                // Layer 5
-  };
-}
+        <p className="text-muted-foreground">
+          The context engineering equation: build optimal context by layering content by volatility 
+          (cache-friendly), separating concerns (secure), prioritizing signal over noise (high density), 
+          using dynamic relevance (curated), and keeping it explicit and self-contained. The result is 
+          efficient, cacheable, secure, high-quality context.
+        </p>
 
-// Result: efficient, cacheable, secure, high-quality context`}
-        />
+        {/* Evolving Context */}
+        <h3 id="evolving-context" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Evolving Context
+        </h3>
+
+        <p className="text-muted-foreground">
+          Static context gets you started, but production systems need context that <strong className="text-foreground">learns 
+          and adapts</strong>. This is about capturing insights from past interactions and incorporating them 
+          into future calls.
+        </p>
+
+        <div className="space-y-4 mt-6">
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-cyan-400 mb-2">Episodic Summarization</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Long-running sessions accumulate too much history to keep in context. Instead, periodically 
+                <strong className="text-foreground"> summarize completed episodes</strong>:
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1 mb-0">
+                <li>After each major task completion, generate a summary</li>
+                <li>Store summaries with timestamps and outcomes</li>
+                <li>Inject relevant summaries as &quot;memory&quot; in future sessions</li>
+                <li>Enables continuity without exponential context growth</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-violet-400 mb-2">Learning from Errors</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Track patterns in failures and surface them proactively:
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1 mb-0">
+                <li>Log when the agent corrects itself or user overrides</li>
+                <li>Identify recurring failure modes (wrong tool choice, missed edge cases)</li>
+                <li>Add targeted instructions: &quot;When dealing with dates, always check timezone&quot;</li>
+                <li>Periodically review and prune outdated learnings</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-amber-400 mb-2">User Preference Learning</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Capture and inject user-specific preferences:
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1 mb-0">
+                <li>Code style preferences (tabs vs spaces, naming conventions)</li>
+                <li>Communication style (concise vs detailed, formal vs casual)</li>
+                <li>Domain-specific terminology and conventions</li>
+                <li>Store as a &quot;user profile&quot; layer injected into system prompts</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Callout variant="tip" title="The Learning Loop">
+          <p className="mb-2">
+            A practical pattern: after each session, ask the model to extract learnings in a structured 
+            format. Store these, then inject the most relevant ones (by recency or similarity) into 
+            future sessions as part of the system prompt.
+          </p>
+          <p className="m-0">
+            <code className="text-xs bg-muted px-1 rounded">
+              {'{'}learnings: [&quot;User prefers TypeScript&quot;, &quot;Always include error handling examples&quot;]{'}'}
+            </code>
+          </p>
+        </Callout>
+
+        <p className="text-muted-foreground">
+          The key insight: <strong className="text-foreground">treat context as a living system</strong>. 
+          Static prompts hit a ceiling; systems that learn from their interactions compound improvements 
+          over time. This is especially powerful when combined with observability tools that track 
+          what&apos;s working and what isn&apos;t.
+        </p>
 
         {/* Connection to Foundations */}
         <h3 id="techniques-connection" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">

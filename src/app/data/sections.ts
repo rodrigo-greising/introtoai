@@ -34,7 +34,8 @@ export interface Section {
     | "evaluation"
     | "coding-agents"
     | "workflow"
-    | "production";
+    | "production"
+    | "capstone";
   description?: string;
   subSections?: SubSection[];
 }
@@ -51,6 +52,7 @@ export const partMeta = {
   "coding-agents": { label: "Part 8: Coding Agents", order: 8 },
   workflow: { label: "Part 9: Development Workflow", order: 9 },
   production: { label: "Part 10: Production", order: 10 },
+  capstone: { label: "Capstone Project", order: 11 },
 } as const;
 
 export const sections: Section[] = [
@@ -158,9 +160,22 @@ export const sections: Section[] = [
       { id: "compression-techniques", title: "Compression Techniques" },
     ],
   },
+  {
+    id: "episodic-summarization",
+    title: "Episodic Summarization & Retrospectives",
+    part: "context",
+    description: "Evolving context through learnings and error analysis",
+    subSections: [
+      { id: "episodic-overview", title: "What is Episodic Summarization?" },
+      { id: "building-retrospectives", title: "Building Retrospectives" },
+      { id: "learning-from-failures", title: "Learning from Failures" },
+      { id: "embedding-similar-situations", title: "Embedding Similar Situations" },
+      { id: "integrating-learnings", title: "Integrating Learnings into Context" },
+    ],
+  },
 
   // ==========================================================================
-  // Part 3: Capabilities (4 sections)
+  // Part 3: Capabilities (6 sections)
   // ==========================================================================
   {
     id: "structured-outputs",
@@ -209,6 +224,35 @@ export const sections: Section[] = [
       { id: "agents-defined", title: "What are Agents?" },
       { id: "comparison", title: "When to Use Each" },
       { id: "hybrid-patterns", title: "Hybrid Patterns" },
+    ],
+  },
+  {
+    id: "data-structuring",
+    title: "Structuring Data for AI",
+    part: "capabilities",
+    description: "Making data actionable through ontologies and schemas",
+    subSections: [
+      { id: "data-structure-problem", title: "The Data Structure Problem" },
+      { id: "ontology-action-planes", title: "Ontology and Action Planes" },
+      { id: "deterministic-api-layer", title: "Deterministic API Layer" },
+      { id: "ai-validation", title: "AI Validation Against APIs" },
+      { id: "data-driven-skills", title: "Data-Driven Skills" },
+      { id: "agents-as-data", title: "Agents as Data Structures" },
+      { id: "production-schema-patterns", title: "Production Schema Patterns" },
+      { id: "dynamic-tool-generation", title: "Dynamic Tool Generation" },
+    ],
+  },
+  {
+    id: "streaming-voice",
+    title: "Streaming & Voice Agents",
+    part: "capabilities",
+    description: "Real-time responses and voice agent architecture",
+    subSections: [
+      { id: "streaming-fundamentals", title: "Streaming Fundamentals" },
+      { id: "live-call-flows", title: "Live Call Flows" },
+      { id: "voice-agent-architecture", title: "Voice Agent Architecture" },
+      { id: "realtime-patterns", title: "Real-time Patterns" },
+      { id: "streaming-best-practices", title: "Streaming Best Practices" },
     ],
   },
 
@@ -397,6 +441,19 @@ export const sections: Section[] = [
       { id: "tdd-animation", title: "Interactive: TDD Cycle" },
     ],
   },
+  {
+    id: "observability",
+    title: "Observability & Monitoring",
+    part: "evaluation",
+    description: "Tracking, labeling, and learning from agent behavior",
+    subSections: [
+      { id: "why-observability", title: "Why Observability Matters" },
+      { id: "labeling-langfuse", title: "Labeling with Langfuse" },
+      { id: "failure-pattern-analysis", title: "Failure Pattern Analysis" },
+      { id: "prompt-iteration", title: "Prompt Iteration from Data" },
+      { id: "automated-learning", title: "Automated Learning Systems" },
+    ],
+  },
 
   // ==========================================================================
   // Part 8: Coding Agents (6 sections)
@@ -563,6 +620,29 @@ export const sections: Section[] = [
       { id: "retry-patterns", title: "Retry Patterns" },
       { id: "fallback-strategies", title: "Fallback Strategies" },
       { id: "retry-simulator", title: "Interactive: Retry Simulator" },
+    ],
+  },
+
+  // ==========================================================================
+  // Capstone Project (1 section)
+  // ==========================================================================
+  {
+    id: "capstone",
+    title: "Virtual Tabletop Assistant",
+    part: "capstone",
+    description: "Architectural deep-dive combining all guide concepts",
+    subSections: [
+      { id: "vtt-overview", title: "System Overview" },
+      { id: "multi-system-support", title: "Multi-System Support" },
+      { id: "pdf-parsing-strategy", title: "PDF Parsing Strategy" },
+      { id: "dynamic-schema-generation", title: "Dynamic Schema Generation" },
+      { id: "intake-agent-pipeline", title: "Intake Agent Pipeline" },
+      { id: "agents-building-agents", title: "Agents Building Agents" },
+      { id: "player-assistant-demo", title: "Player Assistant in Action" },
+      { id: "permission-system", title: "Permission System Design" },
+      { id: "query-architecture", title: "Query Architecture" },
+      { id: "cost-architecture", title: "Cost Architecture" },
+      { id: "concepts-applied", title: "Concepts Applied" },
     ],
   },
 ];

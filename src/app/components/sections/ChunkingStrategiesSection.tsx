@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   Scissors, 
   FileText, 
@@ -98,45 +98,8 @@ function ChunkingComparisonVisualizer() {
 
   const current = strategies[activeStrategy];
 
-  const coreLogic = `// LangChain-style recursive text splitter
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-
-const splitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 1000,      // Target chunk size in characters
-  chunkOverlap: 200,    // Overlap between chunks
-  separators: [         // Try these in order
-    "\\n\\n",           // 1. Paragraph breaks
-    "\\n",              // 2. Line breaks  
-    ". ",               // 3. Sentences
-    " ",                // 4. Words
-    ""                  // 5. Characters (fallback)
-  ]
-});
-
-// The algorithm:
-// 1. Try to split on the first separator (paragraphs)
-// 2. If any chunk is still too large, recursively split with next separator
-// 3. Continue until all chunks are below chunkSize
-// 4. Add overlap from previous chunk to maintain context
-
-const chunks = await splitter.splitText(document);
-
-// For code: use language-aware splitters
-import { RecursiveCharacterTextSplitter as CodeSplitter } from "langchain/text_splitter";
-
-const codeSplitter = CodeSplitter.fromLanguage("typescript", {
-  chunkSize: 1500,
-  chunkOverlap: 100
-});
-// Splits on: class, function, method boundaries first`;
-
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Chunking Strategies Comparison"
-      description="Compare how different strategies split the same document"
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         {/* Strategy tabs */}
         <div className="flex flex-wrap gap-2">
           {(Object.keys(strategies) as ChunkingStrategy[]).map((strategy) => {
@@ -222,7 +185,6 @@ const codeSplitter = CodeSplitter.fromLanguage("typescript", {
           </div>
         </div>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -407,54 +369,6 @@ export function ChunkingStrategiesSection() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Implementation Example */}
-        <h3 id="implementation" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
-          Implementation Example
-        </h3>
-
-        <CodeBlock
-          language="typescript"
-          filename="chunking-example.ts"
-          code={`import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { MarkdownTextSplitter } from "langchain/text_splitter";
-
-// For general prose
-const proseSplitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 1000,
-  chunkOverlap: 200,
-  separators: ["\\n\\n", "\\n", ". ", " ", ""]
-});
-
-// For Markdown documentation  
-const markdownSplitter = MarkdownTextSplitter.fromLanguage("markdown", {
-  chunkSize: 1500,
-  chunkOverlap: 100
-});
-
-// For code
-const codeSplitter = RecursiveCharacterTextSplitter.fromLanguage("typescript", {
-  chunkSize: 2000,
-  chunkOverlap: 200
-});
-
-// Custom chunking with metadata
-async function chunkDocument(doc: Document): Promise<Chunk[]> {
-  const splitter = selectSplitter(doc.type);
-  const texts = await splitter.splitText(doc.content);
-  
-  return texts.map((text, idx) => ({
-    content: text,
-    metadata: {
-      source: doc.source,
-      chunk_index: idx,
-      total_chunks: texts.length,
-      // Include parent heading for context
-      section: extractParentHeading(doc.content, text)
-    }
-  }));
-}`}
-        />
 
         {/* Best Practices */}
         <h3 className="text-xl font-semibold mt-10 mb-4">Best Practices</h3>

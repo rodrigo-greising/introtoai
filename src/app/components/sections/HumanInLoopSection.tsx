@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   User, 
@@ -304,82 +304,12 @@ export function HumanInLoopSection() {
           Implementation
         </h3>
 
-        <CodeBlock
-          language="typescript"
-          filename="human-in-loop.ts"
-          code={`interface ApprovalRequest {
-  id: string;
-  action: string;
-  details: Record<string, unknown>;
-  risk: "low" | "medium" | "high";
-  agentReason: string;
-  timeout?: number;  // Auto-reject after timeout
-}
-
-interface ApprovalResponse {
-  approved: boolean;
-  modifiedDetails?: Record<string, unknown>;
-  humanNote?: string;
-}
-
-class HumanApprovalGate {
-  private pendingApprovals = new Map<string, ApprovalRequest>();
-  
-  async requestApproval(request: ApprovalRequest): Promise<ApprovalResponse> {
-    this.pendingApprovals.set(request.id, request);
-    
-    // Notify human (Slack, email, dashboard, etc.)
-    await this.notifyHuman(request);
-    
-    // Wait for response (or timeout)
-    const response = await this.waitForDecision(request);
-    
-    this.pendingApprovals.delete(request.id);
-    return response;
-  }
-  
-  private async notifyHuman(request: ApprovalRequest) {
-    await slack.sendMessage({
-      channel: "#agent-approvals",
-      text: \`🤖 Agent requests approval\`,
-      blocks: [
-        { type: "header", text: request.action },
-        { type: "section", text: \`Risk: \${request.risk}\` },
-        { type: "section", text: request.agentReason },
-        {
-          type: "actions",
-          elements: [
-            { type: "button", text: "Approve", style: "primary" },
-            { type: "button", text: "Reject", style: "danger" },
-          ]
-        }
-      ]
-    });
-  }
-}
-
-// Usage in agent
-async function executeWithApproval(action: Action) {
-  if (requiresApproval(action)) {
-    const response = await approvalGate.requestApproval({
-      id: generateId(),
-      action: action.name,
-      details: action.params,
-      risk: assessRisk(action),
-      agentReason: action.reasoning,
-    });
-    
-    if (!response.approved) {
-      return { success: false, reason: "Human rejected" };
-    }
-    
-    // Use modified details if provided
-    action.params = response.modifiedDetails ?? action.params;
-  }
-  
-  return executeAction(action);
-}`}
-        />
+        <p className="text-muted-foreground">
+          Implement a human approval gate that requests approval for high-risk actions. The approval request 
+          includes the action, details, risk level, and agent reasoning. Notify humans via Slack, email, or 
+          dashboard, wait for their decision (or timeout), and use the response to proceed or stop. The human 
+          can approve, reject, or modify the details before approval.
+        </p>
 
         {/* Best Practices */}
         <h3 className="text-xl font-semibold mt-10 mb-4">Best Practices</h3>

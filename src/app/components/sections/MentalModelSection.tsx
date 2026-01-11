@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock, CostVisualizer } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout, CostVisualizer } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { Play, RotateCcw, ArrowRight } from "lucide-react";
 
 // =============================================================================
@@ -111,40 +111,8 @@ function StatelessFunctionDemo() {
     setShowLogs(false);
   };
 
-  const coreLogic = `// The Reality: LLM as a Stateless Function
-
-async function chat(userMessage: string, history: Message[]) {
-  // Step 1: Build the FULL context from history
-  const messages = [
-    { role: "system", content: SYSTEM_PROMPT },
-    ...history,  // ALL previous messages
-    { role: "user", content: userMessage }  // New message
-  ];
-
-  // Step 2: Send EVERYTHING to the API
-  // The API has no memory—it sees this as a fresh request
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages,  // Entire conversation sent every time
-  });
-
-  // Step 3: Return response (and store history yourself)
-  return response.choices[0].message.content;
-}
-
-// What feels like a "conversation" is actually:
-// Call 1: "Hello" → sends [Hello]
-// Call 2: "How are you?" → sends [Hello, Hi!, How are you?]
-// Call 3: "Tell me more" → sends [Hello, Hi!, How are you?, I'm good!, Tell me more]
-// Each call resends EVERYTHING. Context grows linearly, cost grows quadratically.`;
-
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Stateless Function Pattern"
-      description="How 'conversations' actually work under the hood"
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         {/* Chat interface */}
         <div className="rounded-lg border border-border overflow-hidden">
           {/* Messages */}
@@ -267,7 +235,6 @@ async function chat(userMessage: string, history: Message[]) {
           </p>
         </div>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -312,28 +279,12 @@ export function MentalModelSection() {
           <StatelessFunctionDemo />
         </InteractiveWrapper>
 
-        <CodeBlock
-          language="typescript"
-          filename="llm-as-function.ts"
-          showLineNumbers
-          code={`// This is the reality
-async function callLLM(context: string): Promise<string> {
-  // Each call is completely independent
-  // The LLM has no memory of previous calls
-  // All "memory" must be passed in the context
-  return await openai.chat.completions.create({
-    messages: [{ role: "user", content: context }],
-  });
-}
-
-// What feels like a conversation is actually:
-const response1 = await callLLM("Hello");
-const response2 = await callLLM("Hello" + response1 + "How are you?");
-const response3 = await callLLM("Hello" + response1 + "How are you?" + response2 + "Tell me more");
-
-// Each call sends the ENTIRE history. 
-// The "conversation" is reconstructed every time.`}
-        />
+        <p className="text-muted-foreground">
+          Each LLM call is completely independent—the model has no memory of previous calls. 
+          All &quot;memory&quot; must be passed in the context. What feels like a conversation is actually 
+          reconstructing the entire history with each call. Each call sends the ENTIRE history, 
+          which is why context grows linearly but cost grows quadratically.
+        </p>
 
         <h3 id="why-this-matters" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Why This Matters</h3>
 
@@ -423,34 +374,17 @@ const response3 = await callLLM("Hello" + response1 + "How are you?" + response2
 
         <h4 id="two-approaches" className="text-lg font-medium mt-8 mb-4 scroll-mt-20">The Two Approaches</h4>
 
-        <CodeBlock
-          language="typescript"
-          filename="practical-example.ts"
-          code={`// 📝 Simple approach: accumulating conversation history
-// Good for: prototypes, short chats, simple assistants
-// Watch out for: cost growth, context limits, error accumulation
-async function chatWithUser(userMessage: string) {
-  conversationHistory.push(userMessage);
-  const response = await callLLM(conversationHistory.join("\\n"));
-  conversationHistory.push(response);
-  return response;
-}
+        <p className="text-muted-foreground">
+          The simple approach accumulates conversation history and sends it all each time. This works 
+          for prototypes, short chats, and simple assistants, but watch out for cost growth, context limits, 
+          and error accumulation.
+        </p>
 
-// ✅ Production approach: self-contained context
-// Better for: cost control, reliability, long-running features
-async function processRequest(request: Request) {
-  const context = buildContext({
-    systemPrompt: SYSTEM_PROMPT,
-    userRequest: request.message,
-    relevantDocs: await retrieveRelevantDocs(request),
-    userPreferences: request.user.preferences,
-    // Only include relevant history, summarized if needed
-    recentContext: summarizeIfNeeded(request.recentMessages),
-  });
-  
-  return await callLLM(context);
-}`}
-        />
+        <p className="text-muted-foreground">
+          The production approach uses self-contained context. Build context with only what&apos;s needed: 
+          system prompt, user request, relevant documents, user preferences, and summarized recent history 
+          if needed. This is better for cost control, reliability, and long-running features.
+        </p>
 
         <Callout variant="info" title="When to use each approach" className="mt-6">
           <p className="mb-2">

@@ -1,6 +1,7 @@
 "use client";
 
-import { Menu, Sparkles, Github } from "lucide-react";
+import { useState } from "react";
+import { Menu, Sparkles, Github, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -8,6 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getPageMarkdown } from "@/lib/markdown-utils";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -15,6 +17,19 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick, isSidebarOpen }: HeaderProps) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyPage = async () => {
+    try {
+      const markdown = getPageMarkdown();
+      await navigator.clipboard.writeText(markdown);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full glass">
       <div className="flex h-14 items-center px-4 lg:px-6">
@@ -50,6 +65,26 @@ export function Header({ onMenuClick, isSidebarOpen }: HeaderProps) {
         {/* Actions */}
         <div className="flex items-center gap-1">
           <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={handleCopyPage}
+                  aria-label={copied ? "Copied!" : "Copy entire page as markdown"}
+                >
+                  {copied ? (
+                    <Check className="size-4 text-green-500" />
+                  ) : (
+                    <Copy className="size-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{copied ? "Copied to clipboard!" : "Copy entire page as markdown"}</p>
+              </TooltipContent>
+            </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button

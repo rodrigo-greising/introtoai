@@ -2,8 +2,8 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   Play,
   RotateCcw,
@@ -89,60 +89,16 @@ function TimelineComparisonVisualizer() {
 
   const getTaskStatus = (task: Task & { startTime?: number; endTime?: number }) => {
     if (!task.startTime || !task.endTime) return "pending";
-    if (currentTime < task.startTime) return "pending";
+    if (currentTime < task.startTime)     return "pending";
     if (currentTime >= task.endTime) return "complete";
     return "running";
   };
-
-  const coreLogic = `// Sequential execution: Wait for each task
-async function sequential() {
-  const userData = await fetchUserData();    // 2s
-  const docs = await searchDocuments();       // 3s
-  const context = await analyzeContext();     // 2s
-  const response = await generateResponse(); // 4s
-  // Total: 11s
-}
-
-// Parallel execution: Run independent tasks concurrently  
-async function parallel() {
-  // These 3 have no dependencies - run in parallel
-  const [userData, docs, context] = await Promise.all([
-    fetchUserData(),     // 2s ┐
-    searchDocuments(),   // 3s ├─ All start at t=0
-    analyzeContext(),    // 2s ┘
-  ]);
-  // Wait for longest: 3s
-  
-  // This depends on the above - must wait
-  const response = await generateResponse({ userData, docs, context }); // 4s
-  // Total: 3s + 4s = 7s (vs 11s sequential)
-}
-
-// With concurrency limits (for rate limiting)
-async function parallelWithLimit(items: Item[], limit = 5) {
-  const results: Result[] = [];
-  
-  for (let i = 0; i < items.length; i += limit) {
-    const batch = items.slice(i, i + limit);
-    const batchResults = await Promise.all(
-      batch.map(item => processItem(item))
-    );
-    results.push(...batchResults);
-  }
-  
-  return results;
-}`;
 
   const timelineWidth = 300;
   const timeScale = timelineWidth / totalTime;
 
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Sequential vs Parallel Execution"
-      description="Compare execution times with different strategies"
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         {/* Mode toggle and controls */}
         <div className="flex items-center gap-3">
           <div className="flex rounded-lg bg-muted/30 p-1">
@@ -266,7 +222,7 @@ async function parallelWithLimit(items: Item[], limit = 5) {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats - Percentages emphasized (they matter!), numbers secondary */}
         <div className="flex gap-4">
           <div className={cn(
             "flex-1 p-3 rounded-lg border text-center",
@@ -274,7 +230,7 @@ async function parallelWithLimit(items: Item[], limit = 5) {
               ? "bg-rose-500/10 border-rose-500/30"
               : "bg-muted/30 border-border"
           )}>
-            <div className="text-2xl font-bold text-foreground">11s</div>
+            <div className="text-sm text-muted-foreground">11s</div>
             <div className="text-xs text-muted-foreground">Sequential</div>
           </div>
           <div className={cn(
@@ -283,16 +239,16 @@ async function parallelWithLimit(items: Item[], limit = 5) {
               ? "bg-emerald-500/10 border-emerald-500/30"
               : "bg-muted/30 border-border"
           )}>
-            <div className="text-2xl font-bold text-foreground">7s</div>
+            <div className="text-sm text-muted-foreground">7s</div>
             <div className="text-xs text-muted-foreground">Parallel</div>
           </div>
-          <div className="flex-1 p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-center">
-            <div className="text-2xl font-bold text-cyan-400">36%</div>
-            <div className="text-xs text-muted-foreground">Time Saved</div>
+          <div className="flex-[2] p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-center">
+            <div className="text-3xl font-bold text-cyan-400">36%</div>
+            <div className="text-sm text-cyan-300">Faster</div>
+            <div className="text-xs text-muted-foreground mt-1">11s → 7s</div>
           </div>
         </div>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -381,54 +337,11 @@ export function ParallelizationSection() {
           balance speed with reliability.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="concurrency-control.ts"
-          code={`// Simple batched execution
-async function batchProcess<T, R>(
-  items: T[],
-  fn: (item: T) => Promise<R>,
-  batchSize = 5
-): Promise<R[]> {
-  const results: R[] = [];
-  
-  for (let i = 0; i < items.length; i += batchSize) {
-    const batch = items.slice(i, i + batchSize);
-    const batchResults = await Promise.all(batch.map(fn));
-    results.push(...batchResults);
-  }
-  
-  return results;
-}
-
-// Using p-limit for fine-grained control
-import pLimit from 'p-limit';
-
-const limit = pLimit(5); // Max 5 concurrent
-
-async function processWithLimit(items: Item[]) {
-  return Promise.all(
-    items.map(item => limit(() => processItem(item)))
-  );
-}
-
-// With progress tracking
-async function processWithProgress(items: Item[]) {
-  let completed = 0;
-  const total = items.length;
-  
-  const results = await Promise.all(
-    items.map(item => limit(async () => {
-      const result = await processItem(item);
-      completed++;
-      console.log(\`Progress: \${completed}/\${total}\`);
-      return result;
-    }))
-  );
-  
-  return results;
-}`}
-        />
+        <p className="text-muted-foreground">
+          Unbounded parallelism can overwhelm APIs or exhaust resources. Use concurrency limits to 
+          balance speed with reliability. Simple batched execution processes items in batches, while 
+          libraries like p-limit provide fine-grained control over concurrent operations.
+        </p>
 
         {/* Error Handling */}
         <h3 id="error-handling" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
@@ -440,47 +353,18 @@ async function processWithProgress(items: Item[]) {
           you often want to continue and collect partial results.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="parallel-error-handling.ts"
-          code={`// Promise.allSettled: Continue despite failures
-async function processAllWithPartialFailure(items: Item[]) {
-  const results = await Promise.allSettled(
-    items.map(item => processItem(item))
-  );
-  
-  const successes = results
-    .filter((r): r is PromiseFulfilledResult<Result> => r.status === 'fulfilled')
-    .map(r => r.value);
-    
-  const failures = results
-    .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
-    .map(r => r.reason);
-  
-  if (failures.length > 0) {
-    console.warn(\`\${failures.length} items failed\`);
-  }
-  
-  return { successes, failures };
-}
+        <p className="text-muted-foreground">
+          <code>Promise.all</code> fails fast—one rejection aborts everything. For batch processing, 
+          you often want to continue and collect partial results. Use <code>Promise.allSettled</code> 
+          to continue despite failures, or implement retry logic with exponential backoff for transient errors.
+        </p>
 
-// With retry on failure
-async function processWithRetry<T>(
-  item: T,
-  fn: (item: T) => Promise<Result>,
-  maxRetries = 3
-): Promise<Result> {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      return await fn(item);
-    } catch (error) {
-      if (attempt === maxRetries) throw error;
-      await sleep(Math.pow(2, attempt) * 100); // Exponential backoff
-    }
-  }
-  throw new Error('Unreachable');
-}`}
-        />
+        <ul className="list-disc list-inside space-y-2 text-muted-foreground mt-4">
+          <li>Using <code>Promise.allSettled</code> to continue despite failures</li>
+          <li>Implementing retry logic with exponential backoff</li>
+          <li>Collecting partial results when some operations fail</li>
+          <li>Handling rate limits and API quotas</li>
+        </ul>
 
         {/* Patterns */}
         <h3 className="text-xl font-semibold mt-10 mb-4">Common Patterns</h3>

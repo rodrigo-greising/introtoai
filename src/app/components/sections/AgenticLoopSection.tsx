@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   RotateCw, 
   Play, 
@@ -94,47 +94,8 @@ function AgenticLoopVisualizer() {
     setContextItems([]);
   };
 
-  const coreLogic = `// The Agentic Loop Pattern
-
-async function agenticLoop(userMessage: string): Promise<string> {
-  const context: Message[] = [
-    { role: "system", content: SYSTEM_PROMPT },
-    { role: "user", content: userMessage },
-  ];
-
-  while (true) {
-    // 1. THINK: Model decides what to do
-    const response = await llm.complete({ messages: context, tools });
-    
-    // 2. CHECK: Is the model done?
-    if (response.finishReason === "stop") {
-      return response.content;  // Final answer
-    }
-    
-    // 3. ACT: Execute requested tool calls
-    if (response.toolCalls) {
-      for (const call of response.toolCalls) {
-        const result = await executeTool(call);
-        
-        // 4. OBSERVE: Add result to context
-        context.push({ role: "tool", content: result });
-      }
-    }
-    
-    // Loop continues: model sees results and decides next step
-  }
-}
-
-// The loop repeats until the model decides it has enough
-// information to answer the user's question.`;
-
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Agentic Loop Implementation"
-      description="The core pattern for iterative tool-using agents"
-    >
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Main visualization */}
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Loop steps */}
@@ -274,7 +235,6 @@ async function agenticLoop(userMessage: string): Promise<string> {
           </span>
         </div>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -305,6 +265,93 @@ export function AgenticLoopSection() {
             <strong>Observe</strong> → ... → <strong>Complete</strong>
             <br /><br />
             The model decides when to stop. Each iteration adds information to the context.
+          </p>
+        </Callout>
+
+        {/* How It Actually Works */}
+        <h3 id="how-it-works" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          How It Actually Works
+        </h3>
+
+        <p className="text-muted-foreground">
+          At its core, an agentic loop is surprisingly simple: <strong className="text-foreground">you call 
+          the LLM repeatedly until it signals completion</strong>. The magic is in the structured output 
+          that tells your code whether to continue or stop.
+        </p>
+
+        <div className="my-6 p-4 rounded-xl bg-card border border-border font-mono text-sm overflow-x-auto">
+          <pre className="text-muted-foreground whitespace-pre-wrap">{`// The fundamental agentic loop pattern
+async function runAgent(task: string) {
+  const messages = [{ role: "user", content: task }];
+  
+  while (true) {
+    // 1. Call the LLM with structured output
+    const response = await llm.complete({
+      messages,
+      tools: availableTools,
+      response_format: {
+        type: "json_schema",
+        schema: agentResponseSchema // Defines: tool_calls OR final_answer
+      }
+    });
+    
+    // 2. Parse the structured response
+    const action = JSON.parse(response.content);
+    
+    // 3. Check if agent signaled completion
+    if (action.type === "final_answer") {
+      return action.answer; // Done!
+    }
+    
+    // 4. Otherwise, execute the tool call
+    const toolResult = await executeTools(action.tool_calls);
+    
+    // 5. Add results to context and continue
+    messages.push(
+      { role: "assistant", content: response.content },
+      { role: "tool", content: toolResult }
+    );
+  }
+}`}</pre>
+        </div>
+
+        <p className="text-muted-foreground">
+          The key insight: <strong className="text-foreground">the LLM controls when to stop by choosing 
+          which type of response to produce</strong>. If it outputs a tool call, the loop continues. If it 
+          outputs a final answer, the loop terminates.
+        </p>
+
+        <Card variant="highlight" className="mt-6">
+          <CardContent>
+            <h4 className="font-medium text-foreground mb-2">The Schema Makes It Work</h4>
+            <div className="font-mono text-xs bg-muted/30 p-3 rounded-lg overflow-x-auto">
+              <pre className="text-muted-foreground whitespace-pre-wrap">{`// Agent response schema - discriminated union
+const agentResponseSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("tool_call"),
+    thinking: z.string(), // Agent's reasoning
+    tool_calls: z.array(toolCallSchema)
+  }),
+  z.object({
+    type: z.literal("final_answer"),
+    thinking: z.string(),
+    answer: z.string()
+  })
+]);
+
+// The LLM MUST respond with one of these types
+// - "tool_call" → loop continues
+// - "final_answer" → loop terminates`}</pre>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Callout variant="info" title="Why Structured Output Matters">
+          <p>
+            Without structured output, you&apos;d have to parse free-form text to detect tool calls and 
+            completion signals. With structured output (JSON mode or function calling), the LLM is 
+            <strong> constrained to produce valid, parseable responses</strong>. This makes the loop 
+            reliable and predictable.
           </p>
         </Callout>
 
@@ -389,46 +436,65 @@ export function AgenticLoopSection() {
           When to Stop
         </h3>
 
-        <CodeBlock
-          language="typescript"
-          filename="stopping-conditions.ts"
-          code={`async function agenticLoop(input: string): Promise<string> {
-  const MAX_ITERATIONS = 10;
-  const TIMEOUT_MS = 30000;
-  const startTime = Date.now();
-  
-  for (let i = 0; i < MAX_ITERATIONS; i++) {
-    // Check timeout
-    if (Date.now() - startTime > TIMEOUT_MS) {
-      return "Task timed out. Here's what I found so far...";
-    }
-    
-    const response = await llm.complete({ messages: context, tools });
-    
-    // Model signals completion
-    if (response.finishReason === "stop") {
-      return response.content;
-    }
-    
-    // No more tool calls - model is done
-    if (!response.toolCalls || response.toolCalls.length === 0) {
-      return response.content;
-    }
-    
-    // Execute tools and continue
-    await executeToolCalls(response.toolCalls);
-  }
-  
-  return "Max iterations reached. Partial results: ...";
-}
+        <p className="text-muted-foreground">
+          The agent decides when to stop by producing a &quot;final_answer&quot; response. But you still need 
+          <strong className="text-foreground"> safety rails</strong> to prevent runaway loops:
+        </p>
 
-// Good stopping conditions:
-// 1. Model's natural completion (finishReason: "stop")
-// 2. Maximum iteration count
-// 3. Timeout
-// 4. Explicit "done" tool call
-// 5. Error threshold exceeded`}
-        />
+        <div className="my-6 p-4 rounded-xl bg-card border border-border font-mono text-sm overflow-x-auto">
+          <pre className="text-muted-foreground whitespace-pre-wrap">{`// Production-ready loop with safety rails
+async function runAgentSafe(task: string, options: AgentOptions) {
+  const { maxIterations = 20, timeoutMs = 60000 } = options;
+  const startTime = Date.now();
+  let iterations = 0;
+  
+  while (true) {
+    // Safety: Check iteration limit
+    if (++iterations > maxIterations) {
+      throw new Error(\`Agent exceeded \${maxIterations} iterations\`);
+    }
+    
+    // Safety: Check timeout
+    if (Date.now() - startTime > timeoutMs) {
+      throw new Error(\`Agent timed out after \${timeoutMs}ms\`);
+    }
+    
+    const response = await llm.complete({ messages, tools });
+    const action = parseResponse(response);
+    
+    // Normal termination: agent says it's done
+    if (action.type === "final_answer") {
+      return action.answer;
+    }
+    
+    // Continue the loop...
+  }
+}`}</pre>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 mt-6">
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-emerald-400 mb-2">✓ Good Stopping Signals</h4>
+              <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
+                <li>Agent outputs <code className="text-cyan-400">final_answer</code> type</li>
+                <li>Task completed successfully (verified)</li>
+                <li>User explicitly requested stop</li>
+              </ul>
+            </CardContent>
+          </Card>
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-amber-400 mb-2">⚡ Safety Rails</h4>
+              <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
+                <li>Maximum iteration count (e.g., 20-50)</li>
+                <li>Timeout (e.g., 60-300 seconds)</li>
+                <li>Token/cost budget exceeded</li>
+                <li>Consecutive error threshold</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Implementation Tips */}
         <h3 className="text-xl font-semibold mt-10 mb-4">Implementation Tips</h3>
@@ -464,6 +530,69 @@ export function AgenticLoopSection() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Streaming and Voice Agents */}
+        <h3 id="streaming-voice" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Streaming and Voice Agents
+        </h3>
+
+        <p className="text-muted-foreground">
+          The agentic loop extends naturally to <strong className="text-foreground">real-time, streaming 
+          applications</strong>—including voice agents where latency is critical.
+        </p>
+
+        <div className="space-y-4 mt-6">
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-cyan-400 mb-2">Streaming Architecture</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                In streaming mode, tokens flow back as they&apos;re generated:
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>First token latency matters more than total latency</li>
+                <li>Stream partial responses while processing continues</li>
+                <li>Use SSE (Server-Sent Events) or WebSockets for delivery</li>
+                <li>Buffer tool calls until complete, then execute and stream results</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-violet-400 mb-2">Voice Agent Flow</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Voice adds speech-to-text and text-to-speech to the loop:
+              </p>
+              <ol className="text-sm text-muted-foreground list-decimal list-inside space-y-1">
+                <li><strong>Listen:</strong> Speech-to-text converts user audio</li>
+                <li><strong>Think:</strong> LLM processes (same agentic loop)</li>
+                <li><strong>Speak:</strong> Stream text-to-speech as tokens arrive</li>
+                <li><strong>Interrupt:</strong> Detect user interruption, cancel current speech</li>
+              </ol>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-amber-400 mb-2">Latency Optimization</h4>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li><strong>Speculative generation:</strong> Start TTS before sentence completes</li>
+                <li><strong>Parallel processing:</strong> Run ASR on next chunk while processing current</li>
+                <li><strong>Warm connections:</strong> Keep WebSocket/API connections alive</li>
+                <li><strong>Edge deployment:</strong> Run models closer to users when possible</li>
+                <li><strong>Caching:</strong> Prefix caching reduces first-token latency dramatically</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Callout variant="info" title="Real-Time APIs">
+          <p className="m-0">
+            OpenAI, ElevenLabs, and others offer real-time voice APIs that handle the full pipeline. 
+            These abstract away the complexity but understand the underlying flow—it helps when debugging 
+            latency issues or customizing behavior.
+          </p>
+        </Callout>
 
         <Callout variant="tip" title="Coming Up: Workflows vs Agents">
           <p>

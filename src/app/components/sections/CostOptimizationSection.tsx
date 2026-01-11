@@ -14,16 +14,16 @@ function BudgetCalculator() {
   const [requestsPerDay, setRequestsPerDay] = useState(1000);
   const [avgInputTokens, setAvgInputTokens] = useState(500);
   const [avgOutputTokens, setAvgOutputTokens] = useState(200);
-  const [selectedModel, setSelectedModel] = useState("claude-3-5-sonnet");
+  const [selectedModel, setSelectedModel] = useState("standard-capable");
   const [cacheHitRate, setCacheHitRate] = useState(30);
 
+  // Note: These are example model tiers with representative pricing.
+  // Actual prices change frequently - always check provider documentation.
   const models = useMemo(() => [
-    { id: "claude-3-5-sonnet", name: "Claude 3.5 Sonnet", inputCost: 3, outputCost: 15, cacheCost: 0.3 },
-    { id: "claude-3-5-haiku", name: "Claude 3.5 Haiku", inputCost: 0.25, outputCost: 1.25, cacheCost: 0.03 },
-    { id: "gpt-4o", name: "GPT-4o", inputCost: 2.5, outputCost: 10, cacheCost: 1.25 },
-    { id: "gpt-4o-mini", name: "GPT-4o Mini", inputCost: 0.15, outputCost: 0.6, cacheCost: 0.075 },
-    { id: "gemini-1.5-pro", name: "Gemini 1.5 Pro", inputCost: 1.25, outputCost: 5, cacheCost: 0.3125 },
-    { id: "gemini-1.5-flash", name: "Gemini 1.5 Flash", inputCost: 0.075, outputCost: 0.3, cacheCost: 0.01875 },
+    { id: "premium-reasoning", name: "Premium Reasoning Tier", inputCost: 3, outputCost: 15, cacheCost: 0.3 },
+    { id: "standard-capable", name: "Standard Capable Tier", inputCost: 1, outputCost: 5, cacheCost: 0.1 },
+    { id: "fast-efficient", name: "Fast & Efficient Tier", inputCost: 0.25, outputCost: 1.25, cacheCost: 0.03 },
+    { id: "economy", name: "Economy Tier", inputCost: 0.1, outputCost: 0.4, cacheCost: 0.01 },
   ], []);
 
   const calculations = useMemo(() => {
@@ -201,10 +201,10 @@ function BudgetCalculator() {
             </div>
           )}
 
-          <div className="text-xs text-muted-foreground">
-            Pricing: ${calculations.model.inputCost}/M input, ${calculations.model.outputCost}/M output, 
-            ${calculations.model.cacheCost}/M cached
-          </div>
+                  <div className="text-xs text-muted-foreground">
+                    Example pricing: ${calculations.model.inputCost}/M input, ${calculations.model.outputCost}/M output, 
+                    ${calculations.model.cacheCost}/M cached. <span className="text-amber-400">Prices vary by provider - check current rates.</span>
+                  </div>
         </div>
       </div>
     </div>

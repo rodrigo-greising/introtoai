@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import {
   GitBranch,
   GitMerge,
@@ -281,20 +281,11 @@ export function GraphiteSection() {
           the complex rebasing that stacking requires, so you focus on the code.
         </p>
 
-        <CodeBlock
-          language="bash"
-          filename="stacking-workflow.sh"
-          code={`# Create a stack with Graphite CLI
-gt create -m "feat: add user model"      # PR 1
-gt create -m "feat: add user API routes" # PR 2, stacked on PR 1
-gt create -m "feat: add user UI"         # PR 3, stacked on PR 2
-
-# View the stack
-gt log
-
-# Submit all PRs in the stack
-gt submit --stack`}
-        />
+        <p className="text-muted-foreground">
+          Graphite provides a CLI tool and web dashboard for managing stacked PRs. Use <code>gt create</code> 
+          to create each PR in the stack, <code>gt log</code> to view the stack, and <code>gt submit --stack</code> 
+          to submit all PRs. Graphite handles the complex rebasing automatically.
+        </p>
 
         <Card variant="highlight" className="mt-6">
           <CardContent>
@@ -405,21 +396,11 @@ gt submit --stack`}
           </Card>
         </div>
 
-        <CodeBlock
-          language="bash"
-          filename="stack-maintenance.sh"
-          code={`# Sync your stack with main
-gt sync
-
-# Rebase entire stack on latest main
-gt restack
-
-# If conflicts occur, resolve them and continue
-gt continue
-
-# Force-push updated stack
-gt submit --force`}
-        />
+        <p className="text-muted-foreground">
+          When you need to make changes to an earlier PR in the stack, Graphite automatically rebases 
+          all dependent PRs. Use <code>gt sync</code> to update your local branches after changes, and 
+          <code>gt submit</code> to push updates to the remote stack.
+        </p>
 
         <Callout variant="warning" title="Conflict Resolution">
           <p className="m-0">

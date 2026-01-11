@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { Sparkles, Trash2, AlertTriangle, CheckCircle, ArrowRight } from "lucide-react";
 
 // =============================================================================
@@ -59,48 +59,8 @@ function SignalNoiseVisualizer() {
     setShowOptimized(false);
   };
 
-  const coreLogic = `// Context Engineering: Maximize Signal, Minimize Noise
-
-interface ContextItem {
-  content: string;
-  relevance: 'high' | 'medium' | 'low' | 'noise';
-  tokens: number;
-}
-
-function optimizeContext(items: ContextItem[], budget: number): ContextItem[] {
-  // Step 1: Remove obvious noise
-  const filtered = items.filter(i => i.relevance !== 'noise');
-  
-  // Step 2: Sort by relevance (high first)
-  const sorted = filtered.sort((a, b) => {
-    const order = { high: 0, medium: 1, low: 2 };
-    return order[a.relevance] - order[b.relevance];
-  });
-  
-  // Step 3: Fit within budget, prioritizing high-relevance items
-  const result: ContextItem[] = [];
-  let used = 0;
-  
-  for (const item of sorted) {
-    if (used + item.tokens <= budget) {
-      result.push(item);
-      used += item.tokens;
-    }
-  }
-  
-  return result;
-}
-
-// Key principle: Every token must earn its place
-// Ask: "Does this information help the model complete the task?"`;
-
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Signal-to-Noise Optimization"
-      description="How to prioritize and filter context for better results"
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         {/* Stats bar */}
         <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border">
           <div className="flex items-center gap-4 text-sm">
@@ -227,7 +187,6 @@ function optimizeContext(items: ContextItem[], budget: number): ContextItem[] {
           </p>
         </div>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -318,30 +277,11 @@ export function ContextPrinciplesSection() {
           if it feels redundant.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="explicit-context.ts"
-          code={`// ❌ IMPLICIT: Assumes the model knows your conventions
-const prompt = \`Fix the bug in the user service\`;
-
-// ✅ EXPLICIT: States exactly what you need
-const prompt = \`
-  Fix the authentication bug in src/services/user.ts.
-  
-  The bug: Users get logged out after 5 minutes even with
-  "remember me" checked. Expected behavior is 30-day sessions.
-  
-  Our stack:
-  - Node.js 20 with Express
-  - JWT tokens with refresh mechanism
-  - Session stored in Redis
-  
-  Constraints:
-  - Don't change the JWT library
-  - Maintain backward compatibility with existing tokens
-  - Add logging for debugging
-\`;`}
-        />
+        <p className="text-muted-foreground">
+          Don&apos;t assume the model knows your conventions. Instead of an implicit prompt like &quot;Fix the bug 
+          in the user service,&quot; be explicit: state the exact file, describe the bug, explain expected behavior, 
+          list your tech stack, and specify constraints. The more explicit you are, the better the model can help.
+        </p>
 
         <Callout variant="important">
           <p>
@@ -426,33 +366,12 @@ const prompt = \`
           </Card>
         </div>
 
-        <CodeBlock
-          language="typescript"
-          filename="structured-context.ts"
-          code={`// Well-structured context with clear sections
-const context = \`
-<system>
-You are a code review assistant. Be concise but thorough.
-</system>
-
-<code_to_review>
-\${codeToReview}
-</code_to_review>
-
-<review_criteria>
-- Check for security vulnerabilities
-- Verify error handling
-- Assess performance implications
-</review_criteria>
-
-<user_request>
-\${userRequest}
-</user_request>
-\`;
-
-// The model can now easily reference specific sections
-// and the structure makes your intent clear`}
-        />
+        <p className="text-muted-foreground">
+          Well-structured context uses clear sections with XML-like tags to separate different parts: 
+          system instructions, code to review, review criteria, and user request. This structure helps 
+          the model parse and reference your context, making your intent clear and improving the quality 
+          of responses.
+        </p>
 
         <Callout variant="tip" title="Coming Up: Layered Architecture">
           <p>

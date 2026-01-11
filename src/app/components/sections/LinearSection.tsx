@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import {
   MessageSquare,
   FileText,
@@ -140,77 +140,100 @@ function IssueToPRFlow() {
         </div>
       </div>
 
-      {/* Flow visualization */}
-      <div className="relative overflow-x-auto pb-4">
-        <div className="flex items-start gap-2 min-w-max">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            const colors = colorClasses[step.color];
-            const isActive = currentStep === index;
-            const isPast = currentStep > index;
-            const isFuture = currentStep < index;
+      {/* Flow visualization - Grid layout for better visibility */}
+      <div className="space-y-6">
+        {/* Top row: visual flow */}
+        <div className="relative overflow-x-auto pb-4">
+          <div className="flex items-center gap-1 min-w-max px-2">
+            {steps.map((step, index) => {
+              const Icon = step.icon;
+              const colors = colorClasses[step.color];
+              const isActive = currentStep === index;
+              const isPast = currentStep > index;
+              const isFuture = currentStep < index;
 
-            return (
-              <div key={step.id} className="flex items-center">
-                <div className={`
-                  relative flex flex-col items-center w-28 transition-all duration-300
-                  ${isActive ? "scale-110" : ""}
-                  ${isFuture && currentStep >= 0 ? "opacity-40" : "opacity-100"}
-                `}>
-                  {/* Icon container */}
+              return (
+                <div key={step.id} className="flex items-center">
                   <div className={`
-                    w-12 h-12 rounded-xl flex items-center justify-center transition-all
-                    ${isPast ? "bg-emerald-500/20 border-emerald-500/30" : colors.bg}
-                    ${isActive ? `${colors.border} border-2 shadow-lg` : "border border-border"}
+                    relative flex flex-col items-center transition-all duration-300
+                    ${isActive ? "scale-105" : ""}
+                    ${isFuture && currentStep >= 0 ? "opacity-40" : "opacity-100"}
                   `}>
-                    {isPast ? (
-                      <CheckCircle className="w-6 h-6 text-emerald-400" />
-                    ) : (
-                      <Icon className={`w-6 h-6 ${isActive ? colors.text : "text-muted-foreground"}`} />
-                    )}
-                  </div>
-                  
-                  {/* Label */}
-                  <div className={`mt-2 text-center ${isActive ? colors.text : "text-muted-foreground"}`}>
-                    <div className="text-xs font-medium truncate w-28">{step.name}</div>
+                    {/* Icon container */}
+                    <div className={`
+                      w-14 h-14 rounded-xl flex items-center justify-center transition-all
+                      ${isPast ? "bg-emerald-500/20 border-emerald-500/30" : colors.bg}
+                      ${isActive ? `${colors.border} border-2 shadow-lg shadow-${step.color}-500/20` : "border border-border"}
+                    `}>
+                      {isPast ? (
+                        <CheckCircle className="w-7 h-7 text-emerald-400" />
+                      ) : (
+                        <Icon className={`w-7 h-7 ${isActive ? colors.text : "text-muted-foreground"}`} />
+                      )}
+                    </div>
+                    
+                    {/* Label */}
+                    <div className={`mt-2 text-center px-1 ${isActive ? colors.text : "text-muted-foreground"}`}>
+                      <div className="text-[11px] font-medium whitespace-nowrap">{step.name}</div>
+                    </div>
                   </div>
 
-                  {/* Description tooltip (shows when active) */}
-                  {isActive && (
-                    <div className={`absolute top-16 mt-2 p-3 rounded-lg ${colors.bg} border ${colors.border} w-48 z-10`}>
-                      <div className="text-sm font-medium text-foreground mb-1">{step.description}</div>
-                      <div className="text-xs text-muted-foreground">{step.detail}</div>
-                    </div>
+                  {/* Arrow connector */}
+                  {index < steps.length - 1 && (
+                    <ArrowRight className={`w-5 h-5 mx-2 shrink-0 transition-colors ${
+                      isPast ? "text-emerald-400" : 
+                      isActive ? colors.text : 
+                      "text-muted-foreground/30"
+                    }`} />
                   )}
                 </div>
+              );
+            })}
+          </div>
+        </div>
 
-                {/* Arrow connector */}
-                {index < steps.length - 1 && (
-                  <ArrowRight className={`w-4 h-4 mx-1 shrink-0 transition-colors ${
-                    isPast ? "text-emerald-400" : 
-                    isActive ? colors.text : 
-                    "text-muted-foreground/30"
-                  }`} />
-                )}
+        {/* Bottom section: detailed step info */}
+        <div className="min-h-[120px]">
+          {currentStep >= 0 && currentStep < steps.length && (
+            <div className={`p-4 rounded-xl ${colorClasses[steps[currentStep].color].bg} border ${colorClasses[steps[currentStep].color].border} animate-in fade-in slide-in-from-bottom-2 duration-200`}>
+              <div className="flex items-start gap-4">
+                <div className={`w-12 h-12 rounded-lg ${colorClasses[steps[currentStep].color].bg} border ${colorClasses[steps[currentStep].color].border} flex items-center justify-center shrink-0`}>
+                  {(() => {
+                    const Icon = steps[currentStep].icon;
+                    return <Icon className={`w-6 h-6 ${colorClasses[steps[currentStep].color].text}`} />;
+                  })()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className={`text-sm font-semibold ${colorClasses[steps[currentStep].color].text} mb-1`}>
+                    Step {currentStep + 1}: {steps[currentStep].name}
+                  </div>
+                  <div className="text-sm text-foreground mb-2">{steps[currentStep].description}</div>
+                  <div className="text-xs text-muted-foreground">{steps[currentStep].detail}</div>
+                </div>
+                <div className="text-xs text-muted-foreground font-mono shrink-0">
+                  {currentStep + 1}/{steps.length}
+                </div>
               </div>
-            );
-          })}
+            </div>
+          )}
+          {currentStep === -1 && !completed && (
+            <div className="p-4 rounded-xl bg-muted/30 border border-border flex items-center justify-center">
+              <span className="text-sm text-muted-foreground">
+                Click &quot;Run Flow&quot; to see the automated issue-to-PR pipeline
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Status message */}
       {completed && (
-        <div className="mt-8 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2">
-          <CheckCircle className="w-5 h-5 text-emerald-400" />
-          <span className="text-sm text-emerald-400">
-            Complete cycle: Customer feedback → Production in hours, not days!
-          </span>
-        </div>
-      )}
-
-      {currentStep === -1 && !completed && (
-        <div className="mt-8 text-sm text-muted-foreground text-center">
-          Click &quot;Run Flow&quot; to see the automated issue-to-PR pipeline
+        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-3">
+          <CheckCircle className="w-6 h-6 text-emerald-400 shrink-0" />
+          <div>
+            <div className="text-sm font-medium text-emerald-400">Pipeline Complete!</div>
+            <div className="text-xs text-muted-foreground">Customer feedback → Production in hours, not days</div>
+          </div>
         </div>
       )}
     </div>
@@ -326,34 +349,54 @@ export function LinearSection() {
           possible for certain classes of work.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="issue-to-pr.ts"
-          code={`// Webhook triggered when issue is marked "Ready for AI"
-async function handleReadyIssue(issue: LinearIssue) {
-  // Extract task definition
-  const spec = parseIssueToSpec(issue);
-  
-  // Validate spec has required fields
-  if (!spec.acceptanceCriteria || !spec.scope) {
-    await issue.addComment("⚠️ Missing acceptance criteria or scope");
-    return;
-  }
-  
-  // Submit to background agent
-  const job = await backgroundAgent.submit({
-    task: spec,
-    repo: issue.project.repo,
-    branch: \`ai/\${issue.identifier}\`,
-  });
-  
-  // Link job to issue
-  await issue.update({ 
-    status: "In Progress",
-    metadata: { agentJobId: job.id }
-  });
-}`}
-        />
+        <p className="text-muted-foreground">
+          When an issue is marked &quot;Ready for AI&quot;, a webhook can trigger an automated workflow: extract 
+          the task definition from the issue, validate it has required fields (acceptance criteria, scope), 
+          submit to a background agent with the repo and branch info, and link the job to the issue. This 
+          enables fully automated issue-to-PR workflows for well-scoped tasks.
+        </p>
+
+        {/* Example Chat Log */}
+        <div className="my-6 p-4 rounded-xl bg-muted/30 border border-border">
+          <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
+            <MessageSquare className="w-4 h-4 text-cyan-400" />
+            Example: Agent Chat Log
+          </h4>
+          <div className="space-y-3 font-mono text-xs">
+            <div className="flex gap-2">
+              <span className="text-emerald-400 shrink-0">[System]:</span>
+              <span className="text-muted-foreground">New task received: ENG-2847 &quot;Add CSV export to data table&quot;</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-cyan-400 shrink-0">[Agent]:</span>
+              <span className="text-muted-foreground">Analyzing task requirements... Found acceptance criteria.</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-cyan-400 shrink-0">[Agent]:</span>
+              <span className="text-muted-foreground">Creating branch: feat/eng-2847-csv-export</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-cyan-400 shrink-0">[Agent]:</span>
+              <span className="text-muted-foreground">Reading src/components/DataTable.tsx... Found export button location.</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-cyan-400 shrink-0">[Agent]:</span>
+              <span className="text-muted-foreground">Implementing CSV export function using existing data structure...</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-cyan-400 shrink-0">[Agent]:</span>
+              <span className="text-muted-foreground">Running tests... ✓ 12/12 passed</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-violet-400 shrink-0">[Agent]:</span>
+              <span className="text-muted-foreground">Creating PR #456 with summary: &quot;Adds CSV export functionality with proper escaping&quot;</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-emerald-400 shrink-0">[System]:</span>
+              <span className="text-muted-foreground">Task complete. PR linked to ENG-2847. Awaiting human review.</span>
+            </div>
+          </div>
+        </div>
 
         <Callout variant="warning" title="Scope Appropriately">
           <p className="m-0">
@@ -401,6 +444,60 @@ async function handleReadyIssue(issue: LinearIssue) {
             </CardContent>
           </Card>
         </div>
+
+        {/* Prototyping vs Curated Branches */}
+        <h3 id="branch-strategies" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Prototyping vs Curated Branches
+        </h3>
+
+        <p className="text-muted-foreground">
+          AI-generated code creates a new decision point: when should you <strong className="text-foreground">prototype 
+          freely</strong> vs maintain <strong className="text-foreground">curated, production-ready branches</strong>?
+        </p>
+
+        <div className="grid gap-4 sm:grid-cols-2 mt-6">
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-cyan-400 mb-2">Prototype Branches</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Fast exploration, AI generates freely, iterate quickly
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>AI creates multiple implementation options</li>
+                <li>Quick validation of feasibility</li>
+                <li>Throwaway code—don&apos;t merge directly</li>
+                <li>Use for: spikes, POCs, design exploration</li>
+              </ul>
+            </CardContent>
+          </Card>
+          
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-violet-400 mb-2">Curated Branches</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Careful iteration, human-guided, production-ready
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>AI follows established patterns</li>
+                <li>Each commit reviewed before merging</li>
+                <li>Maintains code quality standards</li>
+                <li>Use for: features, bug fixes, refactors</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Callout variant="tip" title="The Mini-Product Pattern">
+          <p className="mb-2">
+            Treat AI-generated prototype branches as <strong>&quot;mini-products&quot;</strong>: self-contained 
+            experiments you can demo, validate with users, then either promote to curated development 
+            or discard entirely.
+          </p>
+          <p className="m-0">
+            This prevents the common failure mode of merging half-baked AI code that becomes 
+            unmaintainable tech debt.
+          </p>
+        </Callout>
 
         <Callout variant="tip" title="Alternative Tools" className="mt-6">
           <p className="m-0">

@@ -1,29 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle, StepThroughPlayer } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper, StepThroughPlayer } from "@/app/components/visualizations/core";
 import type { Step } from "@/app/components/visualizations/core/StepThroughPlayer";
 import { 
   Wrench, 
-  ArrowRight, 
   Code, 
   CheckCircle,
   Zap,
+  User,
+  Brain,
+  Server,
+  MessageSquare,
 } from "lucide-react";
 
 // =============================================================================
 // Tool Invocation Visualizer
 // =============================================================================
-
-interface ToolCall {
-  id: string;
-  name: string;
-  arguments: Record<string, unknown>;
-  result?: string;
-  status: "pending" | "running" | "success" | "error";
-}
 
 const invocationSteps: Step[] = [
   { id: "prompt", label: "User sends prompt", description: "The user asks a question or makes a request" },
@@ -38,16 +33,57 @@ function ToolInvocationDemo() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const toolCall: ToolCall = {
-    id: "call_abc123",
-    name: "get_weather",
-    arguments: { location: "San Francisco", unit: "celsius" },
-    result: '{"temperature": 18, "condition": "sunny"}',
-    status: currentStep >= 4 ? "success" : currentStep >= 3 ? "running" : "pending",
+  // More realistic weather response
+  const weatherResult = JSON.stringify({
+    temperature: 18,
+    condition: "sunny",
+    humidity: 65,
+    wind_speed: "12 km/h",
+    feels_like: 17,
+    location: "San Francisco, CA"
+  }, null, 2);
+
+  // Panel content based on step
+  const getPanelContent = (step: number) => {
+    const chatMessages = [];
+    const llmThoughts = [];
+    const serverLogs = [];
+
+    if (step >= 0) {
+      chatMessages.push({ role: "user", content: "What's the weather in San Francisco?" });
+    }
+    if (step >= 1) {
+      llmThoughts.push("Analyzing user request...");
+      llmThoughts.push("User wants weather data for San Francisco");
+      llmThoughts.push("I need to use the get_weather tool");
+    }
+    if (step >= 2) {
+      llmThoughts.push("Generating tool call with location parameter");
+    }
+    if (step >= 3) {
+      serverLogs.push({ type: "request", message: "Received tool call: get_weather" });
+      serverLogs.push({ type: "info", message: "Fetching weather for San Francisco..." });
+    }
+    if (step >= 4) {
+      serverLogs.push({ type: "success", message: "Weather data retrieved successfully" });
+      serverLogs.push({ type: "response", message: "Returning result to LLM" });
+    }
+    if (step >= 5) {
+      llmThoughts.push("Processing weather data...");
+      llmThoughts.push("Formatting response for user");
+      chatMessages.push({ 
+        role: "assistant", 
+        content: "The weather in San Francisco is sunny with a temperature of 18°C. Humidity is at 65% with winds of 12 km/h. It feels like 17°C." 
+      });
+    }
+
+    return { chatMessages, llmThoughts, serverLogs };
   };
 
-  // Auto-advance when playing
-  useState(() => {
+  const { chatMessages, llmThoughts, serverLogs } = getPanelContent(currentStep);
+
+  // Auto-advance when playing - faster speed (800ms)
+  useEffect(() => {
     if (!isPlaying) return;
     const timer = setInterval(() => {
       setCurrentStep((prev) => {
@@ -57,109 +93,164 @@ function ToolInvocationDemo() {
         }
         return prev + 1;
       });
-    }, 1500);
+    }, 800);
     return () => clearInterval(timer);
-  });
-
-  const coreLogic = `// Tool Calling Flow
-
-// 1. Define your tool
-const weatherTool = {
-  type: "function",
-  function: {
-    name: "get_weather",
-    description: "Get current weather for a location",
-    parameters: {
-      type: "object",
-      properties: {
-        location: { type: "string", description: "City name" },
-        unit: { type: "string", enum: ["celsius", "fahrenheit"] }
-      },
-      required: ["location"]
-    }
-  }
-};
-
-// 2. Call the API with tools
-const response = await openai.chat.completions.create({
-  model: "gpt-4o",
-  messages: [{ role: "user", content: "What's the weather in SF?" }],
-  tools: [weatherTool],
-});
-
-// 3. Check if model wants to call a tool
-const message = response.choices[0].message;
-if (message.tool_calls) {
-  for (const toolCall of message.tool_calls) {
-    // 4. Execute your actual function
-    const args = JSON.parse(toolCall.function.arguments);
-    const result = await getWeather(args.location, args.unit);
-    
-    // 5. Send result back to the model
-    messages.push({ role: "tool", tool_call_id: toolCall.id, content: result });
-  }
-  
-  // 6. Get final response
-  const finalResponse = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages,
-  });
-}`;
+  }, [isPlaying]);
 
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Tool Calling Pattern"
-      description="The complete flow of how tool calls work"
-    >
-      <div className="space-y-6">
-        {/* Visual flow */}
-        <div className="relative">
-          <div className="flex items-center justify-between gap-2 overflow-x-auto pb-4">
+    <div className="space-y-6">
+      {/* 3-Panel Design */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        {/* Panel 1: Chat Interface */}
+        <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 overflow-hidden">
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-cyan-500/30 bg-cyan-500/10">
+            <MessageSquare className="w-4 h-4 text-cyan-400" />
+            <span className="text-xs font-medium text-cyan-400">Chat Interface</span>
+          </div>
+          <div className="p-3 space-y-3 min-h-[200px]">
+            {chatMessages.map((msg, i) => (
+              <div 
+                key={i}
+                className={cn(
+                  "flex gap-2 animate-in fade-in slide-in-from-bottom-2",
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                )}
+              >
+                {msg.role === "assistant" && (
+                  <div className="w-6 h-6 rounded-full bg-violet-500/20 flex items-center justify-center shrink-0">
+                    <Brain className="w-3 h-3 text-violet-400" />
+                  </div>
+                )}
+                <div className={cn(
+                  "px-3 py-2 rounded-lg text-xs max-w-[85%]",
+                  msg.role === "user" 
+                    ? "bg-cyan-500/20 text-cyan-300" 
+                    : "bg-violet-500/20 text-violet-300"
+                )}>
+                  {msg.content}
+                </div>
+                {msg.role === "user" && (
+                  <div className="w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center shrink-0">
+                    <User className="w-3 h-3 text-cyan-400" />
+                  </div>
+                )}
+              </div>
+            ))}
+            {chatMessages.length === 1 && currentStep > 0 && currentStep < 5 && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
+                <span>AI is thinking...</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Panel 2: LLM Internal Processing */}
+        <div className="rounded-xl border border-violet-500/30 bg-violet-500/5 overflow-hidden">
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-violet-500/30 bg-violet-500/10">
+            <Brain className="w-4 h-4 text-violet-400" />
+            <span className="text-xs font-medium text-violet-400">LLM Processing</span>
+          </div>
+          <div className="p-3 space-y-2 min-h-[200px] font-mono text-xs">
+            {llmThoughts.map((thought, i) => (
+              <div 
+                key={i}
+                className="flex items-start gap-2 text-violet-300 animate-in fade-in slide-in-from-left-2"
+              >
+                <Zap className="w-3 h-3 text-violet-400 mt-0.5 shrink-0" />
+                <span>{thought}</span>
+              </div>
+            ))}
+            {currentStep >= 2 && currentStep < 5 && (
+              <div className="mt-3 p-2 rounded-lg bg-violet-500/10 border border-violet-500/20">
+                <div className="text-[10px] text-violet-400 mb-1">Tool Call Generated:</div>
+                <pre className="text-[10px] text-muted-foreground">
+{`{
+  "name": "get_weather",
+  "arguments": {
+    "location": "San Francisco",
+    "unit": "celsius"
+  }
+}`}
+                </pre>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Panel 3: Tool Server */}
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 overflow-hidden">
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-emerald-500/30 bg-emerald-500/10">
+            <Server className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-medium text-emerald-400">Tool Server</span>
+          </div>
+          <div className="p-3 space-y-2 min-h-[200px] font-mono text-xs">
+            {serverLogs.length === 0 && currentStep < 3 && (
+              <div className="text-muted-foreground/50">Waiting for tool call...</div>
+            )}
+            {serverLogs.map((log, i) => (
+              <div 
+                key={i}
+                className={cn(
+                  "flex items-start gap-2 animate-in fade-in slide-in-from-right-2",
+                  log.type === "success" ? "text-emerald-300" :
+                  log.type === "request" ? "text-amber-300" :
+                  log.type === "response" ? "text-cyan-300" :
+                  "text-muted-foreground"
+                )}
+              >
+                <span className={cn(
+                  "text-[10px] px-1 rounded shrink-0",
+                  log.type === "success" ? "bg-emerald-500/20" :
+                  log.type === "request" ? "bg-amber-500/20" :
+                  log.type === "response" ? "bg-cyan-500/20" :
+                  "bg-muted/50"
+                )}>
+                  {log.type.toUpperCase()}
+                </span>
+                <span>{log.message}</span>
+              </div>
+            ))}
+            {currentStep >= 4 && (
+              <div className="mt-3 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                <div className="text-[10px] text-emerald-400 mb-1">Response Data:</div>
+                <pre className="text-[10px] text-muted-foreground overflow-x-auto">
+{weatherResult}
+                </pre>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Step indicator */}
+      <div className="flex items-center justify-center gap-2 overflow-x-auto pb-2">
             {invocationSteps.map((step, index) => {
               const isActive = index === currentStep;
               const isPast = index < currentStep;
 
               return (
-                <div key={step.id} className="flex items-center">
                   <button
+              key={step.id}
                     onClick={() => setCurrentStep(index)}
                     className={cn(
-                      "flex flex-col items-center gap-2 p-3 rounded-xl border transition-all min-w-[80px]",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all text-xs",
                       isActive
-                        ? "bg-cyan-500/20 border-cyan-500/40 ring-2 ring-cyan-500/50 scale-105"
+                  ? "bg-cyan-500/20 border-cyan-500/40 text-cyan-400"
                         : isPast
-                        ? "bg-emerald-500/10 border-emerald-500/30"
-                        : "bg-muted/30 border-border/50"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
-                      isActive
-                        ? "bg-cyan-500 text-white"
-                        : isPast
-                        ? "bg-emerald-500 text-white"
-                        : "bg-muted text-muted-foreground"
-                    )}>
-                      {isPast ? <CheckCircle className="w-4 h-4" /> : index + 1}
-                    </div>
-                    <span className={cn(
-                      "text-xs text-center",
-                      isActive ? "text-cyan-400" : isPast ? "text-emerald-400" : "text-muted-foreground"
-                    )}>
-                      {step.label.split(" ").slice(0, 2).join(" ")}
-                    </span>
+                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                  : "bg-muted/30 border-border/50 text-muted-foreground"
+              )}
+            >
+              {isPast ? <CheckCircle className="w-3 h-3" /> : <span className="font-mono">{index + 1}</span>}
+              <span className="hidden sm:inline">{step.label.split(" ").slice(0, 2).join(" ")}</span>
                   </button>
-                  {index < invocationSteps.length - 1 && (
-                    <ArrowRight className={cn(
-                      "w-4 h-4 mx-1 shrink-0",
-                      index < currentStep ? "text-emerald-500" : "text-muted-foreground/30"
-                    )} />
-                  )}
-                </div>
               );
             })}
-          </div>
         </div>
 
         {/* Current step detail */}
@@ -173,45 +264,6 @@ if (message.tool_calls) {
           <p className="text-sm text-muted-foreground">
             {invocationSteps[currentStep].description}
           </p>
-        </div>
-
-        {/* Tool call visualization */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          {/* Tool Call */}
-          <div className={cn(
-            "p-4 rounded-xl border transition-all",
-            currentStep >= 2
-              ? "bg-violet-500/10 border-violet-500/30"
-              : "bg-muted/30 border-border/50 opacity-50"
-          )}>
-            <div className="flex items-center gap-2 mb-3">
-              <Wrench className="w-4 h-4 text-violet-400" />
-              <span className="text-sm font-medium text-violet-400">Tool Call</span>
-            </div>
-            <pre className="text-xs font-mono text-muted-foreground">
-{`{
-  "id": "${toolCall.id}",
-  "name": "${toolCall.name}",
-  "arguments": ${JSON.stringify(toolCall.arguments, null, 2).split("\n").map((l, i) => i === 0 ? l : "    " + l).join("\n")}
-}`}
-            </pre>
-          </div>
-
-          {/* Tool Result */}
-          <div className={cn(
-            "p-4 rounded-xl border transition-all",
-            currentStep >= 4
-              ? "bg-emerald-500/10 border-emerald-500/30"
-              : "bg-muted/30 border-border/50 opacity-50"
-          )}>
-            <div className="flex items-center gap-2 mb-3">
-              <CheckCircle className="w-4 h-4 text-emerald-400" />
-              <span className="text-sm font-medium text-emerald-400">Tool Result</span>
-            </div>
-            <pre className="text-xs font-mono text-muted-foreground">
-{currentStep >= 4 ? toolCall.result : "// Waiting for execution..."}
-            </pre>
-          </div>
         </div>
 
         {/* Controls */}
@@ -228,7 +280,6 @@ if (message.tool_calls) {
           colorTheme="cyan"
         />
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -304,48 +355,11 @@ export function ToolsSection() {
           Tool Definitions
         </h3>
 
-        <CodeBlock
-          language="typescript"
-          filename="tool-definition.ts"
-          showLineNumbers
-          code={`// Tool definition following OpenAI's format
-const tools = [
-  {
-    type: "function",
-    function: {
-      name: "search_documents",
-      description: "Search the knowledge base for relevant documents",
-      parameters: {
-        type: "object",
-        properties: {
-          query: {
-            type: "string",
-            description: "The search query"
-          },
-          limit: {
-            type: "number",
-            description: "Maximum results to return",
-            default: 5
-          },
-          filters: {
-            type: "object",
-            properties: {
-              category: { type: "string" },
-              dateRange: { type: "string" }
-            }
-          }
-        },
-        required: ["query"]
-      }
-    }
-  }
-];
-
-// The model sees this schema and knows:
-// 1. When this tool is useful (from description)
-// 2. What arguments it needs (from parameters)
-// 3. Which arguments are required vs optional`}
-        />
+        <p className="text-muted-foreground">
+          A tool definition includes a name, description, and parameter schema. The model uses the 
+          description to decide when to use the tool, and the parameter schema to understand what 
+          arguments are needed and which are required vs optional.
+        </p>
 
         {/* How Invocation Works */}
         <h3 id="tool-invocation" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
@@ -373,49 +387,9 @@ const tools = [
 
         <p className="text-muted-foreground">
           Tools can fail. Your code must handle errors gracefully and communicate them back 
-          to the model:
+          to the model. Always return errors as tool results, not exceptions—the model can 
+          often recover or try a different approach.
         </p>
-
-        <CodeBlock
-          language="typescript"
-          filename="tool-error-handling.ts"
-          code={`async function executeToolCall(toolCall: ToolCall): Promise<ToolResult> {
-  try {
-    const args = JSON.parse(toolCall.function.arguments);
-    
-    switch (toolCall.function.name) {
-      case "get_weather":
-        const weather = await weatherAPI.get(args.location);
-        return { 
-          success: true, 
-          result: JSON.stringify(weather) 
-        };
-        
-      case "search_documents":
-        const docs = await searchIndex.query(args.query);
-        return { 
-          success: true, 
-          result: JSON.stringify(docs) 
-        };
-        
-      default:
-        return { 
-          success: false, 
-          error: \`Unknown tool: \${toolCall.function.name}\` 
-        };
-    }
-  } catch (error) {
-    // Return error to the model so it can handle gracefully
-    return {
-      success: false,
-      error: \`Tool execution failed: \${error.message}\`
-    };
-  }
-}
-
-// Important: Return errors as tool results, not exceptions
-// The model can often recover or try a different approach`}
-        />
 
         <Callout variant="important">
           <p>
@@ -445,6 +419,13 @@ const tools = [
                 One tool, one job. <code className="text-xs bg-muted px-1 rounded">search_and_update_and_notify</code> is 
                 worse than three separate tools. Composability beats complexity.
               </p>
+              <div className="mt-3 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <p className="text-xs text-amber-400 m-0">
+                  <strong>Exception:</strong> Consolidate tools only if they&apos;re <em>always</em> used 
+                  together in the same order. If a tool might be used independently (search OR update OR notify), 
+                  keep them separate. The model should be able to call just the step it needs.
+                </p>
+              </div>
             </CardContent>
           </Card>
 

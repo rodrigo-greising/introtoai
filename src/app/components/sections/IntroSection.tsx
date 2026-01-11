@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import {
   BookOpen,
@@ -17,6 +17,8 @@ import {
   Settings,
   ChevronRight,
   Sparkles,
+  Dices,
+  ArrowRight,
 } from "lucide-react";
 
 // =============================================================================
@@ -374,6 +376,28 @@ export function IntroSection() {
           </div>
         </div>
 
+        {/* Capstone Project Link */}
+        <div className="mt-10 p-4 rounded-xl bg-gradient-to-r from-violet-500/10 via-purple-500/10 to-pink-500/10 border border-violet-500/30">
+          <div className="flex items-start gap-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-violet-500/20 shrink-0">
+              <Dices className="w-6 h-6 text-violet-400" />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-semibold text-foreground mb-1">Capstone Project: Virtual Tabletop Assistant</h4>
+              <p className="text-sm text-muted-foreground mb-3">
+                See all guide concepts combined in a comprehensive architectural example: a VTT assistant 
+                that works with any rulebook system, featuring RAG, orchestration, dynamic schemas, and cost optimization.
+              </p>
+              <a
+                href="#capstone"
+                className="inline-flex items-center gap-2 text-sm font-medium text-violet-400 hover:text-violet-300 transition-colors"
+              >
+                Jump to Capstone <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+        </div>
+
         {/* The Core Insight */}
         <h3 className="text-xl font-semibold mt-10 mb-4">The Core Insight</h3>
 
@@ -382,16 +406,11 @@ export function IntroSection() {
           An LLM is a function that transforms context into output:
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="mental-model.ts"
-          code={`// The fundamental equation
-type LLM = (context: Context) => Promise<Output>;
-
-// Context is everything: system prompt, user message, 
-// retrieved documents, code, conversation history...
-// Output quality is directly proportional to context quality.`}
-        />
+        <p className="text-muted-foreground">
+          The fundamental equation: an LLM is a function that transforms context into output. Context is 
+          everything: system prompt, user message, retrieved documents, code, conversation history. 
+          Output quality is directly proportional to context quality.
+        </p>
 
         <Callout variant="important">
           <p>
@@ -414,16 +433,6 @@ type LLM = (context: Context) => Promise<Output>;
             </CardContent>
           </Card>
 
-          <Card variant="highlight">
-            <CardContent>
-              <h4 className="font-medium text-foreground mb-2">👁️ View Code</h4>
-              <p className="text-sm text-muted-foreground m-0">
-                Interactive elements have a &quot;View Code&quot; button showing the core logic.
-                This isn&apos;t the full implementation—it&apos;s simplified, educational code
-                that captures the essential algorithm.
-              </p>
-            </CardContent>
-          </Card>
 
           <Card variant="highlight">
             <CardContent>

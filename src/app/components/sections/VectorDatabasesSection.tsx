@@ -2,8 +2,8 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   Database, 
   Zap, 
@@ -113,46 +113,8 @@ function ANNSearchVisualizer() {
     return colors[clusterId] || "gray";
   };
 
-  const coreLogic = `// Approximate Nearest Neighbor (ANN) with IVF
-// Instead of checking ALL vectors, use inverted file index
-
-interface IVFIndex {
-  centroids: Vector[];     // Cluster centers
-  invertedLists: Map<number, Vector[]>; // cluster_id → vectors
-}
-
-async function annSearch(query: Vector, k: number): Promise<Result[]> {
-  // Phase 1: COARSE SEARCH - Find closest cluster(s)
-  // O(nprobe) instead of O(n) - typically nprobe << n
-  const closestClusters = findClosestCentroids(query, index.centroids, nprobe);
-  
-  // Phase 2: FINE SEARCH - Only search within selected clusters
-  // Check ~1-5% of total vectors instead of 100%
-  const candidates: ScoredVector[] = [];
-  
-  for (const clusterId of closestClusters) {
-    const clusterVectors = index.invertedLists.get(clusterId);
-    for (const vec of clusterVectors) {
-      const distance = cosineSimilarity(query, vec);
-      candidates.push({ vec, distance });
-    }
-  }
-  
-  // Return top-k from candidates (not all vectors!)
-  return candidates.sort((a, b) => b.distance - a.distance).slice(0, k);
-}
-
-// Trade-off: Faster search, but might miss some neighbors
-// If the TRUE nearest neighbor is in a different cluster,
-// we won't find it. This is the "approximate" part of ANN.`;
-
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Approximate Nearest Neighbor Search"
-      description="How vector databases achieve fast similarity search"
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         {/* Controls */}
         <div className="flex items-center gap-3">
           <button
@@ -321,7 +283,6 @@ async function annSearch(query: Vector, k: number): Promise<Result[]> {
           </p>
         </div>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -493,8 +454,56 @@ export function VectorDatabasesSection() {
 
         {/* Popular Options */}
         <h3 id="database-options" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
-          Popular Vector Database Options
+          Recommended: pgvector
         </h3>
+
+        <Callout variant="tip" title="Start with pgvector">
+          <p className="m-0">
+            For most projects, <strong>pgvector</strong> (a PostgreSQL extension) is the recommended starting point. 
+            It lets you combine vector similarity search with full SQL—joining embeddings with relational data, 
+            using complex filters, and leveraging PostgreSQL&apos;s ecosystem of tools and hosting options.
+          </p>
+        </Callout>
+
+        <p className="text-muted-foreground mt-4">
+          The power of pgvector comes from <strong className="text-foreground">mixed queries</strong>—combining 
+          semantic search with traditional SQL in a single query:
+        </p>
+
+        <div className="my-6 p-4 rounded-xl bg-card border border-border font-mono text-sm overflow-x-auto">
+          <pre className="text-muted-foreground whitespace-pre-wrap">{`-- Find similar documents with relational constraints
+SELECT 
+  docs.id,
+  docs.title,
+  docs.content,
+  docs.embedding <=> query_embedding AS distance
+FROM documents docs
+JOIN users u ON docs.user_id = u.id
+WHERE u.organization_id = $1           -- Relational filter
+  AND docs.created_at > NOW() - INTERVAL '30 days'
+  AND docs.status = 'published'
+ORDER BY docs.embedding <=> query_embedding  -- Vector similarity
+LIMIT 10;
+
+-- Hybrid search: keyword + semantic
+SELECT docs.*
+FROM documents docs
+WHERE to_tsvector('english', docs.content) @@ plainto_tsquery('machine learning')
+ORDER BY docs.embedding <=> $1
+LIMIT 10;`}</pre>
+        </div>
+
+        <p className="text-muted-foreground">
+          This is powerful because you&apos;re not managing two systems—your relational data and vectors live 
+          together, can be queried together, and maintain referential integrity.
+        </p>
+
+        <h4 className="text-lg font-medium mt-8 mb-4">Other Vector Database Options</h4>
+
+        <p className="text-muted-foreground">
+          If you have specific requirements that pgvector doesn&apos;t meet (billion-scale vectors, managed hosting, 
+          specialized features), consider dedicated vector databases:
+        </p>
 
         <div className="overflow-x-auto mt-6">
           <table className="w-full text-sm border-collapse">
@@ -503,45 +512,38 @@ export function VectorDatabasesSection() {
                 <th className="text-left p-3 font-medium text-foreground">Database</th>
                 <th className="text-left p-3 font-medium text-foreground">Type</th>
                 <th className="text-left p-3 font-medium text-foreground">Best For</th>
-                <th className="text-left p-3 font-medium text-foreground">Notable Features</th>
               </tr>
             </thead>
             <tbody className="text-muted-foreground">
-              <tr className="border-b border-border/50">
-                <td className="p-3 font-medium text-[var(--highlight)]">Pinecone</td>
-                <td className="p-3">Managed SaaS</td>
-                <td className="p-3">Fast setup, production-ready</td>
-                <td className="p-3">Auto-scaling, metadata filtering, namespaces</td>
+              <tr className="border-b border-border/50 bg-emerald-500/5">
+                <td className="p-3 font-medium text-emerald-400">pgvector ⭐</td>
+                <td className="p-3">PostgreSQL extension</td>
+                <td className="p-3">Most projects—combined SQL + vector queries</td>
               </tr>
               <tr className="border-b border-border/50">
-                <td className="p-3 font-medium text-violet-400">Weaviate</td>
+                <td className="p-3 font-medium text-violet-400">Qdrant</td>
+                <td className="p-3">Open source / Cloud</td>
+                <td className="p-3">High-volume, complex filtering</td>
+              </tr>
+              <tr className="border-b border-border/50">
+                <td className="p-3 font-medium text-cyan-400">Weaviate</td>
                 <td className="p-3">Open source / Cloud</td>
                 <td className="p-3">GraphQL API, hybrid search</td>
-                <td className="p-3">Built-in vectorizers, multimodal support</td>
               </tr>
               <tr className="border-b border-border/50">
-                <td className="p-3 font-medium text-cyan-400">pgvector</td>
-                <td className="p-3">PostgreSQL extension</td>
-                <td className="p-3">Existing Postgres users</td>
-                <td className="p-3">Familiar SQL, joins with relational data</td>
-              </tr>
-              <tr className="border-b border-border/50">
-                <td className="p-3 font-medium text-emerald-400">Chroma</td>
+                <td className="p-3 font-medium text-amber-400">Chroma</td>
                 <td className="p-3">Open source</td>
-                <td className="p-3">Local development, prototyping</td>
-                <td className="p-3">Simple API, embedded mode, LangChain integration</td>
-              </tr>
-              <tr className="border-b border-border/50">
-                <td className="p-3 font-medium text-amber-400">Qdrant</td>
-                <td className="p-3">Open source / Cloud</td>
-                <td className="p-3">High performance, filtering</td>
-                <td className="p-3">Rich filtering, payload storage, Rust performance</td>
+                <td className="p-3">Local dev, prototyping</td>
               </tr>
               <tr className="border-b border-border/50">
                 <td className="p-3 font-medium text-rose-400">Milvus</td>
                 <td className="p-3">Open source</td>
-                <td className="p-3">Large scale, GPU acceleration</td>
-                <td className="p-3">Billion-scale vectors, multiple index types</td>
+                <td className="p-3">Billion+ vectors, GPU acceleration</td>
+              </tr>
+              <tr className="border-b border-border/50">
+                <td className="p-3 font-medium text-muted-foreground">Pinecone, etc.</td>
+                <td className="p-3">Managed SaaS</td>
+                <td className="p-3">Zero-ops, quick start</td>
               </tr>
             </tbody>
           </table>
@@ -549,63 +551,45 @@ export function VectorDatabasesSection() {
 
         {/* Usage Example */}
         <h3 id="usage-example" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
-          Example: Pinecone Setup
+          Example: pgvector Setup
         </h3>
 
-        <CodeBlock
-          language="typescript"
-          filename="vector-db-example.ts"
-          code={`import { Pinecone } from '@pinecone-database/pinecone';
-import { OpenAI } from 'openai';
+        <div className="my-6 p-4 rounded-xl bg-card border border-border font-mono text-sm overflow-x-auto">
+          <pre className="text-muted-foreground whitespace-pre-wrap">{`-- Enable the extension
+CREATE EXTENSION IF NOT EXISTS vector;
 
-const pinecone = new Pinecone({ apiKey: process.env.PINECONE_API_KEY! });
-const openai = new OpenAI();
-const index = pinecone.Index('my-rag-index');
+-- Create a table with vector column
+CREATE TABLE documents (
+  id SERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  user_id INTEGER REFERENCES users(id),
+  embedding VECTOR(1536),  -- Dimension matches your model
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 
-// Ingest documents
-async function ingestDocuments(documents: Document[]) {
-  const vectors = await Promise.all(
-    documents.map(async (doc) => ({
-      id: doc.id,
-      values: await embed(doc.content),  // 1536-dim vector
-      metadata: { 
-        source: doc.source,
-        title: doc.title,
-        chunk_index: doc.chunkIndex
-      }
-    }))
-  );
-  
-  await index.upsert(vectors);  // Batch upsert for efficiency
-}
+-- Create an index for fast similarity search
+CREATE INDEX ON documents 
+USING ivfflat (embedding vector_cosine_ops) 
+WITH (lists = 100);  -- Tune based on dataset size
 
-// Query
-async function query(question: string, topK = 5) {
-  const queryVector = await embed(question);
-  
-  const results = await index.query({
-    vector: queryVector,
-    topK,
-    includeMetadata: true,
-    filter: { source: { $eq: 'company-docs' } }  // Metadata filtering
-  });
-  
-  return results.matches.map(m => ({
-    id: m.id,
-    score: m.score,
-    metadata: m.metadata
-  }));
-}
+-- Insert with embedding
+INSERT INTO documents (title, content, user_id, embedding)
+VALUES ('My Doc', 'Content here...', 1, $1);
 
-// Embed helper
-async function embed(text: string): Promise<number[]> {
-  const response = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
-    input: text
-  });
-  return response.data[0].embedding;
-}`}
-        />
+-- Query similar documents
+SELECT id, title, 1 - (embedding <=> $1) AS similarity
+FROM documents
+WHERE user_id = $2
+ORDER BY embedding <=> $1
+LIMIT 5;`}</pre>
+        </div>
+
+        <p className="text-muted-foreground">
+          The typical workflow involves embedding documents during ingestion, storing them with 
+          metadata, and then querying with embedded questions to find the most similar content.
+          With pgvector, you get the full power of SQL for filtering, joining, and aggregating.
+        </p>
 
         {/* Metadata Filtering */}
         <h3 id="metadata-filtering" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
@@ -626,15 +610,9 @@ async function embed(text: string): Promise<number[]> {
               </h4>
               <p className="text-sm text-muted-foreground m-0">
                 Filter first, then search within filtered set. Fast when filter is very selective.
-                Most databases optimize this path.
+                Most databases optimize this path. Use metadata filters like user_id, date ranges, 
+                or source attributes to narrow the search space before similarity matching.
               </p>
-              <CodeBlock
-                language="typescript"
-                code={`filter: { 
-  user_id: "user_123",
-  date: { $gte: "2024-01-01" }
-}`}
-              />
             </CardContent>
           </Card>
           <Card variant="default">
@@ -645,15 +623,9 @@ async function embed(text: string): Promise<number[]> {
               </h4>
               <p className="text-sm text-muted-foreground m-0">
                 Search all vectors, then filter results. Better when filter isn&apos;t very selective.
-                May return fewer results than requested.
+                May return fewer results than requested. Retrieve more candidates (e.g., topK: 20) 
+                and then filter in application code to ensure you get enough results.
               </p>
-              <CodeBlock
-                language="typescript"
-                code={`// Retrieve more, filter after
-topK: 20,
-// Then filter in application code
-.filter(r => r.metadata.public)`}
-              />
             </CardContent>
           </Card>
         </div>

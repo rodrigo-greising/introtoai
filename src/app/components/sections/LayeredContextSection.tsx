@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   GripVertical, 
   Trash2, 
@@ -14,6 +14,7 @@ import {
   User,
   ChevronDown,
   ChevronUp,
+  Clock,
 } from "lucide-react";
 
 // =============================================================================
@@ -74,6 +75,16 @@ const defaultLayers: ContextLayer[] = [
     color: "emerald",
   },
   {
+    id: "realtime",
+    name: "Real-time Data",
+    description: "Current time, live state, session variables",
+    content: `Current time: ${new Date().toISOString()}, user_timezone: "America/New_York", session_id: "abc123"`,
+    tokens: 50,
+    volatility: "variable",
+    icon: Clock,
+    color: "pink",
+  },
+  {
     id: "history",
     name: "Conversation History",
     description: "Recent messages (summarized if needed)",
@@ -100,13 +111,13 @@ function LayerBuilder() {
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [expandedLayer, setExpandedLayer] = useState<string | null>(null);
 
-  const volatilityColors = {
+  const volatilityColors: Record<ContextLayer["volatility"], { bg: string; border: string; text: string; label: string }> = {
     static: { bg: "bg-cyan-500/20", border: "border-cyan-500/40", text: "text-cyan-400", label: "Static" },
     "semi-static": { bg: "bg-amber-500/20", border: "border-amber-500/40", text: "text-amber-400", label: "Semi-static" },
     dynamic: { bg: "bg-emerald-500/20", border: "border-emerald-500/40", text: "text-emerald-400", label: "Dynamic" },
     variable: { bg: "bg-rose-500/20", border: "border-rose-500/40", text: "text-rose-400", label: "Variable" },
   };
-
+  
   const totalTokens = layers.reduce((sum, l) => sum + l.tokens, 0);
   
   // Calculate cache efficiency
@@ -173,43 +184,8 @@ function LayerBuilder() {
     setExpandedLayer(null);
   };
 
-  const coreLogic = `// Layered Context Architecture
-
-interface ContextLayer {
-  name: string;
-  content: string;
-  volatility: 'static' | 'semi-static' | 'dynamic' | 'variable';
-}
-
-function buildContext(layers: ContextLayer[]): string {
-  // Key insight: Order by volatility for cache efficiency
-  // Static → Semi-static → Dynamic → Variable
-  
-  const sorted = layers.sort((a, b) => {
-    const order = { static: 0, 'semi-static': 1, dynamic: 2, variable: 3 };
-    return order[a.volatility] - order[b.volatility];
-  });
-  
-  // The prefix (static + semi-static) gets cached
-  // Only variable content at the end needs fresh processing
-  return sorted.map(layer => layer.content).join('\\n\\n');
-}
-
-// Example optimal ordering:
-// 1. System prompt (static) - CACHED
-// 2. Tool schemas (static) - CACHED  
-// 3. Examples (semi-static) - CACHED
-// 4. Retrieved docs (dynamic) - per-query
-// 5. Conversation (dynamic) - grows
-// 6. User message (variable) - always fresh`;
-
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Context Layer Ordering"
-      description="How to order context layers for optimal caching"
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         {/* Stats bar */}
         <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border">
           <div className="flex items-center gap-4 text-sm">
@@ -362,7 +338,6 @@ function buildContext(layers: ContextLayer[]): string {
           💡 Drag layers to reorder them. Static content should come before dynamic content for optimal caching.
         </p>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -521,32 +496,12 @@ export function LayeredContextSection() {
           <strong className="text-foreground"> identity, constraints, and core behaviors</strong>.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="system-prompt.ts"
-          code={`// A well-structured system prompt
-const systemPrompt = \`
-You are an expert TypeScript developer working on a Next.js application.
-
-Core behaviors:
-- Always use strict TypeScript with explicit types
-- Follow functional programming patterns where practical
-- Explain your reasoning before providing code
-
-Constraints:
-- Never modify files outside the src/ directory
-- Always handle errors explicitly
-- Use the project's existing patterns and conventions
-
-Output format:
-- Start with a brief analysis of the task
-- Provide complete, working code (no placeholders)
-- End with testing suggestions
-\`;
-
-// This prompt is STATIC - it never changes between requests
-// Perfect for the cacheable prefix`}
-        />
+        <p className="text-muted-foreground">
+          A well-structured system prompt sets the model&apos;s identity, constraints, and core behaviors. 
+          It should be stable and complete—if you find yourself constantly tweaking it, extract the 
+          variable parts into later layers or session-specific context. The system prompt is static 
+          and never changes between requests, making it perfect for the cacheable prefix.
+        </p>
 
         <Callout variant="important">
           <p>
@@ -599,42 +554,16 @@ Output format:
 
         <p className="text-muted-foreground">
           The golden rule: <strong className="text-foreground">static content first, variable content last</strong>. 
-          This ensures maximum cache reuse across requests.
+          This ensures maximum cache reuse across requests. Build your context with: system prompt (static), 
+          tool schemas (static), examples (semi-static), retrieved docs (dynamic), conversation (dynamic), 
+          and user message (variable).
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="optimal-context.ts"
-          code={`// Optimal context structure for caching
-async function buildContext(request: Request) {
-  return {
-    // Layer 1: Static (always cached)
-    system: SYSTEM_PROMPT,
-    
-    // Layer 2: Static (always cached)  
-    tools: TOOL_SCHEMAS,
-    
-    // Layer 3: Semi-static (usually cached)
-    examples: STANDARD_EXAMPLES,
-    
-    // Layer 4: Dynamic (cached within session)
-    history: compressIfNeeded(request.session.messages),
-    retrieved: await retrieveRelevant(request.query),
-    
-    // Layer 5: Variable (always fresh)
-    query: request.message,
-  };
-}
-
-// The provider sees:
-// [SYSTEM + TOOLS + EXAMPLES] ← CACHED (90% off)
-// [HISTORY + RETRIEVED + QUERY] ← Fresh (full price)
-
-// With a 2,500 token static prefix and 500 token dynamic suffix:
-// Without cache: 3,000 tokens at full price
-// With cache: 250 tokens (cached) + 500 tokens (fresh)
-// = 83% cost reduction!`}
-        />
+        <p className="text-muted-foreground">
+          With a 2,500 token static prefix and 500 token dynamic suffix, you can achieve significant cost 
+          reduction. Without cache: 3,000 tokens at full price. With cache: 250 tokens (cached) + 500 tokens 
+          (fresh) = 83% cost reduction!
+        </p>
 
         <Callout variant="tip" title="Attention Benefits Too">
           <p>

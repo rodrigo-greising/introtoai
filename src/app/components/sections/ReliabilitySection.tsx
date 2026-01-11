@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import {
   RefreshCw,
   CheckCircle,
@@ -300,40 +300,12 @@ export function ReliabilitySection() {
           (invalid API key, malformed request) should not be retried.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="retry-with-backoff.ts"
-          code={`async function withRetry<T>(
-  fn: () => Promise<T>,
-  maxAttempts: number = 3
-): Promise<T> {
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      return await fn();
-    } catch (error) {
-      // Don't retry non-retryable errors
-      if (!isRetryable(error)) throw error;
-      
-      if (attempt === maxAttempts) throw error;
-      
-      // Exponential backoff with jitter
-      const delay = Math.min(1000 * Math.pow(2, attempt), 30000);
-      const jitter = delay * 0.1 * Math.random();
-      await sleep(delay + jitter);
-    }
-  }
-  throw new Error("Unreachable");
-}
-
-function isRetryable(error: any): boolean {
-  return (
-    error.code === "RATE_LIMITED" ||
-    error.code === "TIMEOUT" ||
-    error.code === "SERVER_ERROR" ||
-    error.status >= 500
-  );
-}`}
-        />
+        <p className="text-muted-foreground">
+          Implement retry logic with exponential backoff and jitter. Don&apos;t retry non-retryable errors 
+          (like invalid API keys or malformed requests). Use exponential backoff with jitter to avoid 
+          thundering herd problems. Only retry errors that indicate transient failures: rate limits, 
+          timeouts, server errors, or 5xx status codes.
+        </p>
 
         {/* Interactive Retry Simulator */}
         <h3 id="retry-simulator" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
@@ -416,6 +388,81 @@ function isRetryable(error: any): boolean {
             </ul>
           </CardContent>
         </Card>
+
+        {/* Observability */}
+        <h3 id="observability" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
+          Observability for AI Systems
+        </h3>
+
+        <p className="text-muted-foreground">
+          AI systems require <strong className="text-foreground">specialized observability</strong> beyond 
+          traditional monitoring. You need to track not just latency and errors, but prompt quality, 
+          output accuracy, token costs, and conversation flows.
+        </p>
+
+        <div className="space-y-4 mt-6">
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-cyan-400 mb-2">
+                <a 
+                  href="https://langfuse.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  Langfuse
+                </a>
+              </h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Open-source LLM engineering platform. Key features:
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Trace complex chains and agents across multiple LLM calls</li>
+                <li>Track token costs per user, feature, or prompt version</li>
+                <li>Collect user feedback for quality scoring</li>
+                <li>Dataset management for evaluations and fine-tuning</li>
+                <li>Self-hostable or cloud—your data stays private</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-violet-400 mb-2">What to Track</h4>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li><strong className="text-foreground">Token usage:</strong> Input, output, and cached tokens per request</li>
+                <li><strong className="text-foreground">Latency breakdown:</strong> Time to first token, total duration, queue time</li>
+                <li><strong className="text-foreground">Success rate:</strong> By model, prompt version, and user segment</li>
+                <li><strong className="text-foreground">User feedback:</strong> Thumbs up/down, edits, regenerations</li>
+                <li><strong className="text-foreground">Prompt versions:</strong> A/B test prompts and track performance</li>
+                <li><strong className="text-foreground">Trace spans:</strong> Full execution path through agent loops</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-amber-400 mb-2">Data Labeling with Observability</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Production data is the best source for improving your system:
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Flag low-confidence or user-corrected outputs for review</li>
+                <li>Build labeled datasets from real interactions</li>
+                <li>Use labeled data for evaluations, fine-tuning, or RAG</li>
+                <li>Identify patterns in failures for targeted improvements</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Callout variant="tip" title="Start Simple, Then Specialize">
+          <p className="m-0">
+            Begin with basic logging (prompts, outputs, latency, costs). Add tracing as you build 
+            complex flows. Introduce user feedback collection early—it&apos;s the most valuable signal 
+            for quality. Tools like Langfuse, LangSmith, or Helicone make this straightforward.
+          </p>
+        </Callout>
 
         <Callout variant="tip" title="Multi-Provider Strategy">
           <p className="m-0">

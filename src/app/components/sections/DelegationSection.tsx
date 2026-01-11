@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   Users, 
   ArrowRight,
@@ -88,61 +88,8 @@ function DelegationVisualizer() {
     }
   };
 
-  const coreLogic = `// Delegation: Orchestrator + Specialized Subagents
-interface Subagent {
-  name: string;
-  systemPrompt: string;
-  tools: Tool[];
-  execute: (task: string, context?: Context) => Promise<Result>;
-}
-
-class Orchestrator {
-  private subagents: Map<string, Subagent>;
-  
-  async delegate(task: string, agentName: string, context?: Context) {
-    const agent = this.subagents.get(agentName);
-    
-    // Each subagent has its OWN context window
-    // This is key: main agent context doesn't bloat
-    return await agent.execute(task, context);
-  }
-  
-  async orchestrate(userRequest: string) {
-    // Step 1: Plan the work
-    const plan = await this.planDelegation(userRequest);
-    
-    // Step 2: Execute each delegation
-    const results: Record<string, Result> = {};
-    
-    for (const step of plan.steps) {
-      // Pass only RELEVANT context to subagent
-      const relevantContext = this.extractRelevantContext(step, results);
-      
-      results[step.id] = await this.delegate(
-        step.task,
-        step.agent,
-        relevantContext
-      );
-    }
-    
-    // Step 3: Synthesize results
-    return await this.synthesize(results, userRequest);
-  }
-}
-
-// Key benefits:
-// 1. Each subagent has focused context (not bloated)
-// 2. Subagents can have specialized tools
-// 3. Main agent stays high-level, subagents do details
-// 4. Easier to test and improve individual agents`;
-
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Multi-Agent Delegation"
-      description="How orchestrators coordinate specialized subagents"
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         {/* Step indicator */}
         <div className="flex items-center gap-2">
           {steps.map((_, i) => (
@@ -242,7 +189,6 @@ class Orchestrator {
           </button>
         </div>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -379,63 +325,81 @@ export function DelegationSection() {
           </Card>
         </div>
 
+        {/* Advanced Multi-Agent Patterns */}
+        <h3 id="advanced-patterns" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Advanced Multi-Agent Patterns
+        </h3>
+
+        <p className="text-muted-foreground">
+          Beyond simple delegation, there are more sophisticated patterns for agent coordination:
+        </p>
+
+        <div className="space-y-4 mt-6">
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-cyan-400 mb-2">Swarm Patterns</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Agents that can dynamically spawn sub-agents based on task requirements:
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Self-organizing: agents decide when to delegate and to whom</li>
+                <li>Dynamic scaling: spawn more workers for parallel subtasks</li>
+                <li>Automatic handoffs: agents transfer context to the right specialist</li>
+                <li>Example: research agent spawns 5 parallel search agents for different sources</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-violet-400 mb-2">Group Chat / Multi-Agent Conversation</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Multiple agents participate in a shared conversation:
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Round-robin: agents take turns responding to the conversation</li>
+                <li>Selective: a manager decides which agent should respond next</li>
+                <li>Free-form: agents respond when they have relevant input</li>
+                <li>Good for: brainstorming, debates, comprehensive analysis</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card variant="highlight">
+            <CardContent>
+              <h4 className="font-medium text-amber-400 mb-2">Agent-to-Agent Communication</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Direct communication between peer agents without orchestrator:
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Message passing: agents send structured messages to each other</li>
+                <li>Shared state: agents read/write to a common context store</li>
+                <li>Negotiation: agents discuss and reach consensus on approach</li>
+                <li>Warning: harder to debug; use when orchestration becomes a bottleneck</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Callout variant="warning" title="Complexity Trade-offs">
+          <p className="m-0">
+            Advanced patterns like swarms and group chat add significant complexity. Start with 
+            simple orchestrator-worker patterns. Only introduce these when you have clear evidence 
+            that simpler approaches are insufficient for your use case.
+          </p>
+        </Callout>
+
         {/* Implementation */}
         <h3 id="implementation" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
           Implementation
         </h3>
 
-        <CodeBlock
-          language="typescript"
-          filename="delegation-example.ts"
-          code={`// Define specialized subagents
-const codeAgent = createAgent({
-  name: "CodeAgent",
-  systemPrompt: \`You are an expert programmer. Write clean, tested code.\`,
-  tools: [readFile, writeFile, runTests, searchCodebase],
-});
-
-const testAgent = createAgent({
-  name: "TestAgent",  
-  systemPrompt: \`You write comprehensive tests. Focus on edge cases.\`,
-  tools: [readFile, writeFile, runTests],
-});
-
-const reviewAgent = createAgent({
-  name: "ReviewAgent",
-  systemPrompt: \`You review code for quality, security, and best practices.\`,
-  tools: [readFile, analyzeCode],
-});
-
-// Orchestrator coordinates them
-class FeatureOrchestrator {
-  async buildFeature(spec: string) {
-    // Step 1: Code agent implements
-    const code = await codeAgent.execute(
-      \`Implement this feature: \${spec}\`,
-      { files: relevantFiles }  // Only pass relevant context
-    );
-    
-    // Step 2: Test agent writes tests
-    const tests = await testAgent.execute(
-      \`Write tests for this implementation\`,
-      { implementation: code.summary }  // Pass summary, not full code
-    );
-    
-    // Step 3: Review agent checks everything
-    const review = await reviewAgent.execute(
-      \`Review this code and tests for quality\`,
-      { files: [code.files, tests.files].flat() }
-    );
-    
-    // Handle review feedback
-    if (!review.approved) {
-      return this.handleRevisions(review.feedback);
-    }
-    
-    return { code, tests, review };
-  }
-}`}
-        />
+        <p className="text-muted-foreground">
+          Define specialized subagents with focused capabilities: a code agent for implementation, a test 
+          agent for writing tests, and a review agent for quality checks. The orchestrator coordinates them 
+          sequentially: code agent implements, test agent writes tests, review agent checks everything. 
+          Only pass relevant context to each agent—summaries, not full code or entire conversations.
+        </p>
 
         {/* Context Management */}
         <h3 id="context-management" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
@@ -449,28 +413,38 @@ class FeatureOrchestrator {
           </p>
         </Callout>
 
-        <CodeBlock
-          language="typescript"
-          filename="context-passing.ts"
-          code={`// ❌ Bad: Passing everything
-await subagent.execute(task, { 
-  fullConversation,  // 50k tokens
-  allFiles,          // 100k tokens
-  entireDatabase,    // way too much
-});
+        <p className="text-muted-foreground">
+          Avoid passing everything to subagents—full conversations, all files, entire databases. Instead, 
+          extract and pass only what&apos;s needed: relevant files, task summaries, and specific context. 
+          This keeps context focused and costs down.
+        </p>
 
-// ✓ Good: Passing relevant context
-const relevantContext = await summarize(fullConversation);
-const neededFiles = await selectRelevantFiles(task);
-
-await subagent.execute(task, {
-  summary: relevantContext,     // 500 tokens
-  files: neededFiles,           // 2k tokens
-  schema: extractInterfaces(), // 1k tokens
-});
-
-// Each subagent stays focused and fast`}
-        />
+        <div className="grid gap-4 sm:grid-cols-2 mt-6">
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-foreground mb-2">✓ Do</h4>
+              <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
+                <li>Extract task summaries</li>
+                <li>Pass only relevant files</li>
+                <li>Use focused context per agent</li>
+                <li>Clear delegation boundaries</li>
+                <li>Error handling and timeouts</li>
+              </ul>
+            </CardContent>
+          </Card>
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-foreground mb-2">✗ Avoid</h4>
+              <ul className="text-sm text-muted-foreground m-0 pl-4 list-disc space-y-1">
+                <li>Overly complex delegation hierarchies</li>
+                <li>Passing full context to every subagent</li>
+                <li>Unclear ownership between agents</li>
+                <li>Infinite delegation loops</li>
+                <li>Silent failures in subagent calls</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Best Practices */}
         <h3 className="text-xl font-semibold mt-10 mb-4">Best Practices</h3>

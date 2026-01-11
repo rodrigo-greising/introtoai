@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import {
   Play,
   RotateCcw,
@@ -236,34 +236,12 @@ export function CICDIterationSection() {
 
         <PipelineVisualizer />
 
-        <CodeBlock
-          language="typescript"
-          filename="iterate-until-pass.ts"
-          code={`async function iterateUntilPass(maxAttempts: number = 5) {
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    console.log(\`Attempt \${attempt}/\${maxAttempts}\`);
-    
-    // Run CI pipeline
-    const result = await runPipeline();
-    
-    if (result.passed) {
-      console.log('✓ Pipeline passed!');
-      return { success: true, attempts: attempt };
-    }
-    
-    // Extract actionable failures
-    const failures = extractFailures(result);
-    
-    // Ask AI to fix
-    const fix = await aiGenerateFix(failures);
-    
-    // Apply the fix
-    await applyChanges(fix);
-  }
-  
-  return { success: false, attempts: maxAttempts };
-}`}
-        />
+        <p className="text-muted-foreground">
+          The iterate-until-pass pattern runs the CI pipeline, checks if it passed, and if not, extracts 
+          actionable failures, asks AI to generate a fix, applies the changes, and repeats up to a maximum 
+          number of attempts. This creates a tight feedback loop where AI fixes issues automatically until 
+          the pipeline passes.
+        </p>
 
         <div className="grid gap-4 sm:grid-cols-2 mt-6">
           <Card variant="default">

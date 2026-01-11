@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
-import { InteractiveWrapper, StepThroughPlayer, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { InteractiveWrapper, StepThroughPlayer } from "@/app/components/visualizations/core";
 import type { Step } from "@/app/components/visualizations/core/StepThroughPlayer";
 import {
   BookOpen,
@@ -103,43 +103,8 @@ function TrainingPipelineVisualizer() {
     emerald: { bg: "bg-emerald-500/20", border: "border-emerald-500/40", text: "text-emerald-400", ring: "ring-emerald-500/50" },
   };
 
-  const coreLogic = `// Simplified: How LLM training works conceptually
-
-// Stage 1: Pre-training (Next Token Prediction)
-function pretrain(model, corpus) {
-  for (const text of corpus) {
-    for (let i = 0; i < text.length - 1; i++) {
-      const context = text.slice(0, i + 1);
-      const nextToken = text[i + 1];
-      // Learn: P(nextToken | context)
-      model.learnToPredict(context, nextToken);
-    }
-  }
-}
-
-// Stage 2: Fine-tuning (Instruction Following)
-function finetune(model, instructionPairs) {
-  for (const { instruction, response } of instructionPairs) {
-    // Learn: P(response | instruction)
-    model.learnToFollow(instruction, response);
-  }
-}
-
-// Stage 3: RLHF (Preference Optimization)
-function rlhf(model, humanPreferences) {
-  for (const { prompt, preferred, rejected } of humanPreferences) {
-    // Learn: prefer outputs humans like
-    model.optimizeForPreference(prompt, preferred, rejected);
-  }
-}`;
-
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Training Pipeline Logic"
-      description="Simplified conceptual view of LLM training stages"
-    >
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Pipeline stages */}
         <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2">
           {pipelineStages.map((stage, index) => {
@@ -241,7 +206,6 @@ function rlhf(model, humanPreferences) {
           colorTheme="cyan"
         />
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -308,38 +272,8 @@ function NextTokenDemo() {
     }, 500);
   };
 
-  const coreLogic = `// Next Token Prediction - The Core of LLMs
-
-function predictNextToken(context: string): TokenProbabilities {
-  // 1. Tokenize the input
-  const tokens = tokenize(context);
-  
-  // 2. Get embeddings for each token
-  const embeddings = tokens.map(t => embed(t));
-  
-  // 3. Pass through transformer layers
-  // Each layer applies attention + feed-forward
-  let hidden = embeddings;
-  for (const layer of transformerLayers) {
-    hidden = layer.attention(hidden);  // "What should I pay attention to?"
-    hidden = layer.feedForward(hidden); // "What does this mean?"
-  }
-  
-  // 4. Project to vocabulary and apply softmax
-  // Result: probability distribution over all possible next tokens
-  const logits = project(hidden.last(), vocabularySize);
-  const probabilities = softmax(logits);
-  
-  return probabilities; // e.g., { "the": 0.15, "jumps": 0.72, ... }
-}`;
-
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Next Token Prediction"
-      description="The fundamental operation that makes LLMs work"
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         <div className="flex gap-3">
           <input
             type="text"
@@ -398,7 +332,6 @@ function predictNextToken(context: string): TokenProbabilities {
           Try: &quot;Once upon a&quot;, &quot;def calculate&quot;, or any text you like
         </p>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -560,6 +493,70 @@ export function HowLLMsWorkSection() {
           </div>
         </div>
 
+        {/* Beyond Imitation: Reinforcement Learning */}
+        <h3 id="beyond-imitation" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Beyond Imitation: Reinforcement Learning & Self-Play
+        </h3>
+
+        <p className="text-muted-foreground">
+          Pre-training alone creates models that can only imitate what they&apos;ve seen. But the most 
+          capable reasoning models go beyond imitation using techniques pioneered in game-playing AI:
+        </p>
+
+        <div className="my-6 p-5 rounded-xl bg-violet-500/10 border border-violet-500/30">
+          <h4 className="text-lg font-semibold text-violet-400 mb-3">The AlphaZero Lesson</h4>
+          <p className="text-sm text-muted-foreground mb-4">
+            DeepMind&apos;s AlphaZero achieved superhuman performance in chess, Go, and shogi through 
+            <strong className="text-foreground"> self-play reinforcement learning</strong>—playing millions of 
+            games against itself and learning from wins and losses. It discovered strategies humans had never 
+            conceived, because it wasn&apos;t limited to imitating human games.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="p-3 rounded-lg bg-background/50">
+              <div className="text-xs font-medium text-violet-400 uppercase mb-1">Imitation Learning</div>
+              <p className="text-sm text-muted-foreground m-0">
+                Learn from human examples → Limited to human-level performance
+              </p>
+            </div>
+            <div className="p-3 rounded-lg bg-background/50">
+              <div className="text-xs font-medium text-violet-400 uppercase mb-1">Self-Play RL</div>
+              <p className="text-sm text-muted-foreground m-0">
+                Learn from trial and error → Can exceed human performance
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-muted-foreground">
+          Modern reasoning models like o1 and o3 apply similar principles. They&apos;re trained not just to 
+          imitate human text, but to <strong className="text-foreground">optimize for correct reasoning 
+          outcomes</strong>. The model learns to &quot;think longer&quot; on hard problems—trading compute for 
+          accuracy—because that strategy leads to better results.
+        </p>
+
+        <Callout variant="tip" title="Reasoning = Compute">
+          <p>
+            The key insight: <strong>reasoning is a form of computation</strong>. When a model &quot;thinks step 
+            by step,&quot; it&apos;s trading inference tokens for better answers. RLHF and self-play train models 
+            to use this compute effectively—allocating more thinking to harder problems.
+          </p>
+        </Callout>
+
+        <div className="space-y-3 mt-6">
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
+            <Brain className="w-5 h-5 text-amber-400 mt-0.5 shrink-0" />
+            <div>
+              <h4 className="font-medium text-amber-400">Why This Matters for Engineers</h4>
+              <p className="text-sm text-muted-foreground mt-1">
+                Understanding that reasoning models are doing <em>search</em> (exploring solution paths) not 
+                just <em>prediction</em> (choosing the most likely next token) changes how you use them. Give 
+                them problems worth thinking about, and don&apos;t interrupt their reasoning with premature 
+                constraints.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Implications */}
         <h3 id="implications" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
           Implications for Engineers
@@ -599,14 +596,98 @@ export function HowLLMsWorkSection() {
           </Card>
           <Card variant="highlight">
             <CardContent>
-              <h4 className="font-medium text-foreground mb-2">Limitations Are Predictable</h4>
+              <h4 className="font-medium text-foreground mb-2">Reasoning Takes Time</h4>
               <p className="text-sm text-muted-foreground m-0">
-                Models struggle with: precise counting, multi-step math, recent events (training cutoff), 
-                and anything not well-represented in training data. Plan accordingly.
+                Reasoning models trade latency for quality. Let them think—don&apos;t set aggressive timeouts 
+                on complex tasks. The extra tokens are often worth it.
               </p>
             </CardContent>
           </Card>
         </div>
+
+        {/* Math Foundations */}
+        <h3 id="math-foundations" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
+          Math Foundations (Optional Deep Dive)
+        </h3>
+
+        <p className="text-muted-foreground">
+          You don&apos;t need to understand the math to use LLMs effectively, but knowing the basics helps 
+          when debugging and reasoning about model behavior.
+        </p>
+
+        <div className="space-y-4 mt-6">
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-cyan-400 mb-2">Backpropagation</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                How neural networks learn: compute error at output, propagate gradients backward, update weights.
+              </p>
+              <div className="text-xs text-muted-foreground bg-muted/30 p-2 rounded font-mono">
+                Forward: input → weights → output → loss<br />
+                Backward: loss → gradients → weight updates
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                <strong>Why it matters:</strong> Training costs scale with how many times you run this loop. 
+                Pre-training runs it trillions of times; that&apos;s why it&apos;s so expensive.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-violet-400 mb-2">Attention Mechanism</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                The core of transformers: each token computes attention scores to all other tokens, 
+                deciding what to &quot;pay attention to&quot; for its representation.
+              </p>
+              <div className="text-xs text-muted-foreground bg-muted/30 p-2 rounded font-mono">
+                Attention(Q, K, V) = softmax(QK<sup>T</sup> / √d) × V
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                <strong>Why it matters:</strong> Attention is O(n²) with sequence length. That&apos;s why context 
+                windows have limits and why long contexts are expensive.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-amber-400 mb-2">Layer Normalization</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Stabilizes training by normalizing activations within each layer. Without it, deep networks 
+                become unstable as gradients explode or vanish.
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                <strong>Why it matters:</strong> LayerNorm placement (pre-norm vs post-norm) affects training 
+                stability. Most modern LLMs use pre-norm for better scaling.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="default">
+            <CardContent>
+              <h4 className="font-medium text-emerald-400 mb-2">Softmax & Temperature</h4>
+              <p className="text-sm text-muted-foreground m-0 mb-2">
+                Softmax converts raw scores into probabilities. Temperature controls the &quot;sharpness&quot; of 
+                the distribution:
+              </p>
+              <ul className="text-xs text-muted-foreground list-disc list-inside space-y-1">
+                <li>Low temp (0.1): Sharp, deterministic—picks the top token</li>
+                <li>High temp (1.5): Flat, random—more diverse but less reliable</li>
+                <li>Temp=1.0: Balanced default for most tasks</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Callout variant="info" title="Want to Go Deeper?">
+          <p className="m-0">
+            For a full technical treatment, see &quot;Attention Is All You Need&quot; (the original transformer 
+            paper), Andrej Karpathy&apos;s &quot;Let&apos;s Build GPT&quot; video series, or the 3Blue1Brown neural 
+            network visualizations. Understanding the math isn&apos;t required for this guide, but it&apos;s 
+            rewarding if you have the time.
+          </p>
+        </Callout>
 
         <Callout variant="tip" title="The Bottom Line">
           <p>

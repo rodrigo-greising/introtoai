@@ -2,8 +2,8 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   Play,
   RotateCcw,
@@ -137,12 +137,7 @@ async function parallelWithLimit(items: Item[], limit = 5) {
   const timeScale = timelineWidth / totalTime;
 
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Sequential vs Parallel Execution"
-      description="Compare execution times with different strategies"
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         {/* Mode toggle and controls */}
         <div className="flex items-center gap-3">
           <div className="flex rounded-lg bg-muted/30 p-1">
@@ -292,7 +287,6 @@ async function parallelWithLimit(items: Item[], limit = 5) {
           </div>
         </div>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -381,54 +375,11 @@ export function ParallelizationSection() {
           balance speed with reliability.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="concurrency-control.ts"
-          code={`// Simple batched execution
-async function batchProcess<T, R>(
-  items: T[],
-  fn: (item: T) => Promise<R>,
-  batchSize = 5
-): Promise<R[]> {
-  const results: R[] = [];
-  
-  for (let i = 0; i < items.length; i += batchSize) {
-    const batch = items.slice(i, i + batchSize);
-    const batchResults = await Promise.all(batch.map(fn));
-    results.push(...batchResults);
-  }
-  
-  return results;
-}
-
-// Using p-limit for fine-grained control
-import pLimit from 'p-limit';
-
-const limit = pLimit(5); // Max 5 concurrent
-
-async function processWithLimit(items: Item[]) {
-  return Promise.all(
-    items.map(item => limit(() => processItem(item)))
-  );
-}
-
-// With progress tracking
-async function processWithProgress(items: Item[]) {
-  let completed = 0;
-  const total = items.length;
-  
-  const results = await Promise.all(
-    items.map(item => limit(async () => {
-      const result = await processItem(item);
-      completed++;
-      console.log(\`Progress: \${completed}/\${total}\`);
-      return result;
-    }))
-  );
-  
-  return results;
-}`}
-        />
+        <p className="text-muted-foreground">
+          Unbounded parallelism can overwhelm APIs or exhaust resources. Use concurrency limits to 
+          balance speed with reliability. Simple batched execution processes items in batches, while 
+          libraries like p-limit provide fine-grained control over concurrent operations.
+        </p>
 
         {/* Error Handling */}
         <h3 id="error-handling" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
@@ -440,47 +391,18 @@ async function processWithProgress(items: Item[]) {
           you often want to continue and collect partial results.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="parallel-error-handling.ts"
-          code={`// Promise.allSettled: Continue despite failures
-async function processAllWithPartialFailure(items: Item[]) {
-  const results = await Promise.allSettled(
-    items.map(item => processItem(item))
-  );
-  
-  const successes = results
-    .filter((r): r is PromiseFulfilledResult<Result> => r.status === 'fulfilled')
-    .map(r => r.value);
-    
-  const failures = results
-    .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
-    .map(r => r.reason);
-  
-  if (failures.length > 0) {
-    console.warn(\`\${failures.length} items failed\`);
-  }
-  
-  return { successes, failures };
-}
+        <p className="text-muted-foreground">
+          <code>Promise.all</code> fails fast—one rejection aborts everything. For batch processing, 
+          you often want to continue and collect partial results. Use <code>Promise.allSettled</code> 
+          to continue despite failures, or implement retry logic with exponential backoff for transient errors.
+        </p>
 
-// With retry on failure
-async function processWithRetry<T>(
-  item: T,
-  fn: (item: T) => Promise<Result>,
-  maxRetries = 3
-): Promise<Result> {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      return await fn(item);
-    } catch (error) {
-      if (attempt === maxRetries) throw error;
-      await sleep(Math.pow(2, attempt) * 100); // Exponential backoff
-    }
-  }
-  throw new Error('Unreachable');
-}`}
-        />
+        <ul className="list-disc list-inside space-y-2 text-muted-foreground mt-4">
+          <li>Using <code>Promise.allSettled</code> to continue despite failures</li>
+          <li>Implementing retry logic with exponential backoff</li>
+          <li>Collecting partial results when some operations fail</li>
+          <li>Handling rate limits and API quotas</li>
+        </ul>
 
         {/* Patterns */}
         <h3 className="text-xl font-semibold mt-10 mb-4">Common Patterns</h3>

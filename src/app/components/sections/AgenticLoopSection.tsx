@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   RotateCw, 
   Play, 
@@ -94,47 +94,8 @@ function AgenticLoopVisualizer() {
     setContextItems([]);
   };
 
-  const coreLogic = `// The Agentic Loop Pattern
-
-async function agenticLoop(userMessage: string): Promise<string> {
-  const context: Message[] = [
-    { role: "system", content: SYSTEM_PROMPT },
-    { role: "user", content: userMessage },
-  ];
-
-  while (true) {
-    // 1. THINK: Model decides what to do
-    const response = await llm.complete({ messages: context, tools });
-    
-    // 2. CHECK: Is the model done?
-    if (response.finishReason === "stop") {
-      return response.content;  // Final answer
-    }
-    
-    // 3. ACT: Execute requested tool calls
-    if (response.toolCalls) {
-      for (const call of response.toolCalls) {
-        const result = await executeTool(call);
-        
-        // 4. OBSERVE: Add result to context
-        context.push({ role: "tool", content: result });
-      }
-    }
-    
-    // Loop continues: model sees results and decides next step
-  }
-}
-
-// The loop repeats until the model decides it has enough
-// information to answer the user's question.`;
-
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Agentic Loop Implementation"
-      description="The core pattern for iterative tool-using agents"
-    >
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Main visualization */}
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Loop steps */}
@@ -274,7 +235,6 @@ async function agenticLoop(userMessage: string): Promise<string> {
           </span>
         </div>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -389,46 +349,17 @@ export function AgenticLoopSection() {
           When to Stop
         </h3>
 
-        <CodeBlock
-          language="typescript"
-          filename="stopping-conditions.ts"
-          code={`async function agenticLoop(input: string): Promise<string> {
-  const MAX_ITERATIONS = 10;
-  const TIMEOUT_MS = 30000;
-  const startTime = Date.now();
-  
-  for (let i = 0; i < MAX_ITERATIONS; i++) {
-    // Check timeout
-    if (Date.now() - startTime > TIMEOUT_MS) {
-      return "Task timed out. Here's what I found so far...";
-    }
-    
-    const response = await llm.complete({ messages: context, tools });
-    
-    // Model signals completion
-    if (response.finishReason === "stop") {
-      return response.content;
-    }
-    
-    // No more tool calls - model is done
-    if (!response.toolCalls || response.toolCalls.length === 0) {
-      return response.content;
-    }
-    
-    // Execute tools and continue
-    await executeToolCalls(response.toolCalls);
-  }
-  
-  return "Max iterations reached. Partial results: ...";
-}
+        <p className="text-muted-foreground">
+          Always include stopping conditions to prevent runaway loops. Good stopping conditions include:
+        </p>
 
-// Good stopping conditions:
-// 1. Model's natural completion (finishReason: "stop")
-// 2. Maximum iteration count
-// 3. Timeout
-// 4. Explicit "done" tool call
-// 5. Error threshold exceeded`}
-        />
+        <ul className="list-disc list-inside space-y-2 text-muted-foreground mt-4">
+          <li>Model&apos;s natural completion (finishReason: &quot;stop&quot;)</li>
+          <li>Maximum iteration count</li>
+          <li>Timeout</li>
+          <li>Explicit &quot;done&quot; tool call</li>
+          <li>Error threshold exceeded</li>
+        </ul>
 
         {/* Implementation Tips */}
         <h3 className="text-xl font-semibold mt-10 mb-4">Implementation Tips</h3>

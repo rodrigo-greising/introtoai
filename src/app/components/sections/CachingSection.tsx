@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock, CachingCostVisualizer } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout, CachingCostVisualizer } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { Check, X, ArrowRight, Zap } from "lucide-react";
 
 // =============================================================================
@@ -107,12 +107,7 @@ function checkCacheMatch(newPrompt: Token[], cache: CacheEntry[]): CacheResult {
 // "Hello world" and "Hello World" are DIFFERENT prefixes`;
 
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Prefix Cache Matching"
-      description="How providers determine which tokens can be served from cache"
-    >
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Request 1 */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -240,7 +235,6 @@ function checkCacheMatch(newPrompt: Token[], cache: CacheEntry[]): CacheResult {
           </div>
         )}
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -373,36 +367,13 @@ export function CachingSection() {
           </ul>
         </Callout>
 
-        <CodeBlock
-          language="text"
-          filename="conversation-caching-example.txt"
-          code={`Turn 1:
-  [System prompt] → NEW, written to cache
-  [User message 1] → NEW
-  ─────────────────
-  Total: ~2,100 tokens, all at full price
-
-Turn 2:
-  [System prompt] → ✅ CACHED (identical prefix)
-  [User message 1] → ✅ CACHED (part of prefix)
-  [Assistant reply 1] → ✅ CACHED (part of prefix)
-  [User message 2] → NEW (appended at end)
-  ─────────────────
-  ~1,800 tokens cached, ~100 tokens new
-
-Turn 3:
-  [System prompt] → ✅ CACHED
-  [User message 1] → ✅ CACHED
-  [Assistant reply 1] → ✅ CACHED
-  [User message 2] → ✅ CACHED
-  [Assistant reply 2] → ✅ CACHED
-  [User message 3] → NEW
-  ─────────────────
-  ~2,100 tokens cached, ~100 tokens new
-
-The cacheable prefix grows each turn while only
-~100-300 new tokens are charged at full price.`}
-        />
+        <p className="text-muted-foreground">
+          In conversation caching, the cacheable prefix grows each turn. Turn 1 sends everything new 
+          (~2,100 tokens at full price). Turn 2 caches the system prompt and previous messages (~1,800 
+          tokens cached), only charging for the new user message (~100 tokens). Turn 3 caches even more 
+          (~2,100 tokens cached), with only the new message charged at full price. The cacheable prefix 
+          grows each turn while only ~100-300 new tokens are charged at full price.
+        </p>
 
         <h3 id="caching-economics" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">Caching Economics</h3>
 
@@ -484,35 +455,13 @@ The cacheable prefix grows each turn while only
           Caching fundamentally changes how you should structure prompts. The rule is simple:
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="cache-friendly-context.ts"
-          showLineNumbers
-          code={`// ❌ BAD: Variable content at the beginning breaks caching
-async function badApproach(userQuery: string, docs: string[]) {
-  return await callLLM(\`
-    User asks: \${userQuery}
-    
-    Here are your instructions...
-    [10,000 tokens of system prompt, tools, examples]
-  \`);
-}
-
-// ✅ GOOD: Static prefix, variable content at the end
-async function goodApproach(userQuery: string, docs: string[]) {
-  return await callLLM(\`
-    [System instructions - STATIC]
-    [Tool schemas - STATIC]
-    [Few-shot examples - STATIC]
-    [Reference docs - mostly STATIC]
-    
-    User query: \${userQuery}
-  \`);
-}
-
-// Every request that shares the same static prefix 
-// can reuse the cached KV tensors`}
-        />
+        <p className="text-muted-foreground">
+          Structure your context with static content first, variable content last. Bad approach: putting variable 
+          content (like user query) at the beginning breaks caching because the prefix changes every request. 
+          Good approach: static prefix (system instructions, tool schemas, examples, reference docs) followed 
+          by variable content (user query). Every request that shares the same static prefix can reuse the cached 
+          KV tensors.
+        </p>
 
         <h4 className="text-lg font-medium mt-6 mb-3">Where Caching Delivers Most Value</h4>
 

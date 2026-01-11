@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   GripVertical, 
   Trash2, 
@@ -204,12 +204,7 @@ function buildContext(layers: ContextLayer[]): string {
 // 6. User message (variable) - always fresh`;
 
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Context Layer Ordering"
-      description="How to order context layers for optimal caching"
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         {/* Stats bar */}
         <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border">
           <div className="flex items-center gap-4 text-sm">
@@ -362,7 +357,6 @@ function buildContext(layers: ContextLayer[]): string {
           💡 Drag layers to reorder them. Static content should come before dynamic content for optimal caching.
         </p>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -521,32 +515,12 @@ export function LayeredContextSection() {
           <strong className="text-foreground"> identity, constraints, and core behaviors</strong>.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="system-prompt.ts"
-          code={`// A well-structured system prompt
-const systemPrompt = \`
-You are an expert TypeScript developer working on a Next.js application.
-
-Core behaviors:
-- Always use strict TypeScript with explicit types
-- Follow functional programming patterns where practical
-- Explain your reasoning before providing code
-
-Constraints:
-- Never modify files outside the src/ directory
-- Always handle errors explicitly
-- Use the project's existing patterns and conventions
-
-Output format:
-- Start with a brief analysis of the task
-- Provide complete, working code (no placeholders)
-- End with testing suggestions
-\`;
-
-// This prompt is STATIC - it never changes between requests
-// Perfect for the cacheable prefix`}
-        />
+        <p className="text-muted-foreground">
+          A well-structured system prompt sets the model&apos;s identity, constraints, and core behaviors. 
+          It should be stable and complete—if you find yourself constantly tweaking it, extract the 
+          variable parts into later layers or session-specific context. The system prompt is static 
+          and never changes between requests, making it perfect for the cacheable prefix.
+        </p>
 
         <Callout variant="important">
           <p>
@@ -599,42 +573,16 @@ Output format:
 
         <p className="text-muted-foreground">
           The golden rule: <strong className="text-foreground">static content first, variable content last</strong>. 
-          This ensures maximum cache reuse across requests.
+          This ensures maximum cache reuse across requests. Build your context with: system prompt (static), 
+          tool schemas (static), examples (semi-static), retrieved docs (dynamic), conversation (dynamic), 
+          and user message (variable).
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="optimal-context.ts"
-          code={`// Optimal context structure for caching
-async function buildContext(request: Request) {
-  return {
-    // Layer 1: Static (always cached)
-    system: SYSTEM_PROMPT,
-    
-    // Layer 2: Static (always cached)  
-    tools: TOOL_SCHEMAS,
-    
-    // Layer 3: Semi-static (usually cached)
-    examples: STANDARD_EXAMPLES,
-    
-    // Layer 4: Dynamic (cached within session)
-    history: compressIfNeeded(request.session.messages),
-    retrieved: await retrieveRelevant(request.query),
-    
-    // Layer 5: Variable (always fresh)
-    query: request.message,
-  };
-}
-
-// The provider sees:
-// [SYSTEM + TOOLS + EXAMPLES] ← CACHED (90% off)
-// [HISTORY + RETRIEVED + QUERY] ← Fresh (full price)
-
-// With a 2,500 token static prefix and 500 token dynamic suffix:
-// Without cache: 3,000 tokens at full price
-// With cache: 250 tokens (cached) + 500 tokens (fresh)
-// = 83% cost reduction!`}
-        />
+        <p className="text-muted-foreground">
+          With a 2,500 token static prefix and 500 token dynamic suffix, you can achieve significant cost 
+          reduction. Without cache: 3,000 tokens at full price. With cache: 250 tokens (cached) + 500 tokens 
+          (fresh) = 83% cost reduction!
+        </p>
 
         <Callout variant="tip" title="Attention Benefits Too">
           <p>

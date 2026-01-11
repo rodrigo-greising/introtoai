@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   Pause,
@@ -281,31 +281,12 @@ export function ExternalControlSection() {
           </Card>
         </div>
 
-        <CodeBlock
-          language="typescript"
-          filename="human-orchestrator.ts"
-          code={`// Human orchestrates, AI executes
-async function humanControlledWorkflow(task: Task) {
-  // Human defines the spec
-  const spec = await human.writeSpec(task);
-  
-  // Human writes tests
-  const tests = await human.writeTests(spec);
-  
-  // AI implements
-  const implementation = await ai.implement(spec, tests);
-  
-  // Human reviews
-  const approved = await human.review(implementation);
-  
-  if (!approved) {
-    // Human provides feedback, AI iterates
-    return humanControlledWorkflow(task.withFeedback(human.feedback));
-  }
-  
-  return implementation;
-}`}
-        />
+        <p className="text-muted-foreground">
+          In human-controlled workflows, the human orchestrates while AI executes. The human defines the 
+          spec, writes tests, then the AI implements. The human reviews, and if not approved, provides 
+          feedback for the AI to iterate. This pattern gives humans control over the workflow while 
+          leveraging AI for execution.
+        </p>
 
         {/* AI-to-AI Orchestration */}
         <h3 id="ai-to-ai-orchestration" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">

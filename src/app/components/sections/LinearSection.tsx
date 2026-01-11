@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import {
   MessageSquare,
   FileText,
@@ -326,34 +326,12 @@ export function LinearSection() {
           possible for certain classes of work.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="issue-to-pr.ts"
-          code={`// Webhook triggered when issue is marked "Ready for AI"
-async function handleReadyIssue(issue: LinearIssue) {
-  // Extract task definition
-  const spec = parseIssueToSpec(issue);
-  
-  // Validate spec has required fields
-  if (!spec.acceptanceCriteria || !spec.scope) {
-    await issue.addComment("⚠️ Missing acceptance criteria or scope");
-    return;
-  }
-  
-  // Submit to background agent
-  const job = await backgroundAgent.submit({
-    task: spec,
-    repo: issue.project.repo,
-    branch: \`ai/\${issue.identifier}\`,
-  });
-  
-  // Link job to issue
-  await issue.update({ 
-    status: "In Progress",
-    metadata: { agentJobId: job.id }
-  });
-}`}
-        />
+        <p className="text-muted-foreground">
+          When an issue is marked &quot;Ready for AI&quot;, a webhook can trigger an automated workflow: extract 
+          the task definition from the issue, validate it has required fields (acceptance criteria, scope), 
+          submit to a background agent with the repo and branch info, and link the job to the issue. This 
+          enables fully automated issue-to-PR workflows for well-scoped tasks.
+        </p>
 
         <Callout variant="warning" title="Scope Appropriately">
           <p className="m-0">

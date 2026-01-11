@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   Shield, 
@@ -326,76 +326,13 @@ export function GuardrailsSection() {
           Implementation Pattern
         </h3>
 
-        <CodeBlock
-          language="typescript"
-          filename="guardrails.ts"
-          code={`interface AgentRole {
-  name: string;
-  allowedTools: string[];
-  deniedTools: string[];
-  requiresApproval: string[];
-  pathRestrictions: string[];  // Allowed file paths
-  maxCostPerRequest?: number;
-}
-
-const roles: Record<string, AgentRole> = {
-  viewer: {
-    name: "Viewer",
-    allowedTools: ["readFile", "search", "summarize"],
-    deniedTools: ["writeFile", "execute", "deleteFile"],
-    requiresApproval: [],
-    pathRestrictions: ["./docs/**", "./src/**"],
-  },
-  developer: {
-    name: "Developer",
-    allowedTools: ["readFile", "writeFile", "search", "lint", "test"],
-    deniedTools: ["deploy", "deleteDatabase"],
-    requiresApproval: ["execute"],
-    pathRestrictions: ["./src/**", "./tests/**"],
-  },
-  admin: {
-    name: "Admin",
-    allowedTools: ["*"],
-    deniedTools: [],
-    requiresApproval: ["deploy", "deleteDatabase", "accessSecrets"],
-    pathRestrictions: ["**"],
-  },
-};
-
-class Guardrails {
-  constructor(private role: AgentRole) {}
-  
-  async validateToolCall(toolName: string, args: unknown): Promise<{
-    allowed: boolean;
-    requiresApproval: boolean;
-    reason?: string;
-  }> {
-    // Check explicit denials first
-    if (this.role.deniedTools.includes(toolName)) {
-      return { allowed: false, requiresApproval: false, reason: "Tool not permitted for this role" };
-    }
-    
-    // Check if requires approval
-    if (this.role.requiresApproval.includes(toolName)) {
-      return { allowed: true, requiresApproval: true };
-    }
-    
-    // Check if explicitly allowed or wildcard
-    if (this.role.allowedTools.includes(toolName) || this.role.allowedTools.includes("*")) {
-      // Additional validation for file operations
-      if (this.isFileOperation(toolName)) {
-        const path = this.extractPath(args);
-        if (!this.isPathAllowed(path)) {
-          return { allowed: false, requiresApproval: false, reason: \`Path not allowed: \${path}\` };
-        }
-      }
-      return { allowed: true, requiresApproval: false };
-    }
-    
-    return { allowed: false, requiresApproval: false, reason: "Tool not in allowed list" };
-  }
-}`}
-        />
+        <p className="text-muted-foreground">
+          Implement guardrails using role-based access control. Define roles with allowed tools, denied tools, 
+          tools requiring approval, path restrictions, and optional cost limits. Validate tool calls by checking 
+          explicit denials first, then approval requirements, then allowed tools (including wildcards). For file 
+          operations, validate paths against restrictions. This ensures agents can only perform actions appropriate 
+          for their role.
+        </p>
 
         {/* Best Practices */}
         <h3 className="text-xl font-semibold mt-10 mb-4">Best Practices</h3>

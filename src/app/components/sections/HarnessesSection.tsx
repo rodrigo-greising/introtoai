@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   Play, 
@@ -279,37 +279,12 @@ export function HarnessesSection() {
           The faster the feedback, the tighter the iteration loop.
         </p>
 
-        <CodeBlock
-          language="bash"
-          filename="harness.sh"
-          code={`#!/bin/bash
-# Simple harness pattern for AI iteration loops
-
-MAX_ATTEMPTS=5
-attempt=0
-
-while [ $attempt -lt $MAX_ATTEMPTS ]; do
-  echo "Attempt $((attempt + 1)) of $MAX_ATTEMPTS"
-  
-  # Run tests and capture output
-  npm test 2>&1 | tee test_output.txt
-  exit_code=\${PIPESTATUS[0]}
-  
-  if [ $exit_code -eq 0 ]; then
-    echo "✓ All tests passed"
-    exit 0
-  fi
-  
-  # Extract error for AI feedback
-  echo "Tests failed. Feeding results back to AI..."
-  # Your AI feedback mechanism here
-  
-  attempt=$((attempt + 1))
-done
-
-echo "✗ Max attempts reached"
-exit 1`}
-        />
+        <p className="text-muted-foreground">
+          A simple harness pattern for AI iteration loops: run tests up to a maximum number of attempts, 
+          capture the output, check if tests passed, and if not, extract errors and feed them back to 
+          the AI for the next iteration. The harness output is what the AI sees, so clear, actionable 
+          error messages are critical.
+        </p>
 
         <Callout variant="tip" title="Error Message Quality">
           <p className="m-0">

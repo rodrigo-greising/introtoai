@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   Search,
@@ -284,71 +284,12 @@ export function SkillsProgressiveDiscoverySection() {
           skill&apos;s &quot;contract&quot;—defining what it does and how to use it.
         </p>
 
-        <CodeBlock
-          language="plaintext"
-          filename="Skill Directory Structure"
-          code={`skills/
-├── code-review/
-│   ├── SKILL.md           # Purpose, capabilities, usage patterns
-│   ├── instructions.md    # Detailed review guidelines
-│   ├── checklists/
-│   │   ├── security.md    # Security review checklist
-│   │   └── performance.md # Performance review checklist
-│   └── tools/
-│       └── review-diff.sh # Script to analyze diffs
-│
-├── database-migration/
-│   ├── SKILL.md
-│   ├── patterns/          # Migration patterns & examples
-│   ├── validators/        # Schema validation scripts
-│   └── rollback.md        # Rollback procedures
-│
-└── api-design/
-    ├── SKILL.md
-    ├── openapi-guide.md   # OpenAPI specification guide
-    └── examples/          # Well-designed API examples`}
-        />
-
         <p className="text-muted-foreground mt-4">
-          The <code className="text-cyan-400">SKILL.md</code> file typically contains:
+          Skills are organized as directories with a <code className="text-cyan-400">SKILL.md</code> file 
+          that serves as the skill&apos;s contract. The SKILL.md file typically contains: purpose, when to use, 
+          capabilities, required context, tools available, and output format. Skills can include additional 
+          files like instructions, checklists, patterns, validators, and tools.
         </p>
-
-        <CodeBlock
-          language="markdown"
-          filename="Example SKILL.md"
-          code={`# Code Review Skill
-
-## Purpose
-Perform thorough code reviews focusing on correctness, security, 
-performance, and maintainability.
-
-## When to Use
-- Pull request review requests
-- Security audit tasks
-- Pre-merge code quality checks
-
-## Capabilities
-- Analyze diffs for common issues
-- Apply language-specific best practices
-- Check against security checklists
-- Suggest performance improvements
-
-## Required Context
-- The code diff or files to review
-- Repository coding standards (if available)
-- Specific focus areas (optional)
-
-## Tools Available
-- \`review-diff.sh\`: Parses and annotates diff output
-- Access to security and performance checklists
-
-## Output Format
-Structured review with:
-- Summary assessment
-- Critical issues (blocking)
-- Suggestions (non-blocking)
-- Positive observations`}
-        />
 
         <Callout variant="tip" title="Skills are Composable">
           <p className="m-0">
@@ -434,57 +375,11 @@ Structured review with:
           </p>
         </Callout>
 
-        <CodeBlock
-          language="typescript"
-          filename="Progressive Disclosure Implementation"
-          code={`interface SkillMetadata {
-  id: string;
-  name: string;
-  description: string;  // Brief, for relevance matching
-  triggers: string[];   // Keywords that suggest this skill
-}
-
-interface Skill extends SkillMetadata {
-  instructions: string;   // Full SKILL.md content
-  tools: ToolDefinition[];
-  resources: ResourceRef[];
-}
-
-class SkillRegistry {
-  private metadata: Map<string, SkillMetadata> = new Map();
-  private loadedSkills: Map<string, Skill> = new Map();
-
-  // Stage 1: Load just metadata at boot
-  async initialize() {
-    const skillDirs = await listSkillDirectories();
-    for (const dir of skillDirs) {
-      const meta = await loadSkillMetadata(dir);
-      this.metadata.set(meta.id, meta);
-    }
-  }
-
-  // Stage 2: Find relevant skills without full loading
-  findRelevantSkills(task: string): SkillMetadata[] {
-    return Array.from(this.metadata.values())
-      .filter(skill => this.isRelevant(skill, task));
-  }
-
-  // Stage 2 continued: Load full skill when needed
-  async loadSkill(skillId: string): Promise<Skill> {
-    if (this.loadedSkills.has(skillId)) {
-      return this.loadedSkills.get(skillId)!;
-    }
-    const skill = await loadFullSkill(skillId);
-    this.loadedSkills.set(skillId, skill);
-    return skill;
-  }
-
-  // Stage 3: Load specific resource on demand
-  async loadResource(skillId: string, resourcePath: string) {
-    return await loadSkillResource(skillId, resourcePath);
-  }
-}`}
-        />
+        <p className="text-muted-foreground">
+          Progressive disclosure is implemented through a skill registry that loads metadata at boot (stage 1), 
+          finds relevant skills based on task keywords (stage 2), loads full skill definitions when needed (stage 2), 
+          and loads specific resources on demand (stage 3). This keeps context lean while maintaining broad capabilities.
+        </p>
 
         {/* Subagents and Delegation */}
         <h3 id="subagents-delegation" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">
@@ -533,63 +428,12 @@ class SkillRegistry {
           </div>
         </div>
 
-        <CodeBlock
-          language="typescript"
-          filename="Subagent Delegation Pattern"
-          code={`interface SubagentConfig {
-  skill: Skill;
-  task: string;
-  context: Record<string, unknown>;
-  maxTokens?: number;
-}
-
-interface SubagentResult {
-  success: boolean;
-  output: unknown;
-  tokensUsed: number;
-  reasoning?: string;
-}
-
-async function delegateToSubagent(config: SubagentConfig): Promise<SubagentResult> {
-  const { skill, task, context } = config;
-  
-  // Build focused context from skill definition
-  const systemPrompt = buildSubagentPrompt(skill);
-  
-  // Subagent gets only skill-specific tools
-  const tools = skill.tools;
-  
-  // Execute in isolated context
-  const response = await llmCall({
-    system: systemPrompt,
-    messages: [
-      { role: "user", content: formatTask(task, context) }
-    ],
-    tools,
-    // Subagent doesn't see main conversation history
-  });
-
-  return parseSubagentResponse(response);
-}
-
-function buildSubagentPrompt(skill: Skill): string {
-  return \`You are a specialized agent for: \${skill.name}
-
-\${skill.instructions}
-
-## Your Focus
-You handle ONLY tasks related to \${skill.name}. 
-Stay focused on this domain.
-
-## Output Requirements
-Provide structured output that can be consumed by the orchestrating agent.
-Include confidence levels and any caveats.
-
-## Available Tools
-\${skill.tools.map(t => \`- \${t.name}: \${t.description}\`).join('\\n')}
-\`;
-}`}
-        />
+        <p className="text-muted-foreground">
+          Subagent delegation pattern: configure a subagent with a skill, task, and context. Build a focused 
+          system prompt from the skill definition, provide only skill-specific tools, execute in isolated context 
+          (no main conversation history), and return structured results. The subagent operates with its own context 
+          window, custom system prompt, scoped tool access, and defined output format.
+        </p>
 
         <Callout variant="tip" title="Subagents Can Have Subagents">
           <p className="m-0">
@@ -779,34 +623,11 @@ Include confidence levels and any caveats.
           </Card>
         </div>
 
-        <CodeBlock
-          language="plaintext"
-          filename="Example Skill Library Organization"
-          code={`skills/
-├── core/                    # Fundamental capabilities
-│   ├── code-review/
-│   ├── documentation/
-│   └── testing/
-│
-├── security/                # Security-focused skills
-│   ├── vulnerability-scan/
-│   ├── dependency-audit/
-│   └── secrets-detection/
-│
-├── data/                    # Data engineering skills
-│   ├── schema-migration/
-│   ├── query-optimization/
-│   └── etl-design/
-│
-├── frontend/                # UI/UX skills
-│   ├── accessibility-audit/
-│   ├── component-review/
-│   └── performance-audit/
-│
-└── team-specific/           # Custom team skills
-    ├── our-api-standards/
-    └── deployment-checklist/`}
-        />
+        <p className="text-muted-foreground">
+          Organize skills into a library structure: core skills for fundamental capabilities, domain-specific 
+          skills (security, data, frontend), and team-specific custom skills. This organization makes skills 
+          discoverable, maintainable, and shareable across the organization.
+        </p>
 
         <Callout variant="tip" title="Putting It All Together" className="mt-8">
           <p className="m-0">

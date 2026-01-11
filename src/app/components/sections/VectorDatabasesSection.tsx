@@ -2,8 +2,8 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   Database, 
   Zap, 
@@ -113,46 +113,8 @@ function ANNSearchVisualizer() {
     return colors[clusterId] || "gray";
   };
 
-  const coreLogic = `// Approximate Nearest Neighbor (ANN) with IVF
-// Instead of checking ALL vectors, use inverted file index
-
-interface IVFIndex {
-  centroids: Vector[];     // Cluster centers
-  invertedLists: Map<number, Vector[]>; // cluster_id → vectors
-}
-
-async function annSearch(query: Vector, k: number): Promise<Result[]> {
-  // Phase 1: COARSE SEARCH - Find closest cluster(s)
-  // O(nprobe) instead of O(n) - typically nprobe << n
-  const closestClusters = findClosestCentroids(query, index.centroids, nprobe);
-  
-  // Phase 2: FINE SEARCH - Only search within selected clusters
-  // Check ~1-5% of total vectors instead of 100%
-  const candidates: ScoredVector[] = [];
-  
-  for (const clusterId of closestClusters) {
-    const clusterVectors = index.invertedLists.get(clusterId);
-    for (const vec of clusterVectors) {
-      const distance = cosineSimilarity(query, vec);
-      candidates.push({ vec, distance });
-    }
-  }
-  
-  // Return top-k from candidates (not all vectors!)
-  return candidates.sort((a, b) => b.distance - a.distance).slice(0, k);
-}
-
-// Trade-off: Faster search, but might miss some neighbors
-// If the TRUE nearest neighbor is in a different cluster,
-// we won't find it. This is the "approximate" part of ANN.`;
-
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Approximate Nearest Neighbor Search"
-      description="How vector databases achieve fast similarity search"
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         {/* Controls */}
         <div className="flex items-center gap-3">
           <button
@@ -321,7 +283,6 @@ async function annSearch(query: Vector, k: number): Promise<Result[]> {
           </p>
         </div>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -552,60 +513,11 @@ export function VectorDatabasesSection() {
           Example: Pinecone Setup
         </h3>
 
-        <CodeBlock
-          language="typescript"
-          filename="vector-db-example.ts"
-          code={`import { Pinecone } from '@pinecone-database/pinecone';
-import { OpenAI } from 'openai';
-
-const pinecone = new Pinecone({ apiKey: process.env.PINECONE_API_KEY! });
-const openai = new OpenAI();
-const index = pinecone.Index('my-rag-index');
-
-// Ingest documents
-async function ingestDocuments(documents: Document[]) {
-  const vectors = await Promise.all(
-    documents.map(async (doc) => ({
-      id: doc.id,
-      values: await embed(doc.content),  // 1536-dim vector
-      metadata: { 
-        source: doc.source,
-        title: doc.title,
-        chunk_index: doc.chunkIndex
-      }
-    }))
-  );
-  
-  await index.upsert(vectors);  // Batch upsert for efficiency
-}
-
-// Query
-async function query(question: string, topK = 5) {
-  const queryVector = await embed(question);
-  
-  const results = await index.query({
-    vector: queryVector,
-    topK,
-    includeMetadata: true,
-    filter: { source: { $eq: 'company-docs' } }  // Metadata filtering
-  });
-  
-  return results.matches.map(m => ({
-    id: m.id,
-    score: m.score,
-    metadata: m.metadata
-  }));
-}
-
-// Embed helper
-async function embed(text: string): Promise<number[]> {
-  const response = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
-    input: text
-  });
-  return response.data[0].embedding;
-}`}
-        />
+        <p className="text-muted-foreground">
+          Vector databases like Pinecone provide APIs for ingesting documents as embeddings and querying 
+          them efficiently. The typical workflow involves embedding documents during ingestion, storing 
+          them with metadata, and then querying with embedded questions to find the most similar content.
+        </p>
 
         {/* Metadata Filtering */}
         <h3 id="metadata-filtering" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
@@ -626,15 +538,9 @@ async function embed(text: string): Promise<number[]> {
               </h4>
               <p className="text-sm text-muted-foreground m-0">
                 Filter first, then search within filtered set. Fast when filter is very selective.
-                Most databases optimize this path.
+                Most databases optimize this path. Use metadata filters like user_id, date ranges, 
+                or source attributes to narrow the search space before similarity matching.
               </p>
-              <CodeBlock
-                language="typescript"
-                code={`filter: { 
-  user_id: "user_123",
-  date: { $gte: "2024-01-01" }
-}`}
-              />
             </CardContent>
           </Card>
           <Card variant="default">
@@ -645,15 +551,9 @@ async function embed(text: string): Promise<number[]> {
               </h4>
               <p className="text-sm text-muted-foreground m-0">
                 Search all vectors, then filter results. Better when filter isn&apos;t very selective.
-                May return fewer results than requested.
+                May return fewer results than requested. Retrieve more candidates (e.g., topK: 20) 
+                and then filter in application code to ensure you get enough results.
               </p>
-              <CodeBlock
-                language="typescript"
-                code={`// Retrieve more, filter after
-topK: 20,
-// Then filter in application code
-.filter(r => r.metadata.public)`}
-              />
             </CardContent>
           </Card>
         </div>

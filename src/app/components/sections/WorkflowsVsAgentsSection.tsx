@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   GitBranch, 
   Sparkles, 
@@ -37,52 +37,8 @@ function ComparisonVisualizer() {
     { label: "Complete: Answer user", type: "complete" },
   ];
 
-  const coreLogic = `// Workflow: Deterministic path through predefined steps
-async function workflow(input: Input): Promise<Output> {
-  // Step 1: Always runs
-  const parsed = parseInput(input);
-  
-  // Step 2: Conditional branch (but still deterministic)
-  const validated = parsed.type === "A" 
-    ? validateTypeA(parsed) 
-    : validateTypeB(parsed);
-  
-  // Step 3: Always runs
-  const results = await queryDatabase(validated);
-  
-  // Step 4: Transform and return
-  return formatOutput(results);
-}
-
-// Agent: Dynamic decisions based on observations
-async function agent(input: Input): Promise<Output> {
-  const context = [{ role: "user", content: input }];
-  
-  while (true) {
-    // LLM decides what to do next
-    const response = await llm.complete({ messages: context, tools });
-    
-    // LLM chooses when to stop
-    if (response.finishReason === "stop") {
-      return response.content;
-    }
-    
-    // LLM chooses which tools to call
-    await executeToolCalls(response.toolCalls);
-  }
-}
-
-// Key difference:
-// Workflow: YOU define the path
-// Agent: LLM decides the path`;
-
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Workflow vs Agent Patterns"
-      description="Compare deterministic workflows with autonomous agents"
-    >
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Tab switcher */}
         <div className="flex rounded-lg bg-muted/30 p-1">
           <button
@@ -213,7 +169,6 @@ async function agent(input: Input): Promise<Output> {
           </div>
         )}
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -252,33 +207,10 @@ export function WorkflowsVsAgentsSection() {
 
         <p className="text-muted-foreground">
           A workflow is a <strong className="text-foreground">predefined sequence of steps</strong>. 
-          You define the path at development time. LLM calls might happen at specific steps, 
-          but the overall structure is deterministic.
+          You define the path at development time. The sequence of steps is fixed: 
+          extract → chunk → summarize → combine. LLM calls might happen at specific steps, but 
+          the overall structure is deterministic and predictable.
         </p>
-
-        <CodeBlock
-          language="typescript"
-          filename="workflow-example.ts"
-          code={`// Workflow: Extract, transform, summarize
-async function processDocument(doc: Document): Promise<Summary> {
-  // Step 1: Extract text (deterministic)
-  const text = await extractText(doc);
-  
-  // Step 2: Chunk (deterministic)
-  const chunks = splitIntoChunks(text, 1000);
-  
-  // Step 3: Summarize each chunk (LLM, but controlled)
-  const summaries = await Promise.all(
-    chunks.map(chunk => llm.summarize(chunk))
-  );
-  
-  // Step 4: Combine summaries (LLM, final step)
-  return await llm.combineSummaries(summaries);
-}
-
-// The path is: extract → chunk → map-summarize → combine
-// This NEVER changes. You can test, profile, and predict it.`}
-        />
 
         {/* What are Agents */}
         <h3 id="agents-defined" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
@@ -291,28 +223,11 @@ async function processDocument(doc: Document): Promise<Summary> {
           The same input can take different paths on different runs.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="agent-example.ts"
-          code={`// Agent: Research and answer
-async function researchAgent(question: string): Promise<string> {
-  return await agenticLoop({
-    goal: question,
-    tools: [
-      searchWeb,      // LLM chooses when to search
-      readDocument,   // LLM chooses what to read
-      askFollowUp,    // LLM can ask clarifying questions
-    ],
-    maxIterations: 10,
-  });
-}
-
-// The LLM might:
-// - Search first, then read multiple documents
-// - Or read one document and find the answer immediately
-// - Or search, find nothing, try a different query
-// The path EMERGES at runtime based on what the LLM finds`}
-        />
+        <p className="text-muted-foreground">
+          An agent has autonomy over its execution path. The LLM decides which tools to call, 
+          how many iterations to run, and when to stop. The same input can take different paths 
+          on different runs. The path emerges at runtime based on what the LLM finds and decides.
+        </p>
 
         {/* Interactive Comparison */}
         <h3 id="comparison" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
@@ -366,34 +281,11 @@ async function researchAgent(question: string): Promise<string> {
           with agents handling specific steps that need flexibility:
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="hybrid-pattern.ts"
-          code={`// Hybrid: Workflow with agent steps
-async function processCustomerRequest(request: Request): Promise<Response> {
-  // Step 1: Classify (workflow - always runs)
-  const category = await classifier.classify(request);
-  
-  // Step 2: Route based on category (workflow - deterministic)
-  switch (category) {
-    case "refund":
-      // Workflow: fixed refund process
-      return await refundWorkflow(request);
-      
-    case "complex_question":
-      // Agent: needs flexibility to research
-      return await researchAgent(request);
-      
-    case "simple_faq":
-      // Workflow: direct lookup
-      return await faqLookup(request);
-  }
-}
-
-// The OUTER structure is a workflow (predictable routing)
-// Some INNER steps use agents (flexibility where needed)
-// Best of both worlds!`}
-        />
+        <p className="text-muted-foreground">
+          The best systems often combine both. Use workflows for the outer structure with agents 
+          handling specific steps that need flexibility. The outer structure is predictable (workflow), 
+          while inner steps can use agents where adaptability is valuable.
+        </p>
 
         <Callout variant="tip" title="The Pragmatic Approach">
           <p>

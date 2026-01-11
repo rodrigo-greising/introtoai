@@ -1,4 +1,4 @@
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { OrchestrationVisualizer, OrchestrationCostAnalysis } from "@/app/components/visualizations";
 
 export function ContextTechniquesSection() {
@@ -151,30 +151,12 @@ export function ContextTechniquesSection() {
           </Card>
         </div>
 
-        <CodeBlock
-          language="typescript"
-          filename="putting-it-together.ts"
-          code={`// The context engineering equation
-function buildOptimalContext(request: Request): Context {
-  return {
-    // Layered by volatility (cache-friendly)
-    // Separated concerns (secure)
-    system: STATIC_SYSTEM_PROMPT,      // Layer 1
-    tools: STATIC_TOOL_SCHEMAS,        // Layer 2
-    
-    // Signal over noise (high density)
-    // Dynamic relevance (curated)
-    knowledge: retrieveRelevant(request),  // Layer 3
-    history: compressIfNeeded(session),    // Layer 4
-    
-    // Explicit (self-contained)
-    // Compressed without loss
-    query: request.message,                // Layer 5
-  };
-}
-
-// Result: efficient, cacheable, secure, high-quality context`}
-        />
+        <p className="text-muted-foreground">
+          The context engineering equation: build optimal context by layering content by volatility 
+          (cache-friendly), separating concerns (secure), prioritizing signal over noise (high density), 
+          using dynamic relevance (curated), and keeping it explicit and self-contained. The result is 
+          efficient, cacheable, secure, high-quality context.
+        </p>
 
         {/* Connection to Foundations */}
         <h3 id="techniques-connection" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">

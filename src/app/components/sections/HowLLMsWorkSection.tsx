@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
-import { InteractiveWrapper, StepThroughPlayer, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { InteractiveWrapper, StepThroughPlayer } from "@/app/components/visualizations/core";
 import type { Step } from "@/app/components/visualizations/core/StepThroughPlayer";
 import {
   BookOpen,
@@ -134,12 +134,7 @@ function rlhf(model, humanPreferences) {
 }`;
 
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Training Pipeline Logic"
-      description="Simplified conceptual view of LLM training stages"
-    >
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Pipeline stages */}
         <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2">
           {pipelineStages.map((stage, index) => {
@@ -241,7 +236,6 @@ function rlhf(model, humanPreferences) {
           colorTheme="cyan"
         />
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -334,12 +328,7 @@ function predictNextToken(context: string): TokenProbabilities {
 }`;
 
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Next Token Prediction"
-      description="The fundamental operation that makes LLMs work"
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         <div className="flex gap-3">
           <input
             type="text"
@@ -398,7 +387,6 @@ function predictNextToken(context: string): TokenProbabilities {
           Try: &quot;Once upon a&quot;, &quot;def calculate&quot;, or any text you like
         </p>
       </div>
-    </ViewCodeToggle>
   );
 }
 

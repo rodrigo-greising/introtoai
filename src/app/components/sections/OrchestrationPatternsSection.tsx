@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   ArrowRight,
   GitBranch,
@@ -377,12 +377,7 @@ async function evaluatorOptimizer(input: string, maxIterations = 3) {
   const activePatternData = patterns.find(p => p.id === activePattern)!;
 
   return (
-    <ViewCodeToggle
-      code={activePatternData.code}
-      title={activePatternData.name}
-      description={activePatternData.description}
-    >
-      <div className="space-y-4">
+    <div className="space-y-4">
         {/* Pattern tabs */}
         <div className="flex flex-wrap gap-2">
           {patterns.map((pattern) => (
@@ -428,7 +423,6 @@ async function evaluatorOptimizer(input: string, maxIterations = 3) {
           </ul>
         </div>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -529,54 +523,13 @@ export function OrchestrationPatternsSection() {
           Combining Patterns
         </h3>
 
-        <CodeBlock
-          language="typescript"
-          filename="combined-patterns.ts"
-          code={`// Real-world example: Customer support system
-async function supportPipeline(message: string) {
-  // Router: Classify intent
-  const intent = await classifier.classify(message);
-  
-  switch (intent) {
-    case "refund_request":
-      // Chain: Multi-step refund process
-      return await refundChain(message);
-      
-    case "technical_issue":
-      // Orchestrator-Worker: Complex troubleshooting
-      return await techSupportOrchestrator(message);
-      
-    case "simple_question":
-      // Fallback: Try RAG, fall back to general model
-      return await withFallback([
-        () => ragPipeline(message),
-        () => generalModel.complete(message),
-      ]);
-      
-    default:
-      // Evaluator-Optimizer: Ensure quality response
-      return await evaluatorOptimizer(message);
-  }
-}
-
-// Each handler can itself use multiple patterns:
-async function techSupportOrchestrator(issue: string) {
-  // Parallel: Search multiple sources simultaneously
-  const [docs, logs, history] = await Promise.all([
-    searchDocs(issue),
-    fetchRecentLogs(userId),
-    getTicketHistory(userId),
-  ]);
-  
-  // Chain: Analyze → Diagnose → Respond
-  const analysis = await analyzeContext({ docs, logs, history, issue });
-  const diagnosis = await diagnoseIssue(analysis);
-  const response = await generateResponse(diagnosis);
-  
-  // Evaluator: Ensure response quality
-  return await evaluateAndRefine(response, { minScore: 0.85 });
-}`}
-        />
+        <p className="text-muted-foreground">
+          Real systems combine multiple patterns. A support pipeline might use a router to classify intent, 
+          then apply different patterns based on the classification: chains for multi-step processes, 
+          orchestrator-worker for complex tasks, fallback patterns for reliability, and evaluator-optimizer 
+          for quality assurance. Each handler can itself use multiple patterns, creating powerful, 
+          composable systems.
+        </p>
 
         {/* Best Practices */}
         <h3 className="text-xl font-semibold mt-10 mb-4">Best Practices</h3>

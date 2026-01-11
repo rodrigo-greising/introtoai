@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   Play, 
@@ -252,28 +252,12 @@ export function TestDrivenAISection() {
           tests lead to technically-correct-but-wrong implementations</strong>. Invest time in comprehensive test cases.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="example.test.ts"
-          code={`// Good: Tests capture edge cases and expected behavior
-describe('calculateDiscount', () => {
-  it('applies 10% discount for orders over $100', () => {
-    expect(calculateDiscount(150)).toBe(15);
-  });
-  
-  it('returns 0 for orders under $100', () => {
-    expect(calculateDiscount(50)).toBe(0);
-  });
-  
-  it('handles edge case at exactly $100', () => {
-    expect(calculateDiscount(100)).toBe(0); // or 10? Test makes it explicit
-  });
-  
-  it('throws for negative amounts', () => {
-    expect(() => calculateDiscount(-10)).toThrow();
-  });
-});`}
-        />
+        <p className="text-muted-foreground">
+          Good tests capture edge cases and expected behavior. For example, a discount calculation function 
+          should test: applying discount for orders over threshold, returning 0 for orders under threshold, 
+          handling the exact threshold edge case, and throwing for invalid inputs like negative amounts. 
+          Each test case is a clause in the contract with the AI.
+        </p>
 
         <Callout variant="tip" title="Test as Contract">
           <p className="m-0">

@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { 
   Check, 
   X, 
@@ -175,12 +175,7 @@ const task = response.choices[0].message.parsed;
 // No more parsing or validation needed!`;
 
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Structured Output Pattern"
-      description="How to get type-safe, validated responses from LLMs"
-    >
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Schema editor */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -337,7 +332,6 @@ const task = response.choices[0].message.parsed;
           </div>
         </div>
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -465,40 +459,11 @@ Not completed yet.`}
           once, get TypeScript types and runtime validation automatically:
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="zod-structured-output.ts"
-          showLineNumbers
-          code={`import { z } from "zod";
-import { zodResponseFormat } from "openai/helpers/zod";
-
-// Define your schema with rich validation
-const ExtractedEvent = z.object({
-  title: z.string().min(1).describe("Event title"),
-  date: z.string().regex(/\\d{4}-\\d{2}-\\d{2}/).describe("ISO date"),
-  location: z.string().optional(),
-  attendees: z.array(z.string()).default([]),
-  isAllDay: z.boolean().default(false),
-});
-
-// Use with the API
-const response = await openai.beta.chat.completions.parse({
-  model: "gpt-4o-2024-08-06",
-  messages: [
-    { role: "system", content: "Extract event details from text." },
-    { role: "user", content: userInput }
-  ],
-  response_format: zodResponseFormat(ExtractedEvent, "event"),
-});
-
-// Type-safe access - TypeScript knows the shape!
-const event = response.choices[0].message.parsed;
-console.log(event.title);      // string
-console.log(event.attendees);  // string[]
-
-// The model is constrained to produce exactly this shape
-// No parsing errors, no type mismatches`}
-        />
+        <p className="text-muted-foreground">
+          With Zod schemas, you define your schema once and get TypeScript types and runtime validation 
+          automatically. The model is constrained to produce exactly the shape you specify, eliminating 
+          parsing errors and type mismatches.
+        </p>
 
         {/* Interactive Schema Builder */}
         <h3 id="schema-builder" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">

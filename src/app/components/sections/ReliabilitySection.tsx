@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import {
   RefreshCw,
   CheckCircle,
@@ -300,40 +300,12 @@ export function ReliabilitySection() {
           (invalid API key, malformed request) should not be retried.
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="retry-with-backoff.ts"
-          code={`async function withRetry<T>(
-  fn: () => Promise<T>,
-  maxAttempts: number = 3
-): Promise<T> {
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      return await fn();
-    } catch (error) {
-      // Don't retry non-retryable errors
-      if (!isRetryable(error)) throw error;
-      
-      if (attempt === maxAttempts) throw error;
-      
-      // Exponential backoff with jitter
-      const delay = Math.min(1000 * Math.pow(2, attempt), 30000);
-      const jitter = delay * 0.1 * Math.random();
-      await sleep(delay + jitter);
-    }
-  }
-  throw new Error("Unreachable");
-}
-
-function isRetryable(error: any): boolean {
-  return (
-    error.code === "RATE_LIMITED" ||
-    error.code === "TIMEOUT" ||
-    error.code === "SERVER_ERROR" ||
-    error.status >= 500
-  );
-}`}
-        />
+        <p className="text-muted-foreground">
+          Implement retry logic with exponential backoff and jitter. Don&apos;t retry non-retryable errors 
+          (like invalid API keys or malformed requests). Use exponential backoff with jitter to avoid 
+          thundering herd problems. Only retry errors that indicate transient failures: rate limits, 
+          timeouts, server errors, or 5xx status codes.
+        </p>
 
         {/* Interactive Retry Simulator */}
         <h3 id="retry-simulator" className="text-xl font-semibold mt-8 mb-4 scroll-mt-20">

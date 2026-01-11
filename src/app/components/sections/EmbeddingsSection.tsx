@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SectionHeading, Card, CardContent, Callout, EmbeddingVisualizer } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle } from "@/app/components/visualizations/core";
+import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import { ArrowRight, Layers, Search, Database, Sparkles } from "lucide-react";
 
 // =============================================================================
@@ -83,12 +83,7 @@ function euclideanDistance(a: number[], b: number[]): number {
 // - Bounded range makes comparison easy`;
 
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Similarity Functions"
-      description="How we measure semantic similarity between embeddings"
-    >
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Vector editors */}
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Vector A */}
@@ -227,7 +222,6 @@ function euclideanDistance(a: number[], b: number[]): number {
           </p>
         </div>
       </div>
-    </ViewCodeToggle>
   );
 }
 

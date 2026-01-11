@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
 import { InteractiveWrapper } from "@/app/components/visualizations/core";
 import {
   BookOpen,
@@ -382,16 +382,11 @@ export function IntroSection() {
           An LLM is a function that transforms context into output:
         </p>
 
-        <CodeBlock
-          language="typescript"
-          filename="mental-model.ts"
-          code={`// The fundamental equation
-type LLM = (context: Context) => Promise<Output>;
-
-// Context is everything: system prompt, user message, 
-// retrieved documents, code, conversation history...
-// Output quality is directly proportional to context quality.`}
-        />
+        <p className="text-muted-foreground">
+          The fundamental equation: an LLM is a function that transforms context into output. Context is 
+          everything: system prompt, user message, retrieved documents, code, conversation history. 
+          Output quality is directly proportional to context quality.
+        </p>
 
         <Callout variant="important">
           <p>
@@ -414,16 +409,6 @@ type LLM = (context: Context) => Promise<Output>;
             </CardContent>
           </Card>
 
-          <Card variant="highlight">
-            <CardContent>
-              <h4 className="font-medium text-foreground mb-2">👁️ View Code</h4>
-              <p className="text-sm text-muted-foreground m-0">
-                Interactive elements have a &quot;View Code&quot; button showing the core logic.
-                This isn&apos;t the full implementation—it&apos;s simplified, educational code
-                that captures the essential algorithm.
-              </p>
-            </CardContent>
-          </Card>
 
           <Card variant="highlight">
             <CardContent>

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { SectionHeading, Card, CardContent, Callout, CodeBlock } from "@/app/components/ui";
-import { InteractiveWrapper, ViewCodeToggle, StepThroughPlayer } from "@/app/components/visualizations/core";
+import { SectionHeading, Card, CardContent, Callout } from "@/app/components/ui";
+import { InteractiveWrapper, StepThroughPlayer } from "@/app/components/visualizations/core";
 import type { Step } from "@/app/components/visualizations/core/StepThroughPlayer";
 import { 
   Wrench, 
@@ -61,58 +61,8 @@ function ToolInvocationDemo() {
     return () => clearInterval(timer);
   });
 
-  const coreLogic = `// Tool Calling Flow
-
-// 1. Define your tool
-const weatherTool = {
-  type: "function",
-  function: {
-    name: "get_weather",
-    description: "Get current weather for a location",
-    parameters: {
-      type: "object",
-      properties: {
-        location: { type: "string", description: "City name" },
-        unit: { type: "string", enum: ["celsius", "fahrenheit"] }
-      },
-      required: ["location"]
-    }
-  }
-};
-
-// 2. Call the API with tools
-const response = await openai.chat.completions.create({
-  model: "gpt-4o",
-  messages: [{ role: "user", content: "What's the weather in SF?" }],
-  tools: [weatherTool],
-});
-
-// 3. Check if model wants to call a tool
-const message = response.choices[0].message;
-if (message.tool_calls) {
-  for (const toolCall of message.tool_calls) {
-    // 4. Execute your actual function
-    const args = JSON.parse(toolCall.function.arguments);
-    const result = await getWeather(args.location, args.unit);
-    
-    // 5. Send result back to the model
-    messages.push({ role: "tool", tool_call_id: toolCall.id, content: result });
-  }
-  
-  // 6. Get final response
-  const finalResponse = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages,
-  });
-}`;
-
   return (
-    <ViewCodeToggle
-      code={coreLogic}
-      title="Tool Calling Pattern"
-      description="The complete flow of how tool calls work"
-    >
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Visual flow */}
         <div className="relative">
           <div className="flex items-center justify-between gap-2 overflow-x-auto pb-4">
@@ -228,7 +178,6 @@ if (message.tool_calls) {
           colorTheme="cyan"
         />
       </div>
-    </ViewCodeToggle>
   );
 }
 
@@ -304,48 +253,11 @@ export function ToolsSection() {
           Tool Definitions
         </h3>
 
-        <CodeBlock
-          language="typescript"
-          filename="tool-definition.ts"
-          showLineNumbers
-          code={`// Tool definition following OpenAI's format
-const tools = [
-  {
-    type: "function",
-    function: {
-      name: "search_documents",
-      description: "Search the knowledge base for relevant documents",
-      parameters: {
-        type: "object",
-        properties: {
-          query: {
-            type: "string",
-            description: "The search query"
-          },
-          limit: {
-            type: "number",
-            description: "Maximum results to return",
-            default: 5
-          },
-          filters: {
-            type: "object",
-            properties: {
-              category: { type: "string" },
-              dateRange: { type: "string" }
-            }
-          }
-        },
-        required: ["query"]
-      }
-    }
-  }
-];
-
-// The model sees this schema and knows:
-// 1. When this tool is useful (from description)
-// 2. What arguments it needs (from parameters)
-// 3. Which arguments are required vs optional`}
-        />
+        <p className="text-muted-foreground">
+          A tool definition includes a name, description, and parameter schema. The model uses the 
+          description to decide when to use the tool, and the parameter schema to understand what 
+          arguments are needed and which are required vs optional.
+        </p>
 
         {/* How Invocation Works */}
         <h3 id="tool-invocation" className="text-xl font-semibold mt-10 mb-4 scroll-mt-20">
@@ -373,49 +285,9 @@ const tools = [
 
         <p className="text-muted-foreground">
           Tools can fail. Your code must handle errors gracefully and communicate them back 
-          to the model:
+          to the model. Always return errors as tool results, not exceptions—the model can 
+          often recover or try a different approach.
         </p>
-
-        <CodeBlock
-          language="typescript"
-          filename="tool-error-handling.ts"
-          code={`async function executeToolCall(toolCall: ToolCall): Promise<ToolResult> {
-  try {
-    const args = JSON.parse(toolCall.function.arguments);
-    
-    switch (toolCall.function.name) {
-      case "get_weather":
-        const weather = await weatherAPI.get(args.location);
-        return { 
-          success: true, 
-          result: JSON.stringify(weather) 
-        };
-        
-      case "search_documents":
-        const docs = await searchIndex.query(args.query);
-        return { 
-          success: true, 
-          result: JSON.stringify(docs) 
-        };
-        
-      default:
-        return { 
-          success: false, 
-          error: \`Unknown tool: \${toolCall.function.name}\` 
-        };
-    }
-  } catch (error) {
-    // Return error to the model so it can handle gracefully
-    return {
-      success: false,
-      error: \`Tool execution failed: \${error.message}\`
-    };
-  }
-}
-
-// Important: Return errors as tool results, not exceptions
-// The model can often recover or try a different approach`}
-        />
 
         <Callout variant="important">
           <p>
